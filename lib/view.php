@@ -30,6 +30,11 @@ class View {
 			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
 			if(!empty($view)) {
 				return $view;
+			} else {
+				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/view/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
+				if(!empty($view)) {
+					return $view;
+				}
 			}
 			return false;
 		}

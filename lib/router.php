@@ -8,10 +8,13 @@ class Router {
 	protected $requestURI;
 	protected $scriptName;
 	
-	public function __construct() {
+	public function __construct($controller = null) {
 		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
 		$this->scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
 		$this->parseURI();
+		if($controller !== null) {
+			$this->controller = $controller;
+		}	
 		Dispatcher::dispatch($this);
 	}
 	

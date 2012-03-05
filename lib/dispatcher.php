@@ -43,7 +43,7 @@ class Dispatcher {
 			
 			$params['uri'] = $requestedURI;
 			$controller->view->controller = 'Errors';
-			$controller->lerror($params);
+			$controller->index($params);
 		
 		}
 		echo $controller->view->renderPage();
