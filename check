@@ -1,0 +1,12 @@
+#!/bin/bash
+o=0
+a=0
+for i in `find .  -name "*.php" -o -name "*.ctp"`; 
+do 
+	php -l $i | grep 'Parse error:' && o=$((o+1)) && printf "\n"
+	a=$((a+1))
+done
+if [ $o != 0 ]
+    then
+	exit 1
+fi
