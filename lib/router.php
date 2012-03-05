@@ -3,7 +3,7 @@ require_once(ROOT . DS . APP_DIR . '/lib/dispatcher.php');
 class Router {
 	protected $command = array();
 	protected $params = array();
-	protected $controller = 'Homes';
+	protected $controller = 'Pages';
 	protected $method = 'index';
 	protected $requestURI;
 	protected $scriptName;

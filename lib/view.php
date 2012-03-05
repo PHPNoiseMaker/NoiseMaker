@@ -2,7 +2,7 @@
 class View {
 		public $view = 'default';
 		public $layout = 'default';
-		public $controller = 'Homes';
+		public $controller = 'Pages';
 		
 		protected $viewVars = array();
 		

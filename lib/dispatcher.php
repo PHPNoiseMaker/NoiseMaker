@@ -42,8 +42,9 @@ class Dispatcher {
 			$params = $router->getParams();
 			
 			$params['uri'] = $requestedURI;
-			
+			$controller->view->controller = 'Errors';
 			$controller->lerror($params);
+		
 		}
 		echo $controller->view->renderPage();
 	}
