@@ -1,5 +1,4 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/lib/dispatcher.php');
 class Router {
 	protected $command = array();
 	protected $params = array();
@@ -15,7 +14,6 @@ class Router {
 		if($controller !== null) {
 			$this->controller = $controller;
 		}	
-		Dispatcher::dispatch($this);
 	}
 	
 	private function parseURI() {

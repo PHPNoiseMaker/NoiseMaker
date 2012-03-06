@@ -18,6 +18,19 @@ class View {
 			unset($this->viewVars[$key]);
 		}
 		
+		public function setView($view = null) {
+			if($view !== null) {
+				$this->view = $view;
+			}
+		}
+		
+		public function setController($controller = null) {
+			if($controller !== null) {
+				$this->controller = $controller;
+				
+			}
+		}
+		
 		protected function renderLayout($content = null) {
 			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/layout/' . $this->layout . '.ctp', array('content' => $content));
 			if(!empty($view) && $view) {

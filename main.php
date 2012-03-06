@@ -1,9 +1,9 @@
 <?php
 require_once('lib/bootstrap.php');
-require_once('lib/router.php');
+require_once('lib/dispatcher.php');
 
-try {
-	new Router();
-} catch(Exception $e) {
-	new Router('Errors', 'index');
-}
+
+$dispatcher = new Dispatcher();
+
+$dispatcher->dispatch();
+
