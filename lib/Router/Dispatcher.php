@@ -11,8 +11,8 @@ class Dispatcher {
 	public function dispatch() {
 		try {
 			$class = $this->router->getController() . 'Controller';
-			if(file_exists('Controllers/' . $class . '.php')) {
-				include ROOT . DS . APP_DIR .'/Controllers/' . $class . '.php';
+			if(file_exists(ROOT . DS . 'Controllers/' . $class . '.php')) {
+				include 'Controllers/' . $class . '.php';
 				
 				$this->controller = new $class();
 				
@@ -27,7 +27,7 @@ class Dispatcher {
 				}
 				$this->controller->render($this->router->getController());
 		
-			} elseif(file_exists('lib/Controllers/' . $class . '.php')) {
+			} elseif(file_exists(ROOT . DS . 'lib/Controllers/' . $class . '.php')) {
 				include 'lib/Controllers/' . $class . '.php';
 				
 				$this->controller = new $class();
