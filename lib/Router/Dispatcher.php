@@ -1,5 +1,6 @@
 <?php
 require_once('lib/Router/Router.php');
+require_once('lib/Core/Exceptions.php');
 class Dispatcher {
 	protected $router;
 	protected $controller;
@@ -61,7 +62,7 @@ class Dispatcher {
 			$requestedURI = $this->router->getURI();
 			$params = array(
 				'error' => array(
-					'message' => $e
+					'message' => $e->getMessage()
 				)
 			);
 			

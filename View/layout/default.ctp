@@ -13,7 +13,9 @@
 		    <div class="container">
 		     <a class="brand" href="/">Ender</a>
 		     <ul class="nav">
-
+		     	<li>
+		     		<a href="/Pages/contact"><i class="icon-envelope icon-white" style="margin-right:5px"></i>Contact</a>
+		     	</li>
 		     </ul>
 		    </div>
 		  </div>
