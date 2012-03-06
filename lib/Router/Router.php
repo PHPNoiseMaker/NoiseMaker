@@ -40,7 +40,7 @@ class Router {
 		if(count($this->command) > 1) {
 			$this->controller = $this->command[0];
 			$this->action = $this->command[1];
-			for($i = 1; $i < count($this->command); $i++) {
+			for($i = 2; $i < count($this->command); $i++) {
 				if(!empty($this->command[$i]))
 					$this->params[] = $this->command[$i];
 				$this->controller = $this->command[0];

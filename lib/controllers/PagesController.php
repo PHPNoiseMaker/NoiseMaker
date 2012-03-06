@@ -2,27 +2,34 @@
 require_once('Controllers/AppController.php');
 class PagesController extends AppController {
 	
-	public function index($page = null) {
-		$numArgs = func_num_args();
+	public function index() {
+		$this->display();
+	}
+	
+	public function display() {
+		
 		$args = func_get_args();
-	 	
-		if($page === null) {
-			$page = 'index';
+		$count = count($args);
+
+		if(
+			isset($args[0])
+			&& !empty($args[0])
+		) {
+			$page = $args[0];
 		} else {
-			$page = $page;
+			$page = 'index';
 		}
-		if($page === 'index') {
-			$this->viewFile = 'index';
+		if($this->View->viewExists('Pages', $page)) {
+			$this->view = $page;
+			
 		} else {
 			
-			if($this->View->viewExists('Pages', $page)) {
-				$this->viewFile = $page;
-			} else {
-				throw new NotFoundException();
-			}
+			throw new NotFoundException();
+		}
 			
 					
-		}
+		
+
 	}
 
 }

@@ -11,7 +11,8 @@ class Dispatcher {
 	
 	public function dispatch() {
 		try {
-			$class = $this->router->getController() . 'Controller';
+			$controller = $this->router->getController();
+			$class = $controller . 'Controller';
 			if(file_exists(ROOT . DS . 'Controllers/' . $class . '.php')) {
 				include 'Controllers/' . $class . '.php';
 		
@@ -25,11 +26,11 @@ class Dispatcher {
 			$this->controller = new $class();
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
-			//var_dump('', $requestedAction, $params, $this->router->getController());
 			if(empty($requestedAction)) {
 				$requestedAction = 'index';
 			}
 		
+			$this->controller->view = $requestedAction;
 			
 			if(method_exists($this->controller, $requestedAction)) {
 				call_user_func_array(array($this->controller, $requestedAction), $params);
@@ -38,11 +39,12 @@ class Dispatcher {
 				throw new NotFoundException();
 			}
 			
-			$this->controller->render($this->router->getController());
+			
+			$this->controller->render($controller);
 			
 		} catch(Exception $e) {
 			include 'lib/Controllers/ErrorsController.php';
-				
+
 			$this->controller = new ErrorsController();
 			$requestedURI = $this->router->getURI();
 			
@@ -53,7 +55,6 @@ class Dispatcher {
 					'uri' =>  $requestedURI
 				)
 			);
-			
 			$this->controller->index($params);
 			$this->controller->render('Errors');
 		}

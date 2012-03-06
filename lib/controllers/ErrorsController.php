@@ -55,7 +55,7 @@ class ErrorsController extends AppController {
 	    509 => 'Bandwidth Limit Exceeded'
 	);
 	public function index($params = null) {
-		$this->viewFile = 'error';
+		$this->view = 'error';
 		
 		if(is_array($params)) {
 			if(
