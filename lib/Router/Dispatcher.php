@@ -25,7 +25,7 @@ class Dispatcher {
 			$this->controller = new $class();
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
-			var_dump('', $requestedAction, $params, $this->router->getController());
+			//var_dump('', $requestedAction, $params, $this->router->getController());
 			if(empty($requestedAction)) {
 				$requestedAction = 'index';
 			}
