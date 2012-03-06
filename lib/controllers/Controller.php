@@ -19,4 +19,11 @@ class Controller {
 	public function set($key, $value) {
 		$this->View->set($key, $value);
 	}
+	
+	public function redirect($location) {
+		if(!is_array($location)) {
+			header('Location: ' . $location);
+		}
+		return false;
+	}
 }
