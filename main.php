@@ -4,6 +4,5 @@ require_once('lib/dispatcher.php');
 
 
 $dispatcher = new Dispatcher();
-
 $dispatcher->dispatch();
 

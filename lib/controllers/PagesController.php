@@ -8,7 +8,7 @@ class PagesController extends AppController {
 		}
 		switch($page) {
 			case 'index':
-				$this->view->view = 'index';
+				$this->viewFile = 'index';
 				break;
 			default:
 				throw new Exception('test');

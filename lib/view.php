@@ -41,18 +41,20 @@ class View {
 		
 		protected function loadView() {
 			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
-			if(!empty($view)) {
+			if($view !== false) {
 				return $view;
 			} else {
 				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/view/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
-				if(!empty($view)) {
+				if($view !== false) {
 					return $view;
 				}
 			}
+			
 			return false;
 		}
 		
 		protected function _evaluate($___viewFn, $___dataForView = null) {
+			
 			if(file_exists($___viewFn)) {
 				extract($___dataForView, EXTR_SKIP);
 				ob_start();

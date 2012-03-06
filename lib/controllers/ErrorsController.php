@@ -1,9 +1,9 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/lib/controller.php');
-class ErrorsController extends Controller {
+require_once(ROOT . DS . APP_DIR . '/controllers/AppController.php');
+class ErrorsController extends AppController {
 	
 	public function index($arg = null) {
-		$this->view->view = 'error';
+		$this->viewFile = 'error';
 	}
 
 }

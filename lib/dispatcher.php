@@ -9,49 +9,65 @@ class Dispatcher {
 	}
 	
 	public function dispatch() {
-		$class = $this->router->getController() . 'Controller';
-		if(file_exists(ROOT . DS . APP_DIR . '/controllers/' . $class . '.php')) {
-			include 'controllers/' . $class . '.php';
-			
-			$this->controller = new $class();
-			
-			$requestedMethod = $this->router->getMethod();
-			$params = $this->router->getParams();
-			
-			if(method_exists($this->controller, $requestedMethod)) {
-				call_user_func_array(array($this->controller, $requestedMethod), $params);
+		try {
+			$class = $this->router->getController() . 'Controller';
+			if(file_exists(ROOT . DS . APP_DIR . '/controllers/' . $class . '.php')) {
+				include 'controllers/' . $class . '.php';
 				
-			} elseif( method_exists($this->controller, 'index')) {
-				call_user_func_array(array($this->controller, 'index'), $params);
-			}
-			$this->controller->render($this->router->getController(), $requestedMethod);
-	
-		} elseif(file_exists(ROOT . DS . APP_DIR . '/lib/controllers/' . $class . '.php')) {
-			include ROOT . DS . APP_DIR . '/lib/controllers/' . $class . '.php';
-			
-			$this->controller = new $class();
-			$requestedMethod = $this->router->getMethod();
-			$params = $this->router->getParams();
-			
-			if(method_exists($this->controller, $requestedMethod)) {
-				call_user_func_array(array($this->controller, $requestedMethod), $params);
+				$this->controller = new $class();
 				
-			} elseif( method_exists($this->controller, 'index')) {
-				call_user_func_array(array($this->controller, 'index'), $params);
-			}
-			$this->controller->render($this->router->getController(), $requestedMethod);
+				$requestedMethod = $this->router->getMethod();
+				$params = $this->router->getParams();
+				
+				if(method_exists($this->controller, $requestedMethod)) {
+					call_user_func_array(array($this->controller, $requestedMethod), $params);
+					
+				} elseif( method_exists($this->controller, 'index')) {
+					call_user_func_array(array($this->controller, 'index'), $params);
+				}
+				$this->controller->render($this->router->getController());
+		
+			} elseif(file_exists(ROOT . DS . APP_DIR . '/lib/controllers/' . $class . '.php')) {
+				include ROOT . DS . APP_DIR . '/lib/controllers/' . $class . '.php';
+				
+				$this->controller = new $class();
+				$requestedMethod = $this->router->getMethod();
+				$params = $this->router->getParams();
+				
+				if(method_exists($this->controller, $requestedMethod)) {
+					call_user_func_array(array($this->controller, $requestedMethod), $params);
+					
+				} elseif( method_exists($this->controller, 'index')) {
+					call_user_func_array(array($this->controller, 'index'), $params);
+				}
+				$this->controller->render($this->router->getController());
+				
+			} else {
+				include ROOT . DS . APP_DIR . '/lib/controllers/ErrorsController.php';
+				
+				$this->controller = new ErrorsController();
+				$requestedURI = $this->router->getURI();
+				$params = $this->router->getParams();
+				
+				$params['uri'] = $requestedURI;
+				$this->controller->index($params);
+				$this->controller->render('Errors');
 			
-		} else {
+			}
+		} catch(Exception $e) {
 			include ROOT . DS . APP_DIR . '/lib/controllers/ErrorsController.php';
-			
+				
 			$this->controller = new ErrorsController();
 			$requestedURI = $this->router->getURI();
-			$params = $this->router->getParams();
+			$params = array(
+				'error' => array(
+					'message' => $e
+				)
+			);
 			
 			$params['uri'] = $requestedURI;
 			$this->controller->index($params);
-			$this->controller->render($this->router->getController(), 'index');
-		
+			$this->controller->render('Errors');
 		}
 		
 	}
