@@ -1,5 +1,5 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/lib/controller.php');
+require_once('lib/Controllers/Controller.php');
 
 class AppController extends Controller {
 

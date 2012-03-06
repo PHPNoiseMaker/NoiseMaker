@@ -1,5 +1,5 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/controllers/AppController.php');
+require_once('Controllers/AppController.php');
 class ErrorsController extends AppController {
 	
 	public function index($arg = null) {

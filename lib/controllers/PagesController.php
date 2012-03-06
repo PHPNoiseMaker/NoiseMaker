@@ -1,5 +1,5 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/controllers/AppController.php');
+require_once('Controllers/AppController.php');
 class PagesController extends AppController {
 	
 	public function index($page = null) {

@@ -1,5 +1,5 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/lib/router.php');
+require_once('lib/Router/Router.php');
 class Dispatcher {
 	protected $router;
 	protected $controller;
@@ -11,8 +11,8 @@ class Dispatcher {
 	public function dispatch() {
 		try {
 			$class = $this->router->getController() . 'Controller';
-			if(file_exists(ROOT . DS . APP_DIR . '/controllers/' . $class . '.php')) {
-				include 'controllers/' . $class . '.php';
+			if(file_exists('Controllers/' . $class . '.php')) {
+				include ROOT . DS . APP_DIR .'/Controllers/' . $class . '.php';
 				
 				$this->controller = new $class();
 				
@@ -27,8 +27,8 @@ class Dispatcher {
 				}
 				$this->controller->render($this->router->getController());
 		
-			} elseif(file_exists(ROOT . DS . APP_DIR . '/lib/controllers/' . $class . '.php')) {
-				include ROOT . DS . APP_DIR . '/lib/controllers/' . $class . '.php';
+			} elseif(file_exists('lib/Controllers/' . $class . '.php')) {
+				include 'lib/Controllers/' . $class . '.php';
 				
 				$this->controller = new $class();
 				$requestedMethod = $this->router->getMethod();
@@ -43,7 +43,7 @@ class Dispatcher {
 				$this->controller->render($this->router->getController());
 				
 			} else {
-				include ROOT . DS . APP_DIR . '/lib/controllers/ErrorsController.php';
+				include 'lib/Controllers/ErrorsController.php';
 				
 				$this->controller = new ErrorsController();
 				$requestedURI = $this->router->getURI();
@@ -55,7 +55,7 @@ class Dispatcher {
 			
 			}
 		} catch(Exception $e) {
-			include ROOT . DS . APP_DIR . '/lib/controllers/ErrorsController.php';
+			include 'lib/Controllers/ErrorsController.php';
 				
 			$this->controller = new ErrorsController();
 			$requestedURI = $this->router->getURI();

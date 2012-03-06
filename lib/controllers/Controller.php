@@ -1,5 +1,5 @@
 <?php
-require_once(ROOT . DS . APP_DIR . '/lib/view.php');
+require_once('lib/View/View.php');
 class Controller {
 	
 	public $view;

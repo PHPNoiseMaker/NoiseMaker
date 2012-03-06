@@ -1,6 +1,6 @@
 <?php
-require_once('lib/bootstrap.php');
-require_once('lib/dispatcher.php');
+require_once('lib/Core/bootstrap.php');
+require_once('lib/Router/Dispatcher.php');
 
 
 $dispatcher = new Dispatcher();

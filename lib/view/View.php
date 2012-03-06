@@ -32,20 +32,20 @@ class View {
 		}
 		
 		public function viewExists($controller, $view) {
-			if(file_exists(ROOT . DS . APP_DIR . '/view/' . $controller . '/' . $view . '.ctp')) {
+			if(file_exists(ROOT . DS . APP_DIR . '/View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
-			} elseif(file_exists(ROOT . DS . APP_DIR . '/lib/view/' . $controller . '/' . $view . '.ctp')) {
+			} elseif(file_exists(ROOT . DS . APP_DIR . '/lib/View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
 			}
 			return false;
 		}
 		
 		protected function renderLayout($content = null) {
-			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/layout/' . $this->layout . '.ctp', array('content' => $content));
+			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/View/Layout/' . $this->layout . '.ctp', array('content' => $content));
 			if($view) {
 				return $view;
 			} else {
-				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/view/layout/' . $this->layout . '.ctp', array('content' => $content));
+				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/View/Layout/' . $this->layout . '.ctp', array('content' => $content));
 				if($view !== false) {
 					return $view;
 				}
@@ -54,11 +54,11 @@ class View {
 		}
 		
 		protected function loadView() {
-			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
+			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
 			if($view !== false) {
 				return $view;
 			} else {
-				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/view/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
+				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
 				if($view !== false) {
 					return $view;
 				}

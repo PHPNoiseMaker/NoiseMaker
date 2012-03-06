@@ -9,4 +9,3 @@ if (!defined('APP_DIR')) {
 if (!defined('ROOT')) {
 	define('ROOT', dirname(dirname(dirname(__FILE__))));
 }
-$content = '';
