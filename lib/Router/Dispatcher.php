@@ -40,13 +40,15 @@ class Dispatcher {
 				
 			$this->controller = new ErrorsController();
 			$requestedURI = $this->router->getURI();
+			
 			$params = array(
 				'error' => array(
-					'message' => $e->getMessage()
+					'message' => $e->getMessage(),
+					'code' => $e->getCode(),
+					'uri' =>  $requestedURI
 				)
 			);
 			
-			$params['uri'] = $requestedURI;
 			$this->controller->index($params);
 			$this->controller->render('Errors');
 		}
