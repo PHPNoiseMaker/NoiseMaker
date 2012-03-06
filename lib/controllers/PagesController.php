@@ -6,12 +6,17 @@ class PagesController extends AppController {
 		if($page === null) {
 			$page = 'index';
 		}
-		switch($page) {
-			case 'index':
-				$this->viewFile = 'index';
-				break;
-			default:
-				throw new Exception('test');
+		if($page === 'index') {
+			$this->viewFile = 'index';
+		} else {
+			
+			if($this->view->viewExists('Pages', $page)) {
+				$this->viewFile = $page;
+			} else {
+				throw new Exception('Not Found');
+			}
+			
+					
 		}
 	}
 

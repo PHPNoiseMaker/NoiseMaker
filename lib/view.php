@@ -31,6 +31,15 @@ class View {
 			}
 		}
 		
+		public function viewExists($controller, $view) {
+			if(file_exists(ROOT . DS . APP_DIR . '/view/' . $controller . '/' . $view . '.ctp')) {
+				return true;
+			} elseif(file_exists(ROOT . DS . APP_DIR . '/lib/view/' . $controller . '/' . $view . '.ctp')) {
+				return true;
+			}
+			return false;
+		}
+		
 		protected function renderLayout($content = null) {
 			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/layout/' . $this->layout . '.ctp', array('content' => $content));
 			if(!empty($view) && $view) {
