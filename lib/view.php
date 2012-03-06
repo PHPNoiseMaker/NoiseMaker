@@ -42,8 +42,13 @@ class View {
 		
 		protected function renderLayout($content = null) {
 			$view = $this->_evaluate(ROOT . DS . APP_DIR . '/view/layout/' . $this->layout . '.ctp', array('content' => $content));
-			if(!empty($view) && $view) {
+			if($view) {
 				return $view;
+			} else {
+				$view = $this->_evaluate(ROOT . DS . APP_DIR . '/lib/view/layout/' . $this->layout . '.ctp', array('content' => $content));
+				if($view !== false) {
+					return $view;
+				}
 			}
 			return false;
 		}
