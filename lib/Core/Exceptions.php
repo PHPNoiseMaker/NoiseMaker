@@ -53,6 +53,17 @@ class NotFoundException extends HttpException {
 
 }
 
+class ViewNotFoundException extends HttpException {
+
+	public function __construct($message = null, $code = 404) {
+		if (empty($message)) {
+			$message = 'View File Not Found';
+		}
+		parent::__construct($message, $code);
+	}
+
+}
+
 
 class MethodNotAllowedException extends HttpException {
 

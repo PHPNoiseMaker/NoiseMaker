@@ -1,6 +1,6 @@
 <?php
 class View {
-		public $view = 'default';
+		public $view = 'index';
 		public $layout = 'default';
 		public $controller = 'Pages';
 		
@@ -64,7 +64,7 @@ class View {
 				}
 			}
 			
-			return false;
+			throw new ViewNotFoundException();
 		}
 		
 		protected function _evaluate($___viewFn, $___dataForView = null) {

@@ -2,8 +2,8 @@
 class Router {
 	protected $command = array();
 	protected $params = array();
-	protected $controller = 'Pages';
-	protected $method = 'index';
+	protected $controller;
+	protected $action;
 	protected $requestURI;
 	protected $scriptName;
 	
@@ -11,9 +11,6 @@ class Router {
 		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
 		$this->scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
 		$this->_parseURI();
-		if($controller !== null) {
-			$this->controller = $controller;
-		}	
 	}
 	public function getCommand() {
 		return $this->command;
@@ -25,8 +22,8 @@ class Router {
 	public function getParams() {
 		return $this->params;
 	}
-	public function getMethod() {
-		return $this->method;
+	public function getAction() {
+		return $this->action;
 	}
 	public function getURI() {
 		return $this->requestURI;
@@ -40,15 +37,27 @@ class Router {
 		
 		$this->command = array_values($this->requestURI);
 		
-		if(count($this->command) > 1) {
+		if(count($this->command) >= 2) {
 			$this->controller = $this->command[0];
-			for($i = 1; $i < count($this->command); $i++) {
+			$this->action = $this->command[1];
+			for($i = 2; $i < count($this->command); $i++) {
 				if(!empty($this->command[$i]))
 					$this->params[$i] = $this->command[$i];
 				$this->controller = $this->command[0];
 			}
+		} elseif(count($this->command) == 1) {
+			$this->controller = $this->command[0];
+			for($i = 2; $i < count($this->command); $i++) {
+				if(!empty($this->command[$i]))
+					$this->params[$i] = $this->command[$i];
+				$this->controller = $this->command[0];
+				
+			}
 		} elseif ( isset($this->command[0]) && !empty($this->command[0]) ) {
 			$this->controller = $this->command[0];
+		}
+		if(empty($this->controller)) {
+			$this->controller = 'Pages';
 		}
 	}
 }

@@ -23,14 +23,19 @@ class Dispatcher {
 			}
 			
 			$this->controller = new $class();
-			$requestedMethod = $this->router->getMethod();
+			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
+			var_dump('', $requestedAction, $params, $this->router->getController());
+			if(empty($requestedAction)) {
+				$requestedAction = 'index';
+			}
+		
 			
-			if(method_exists($this->controller, $requestedMethod)) {
-				call_user_func_array(array($this->controller, $requestedMethod), $params);
+			if(method_exists($this->controller, $requestedAction)) {
+				call_user_func_array(array($this->controller, $requestedAction), $params);
 				
-			} elseif( method_exists($this->controller, 'index')) {
-				call_user_func_array(array($this->controller, 'index'), $params);
+			} else {
+				throw new NotFoundException();
 			}
 			
 			$this->controller->render($this->router->getController());
