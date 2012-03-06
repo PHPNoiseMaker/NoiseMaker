@@ -10,13 +10,28 @@ class Router {
 	public function __construct($controller = null) {
 		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
 		$this->scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
-		$this->parseURI();
+		$this->_parseURI();
 		if($controller !== null) {
 			$this->controller = $controller;
 		}	
 	}
+	public function getCommand() {
+		return $this->command;
+	}
 	
-	private function parseURI() {
+	public function getController() {
+		return $this->controller;
+	}
+	public function getParams() {
+		return $this->params;
+	}
+	public function getMethod() {
+		return $this->method;
+	}
+	public function getURI() {
+		return $this->requestURI;
+	}
+	private function _parseURI() {
 		for($i= 0; $i < sizeof($this->scriptName); $i++) {
 			if ($this->requestURI[$i] == $this->scriptName[$i]) {
 				unset($this->requestURI[$i]);
@@ -36,22 +51,4 @@ class Router {
 			$this->controller = $this->command[0];
 		}
 	}
-	
-	public function getCommand() {
-		return $this->command;
-	}
-	
-	public function getController() {
-		return $this->controller;
-	}
-	public function getParams() {
-		return $this->params;
-	}
-	public function getMethod() {
-		return $this->method;
-	}
-	public function getURI() {
-		return $this->requestURI;
-	}
-
 }

@@ -13,7 +13,7 @@ class PagesController extends AppController {
 			if($this->View->viewExists('Pages', $page)) {
 				$this->viewFile = $page;
 			} else {
-				throw new Exception('Not Found');
+				throw new NotFoundException();
 			}
 			
 					
