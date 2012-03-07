@@ -18,10 +18,15 @@ class Router {
 		$this->_parseURI();
 	}
 	
-	public function addRule($uri, $target, $pass = array()) {
+	public function addRule($uri, $target, $args = array()) {
+		if(is_array($args)) {
+			if(empty($args)) {
+				$args['pass'] = array();
+			}
+		}
 		$this->rules[$uri] = array(
 			'target' => $target,
-			'pass' => $pass
+			'pass' => $args['pass']
 		);
 	}
 	
