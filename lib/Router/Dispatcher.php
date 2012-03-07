@@ -2,8 +2,8 @@
 require_once('lib/Router/Router.php');
 require_once('lib/Core/Exceptions.php');
 class Dispatcher {
-	protected $router;
-	protected $controller;
+	private $router;
+	private $controller;
 	
 	public function __construct() {
 		$this->router = new Router();
@@ -25,7 +25,7 @@ class Dispatcher {
 				throw new NotFoundException();
 			}
 			
-			$this->controller = new $class($this->router->getNamedParams());
+			$this->controller = new $class($this->router);
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
 			if(empty($requestedAction)) {
@@ -57,7 +57,7 @@ class Dispatcher {
 		} catch(Exception $e) {
 			include 'lib/Controllers/ErrorsController.php';
 
-			$this->controller = new ErrorsController($this->router->getNamedParams());
+			$this->controller = new ErrorsController($this->router);
 			$requestedURI = $this->router->getURI();
 			
 			$params = array(
