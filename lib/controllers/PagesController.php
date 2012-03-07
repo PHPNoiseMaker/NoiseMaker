@@ -1,11 +1,28 @@
 <?php
 require_once('Controllers/AppController.php');
+/**
+ * PagesController class.
+ * 
+ * @extends AppController
+ */
 class PagesController extends AppController {
 	
+	/**
+	 * index function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function index() {
 		$this->display();
 	}
 	
+	/**
+	 * display function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function display() {
 		
 		$args = func_get_args();

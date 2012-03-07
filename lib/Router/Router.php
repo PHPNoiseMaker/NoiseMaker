@@ -1,23 +1,129 @@
 <?php
 class Router {
+	/**
+	 * command
+	 * Clean command (script name stripped out)
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access protected
+	 */
 	protected $command = array();
+	
+	
+	
+	/**
+	 * params
+	 * Parameters to be passed to the Controller function
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access protected
+	 */
 	protected $params = array();
+	
+	
+	/**
+	 * namedParams
+	 * Named Parameters to be passed into $this->params['named'] (in Controller)
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access protected
+	 */
 	protected $namedParams = array();
+	
+	
+	/**
+	 * controller
+	 * Name of the requested Controller
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
 	protected $controller;
+	
+	
+	/**
+	 * action
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
 	protected $action;
+	
+	
+	
+	/**
+	 * requestURI
+	 * Raw URI
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
 	protected $requestURI;
+	
+	
+	/**
+	 * scriptName
+	 * Name of the script
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
 	protected $scriptName;
+	
+	
+	
+	/**
+	 * rules
+	 * 
+	 * Route rules
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access protected
+	 */
 	protected $rules = array();
 	
+	/**
+	 * __construct function.
+	 * 
+	 * @access public
+	 * @param mixed $controller (default: null)
+	 * @return void
+	 */
 	public function __construct($controller = null) {
 		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
 		$this->scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
 	}
 	
+	/**
+	 * init function.
+	 *
+	 * Parse the URI 
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function init() {
 		$this->_parseURI();
 	}
 	
+	/**
+	 * addRule function.
+	 *
+	 * See Config/Routes.php for examples
+	 * 
+	 * @access public
+	 * @param mixed $uri
+	 * @param array $target (default: array())
+	 * @param array $args (default: array())
+	 * @return void
+	 */
 	public function addRule($uri, $target = array(), $args = array()) {
 		if(is_array($args)) {
 			if(empty($args)) {
@@ -30,26 +136,73 @@ class Router {
 		);
 	}
 	
+	
+	
+	/**
+	 * getCommand function.
+	 * 
+	 * 
+	 * @access public
+	 * @return $command
+	 */
 	public function getCommand() {
 		return $this->command;
 	}
 	
+	/**
+	 * getNamedParams function.
+	 * 
+	 * @access public
+	 * @return $namedParams
+	 */
 	public function getNamedParams() {
 		return $this->namedParams;
 	}
 	
+	/**
+	 * getController function.
+	 * 
+	 * @access public
+	 * @return $controller
+	 */
 	public function getController() {
 		return $this->controller;
 	}
+	/**
+	 * getParams function.
+	 * 
+	 * @access public
+	 * @return $params
+	 */
 	public function getParams() {
 		return $this->params;
 	}
+	/**
+	 * getAction function.
+	 * 
+	 * @access public
+	 * @return $action
+	 */
 	public function getAction() {
 		return $this->action;
 	}
+	/**
+	 * getURI function.
+	 * 
+	 * @access public
+	 * @return $requestURI
+	 */
 	public function getURI() {
 		return $this->requestURI;
 	}
+	
+	/**
+	 * arrayClean function.
+	 * 
+	 * @access private
+	 * @param array $array
+	 * @return void
+	 */
 	private function arrayClean($array) {
 		foreach($array as $key => $value) {
 			if (strlen($value) == 0) {
@@ -62,6 +215,13 @@ class Router {
 		return $array; 
 	}
 	
+	/**
+	 * parseNamedParams function.
+	 * 
+	 * @access private
+	 * @param array $params (default: array())
+	 * @return array $newParams
+	 */
 	private function parseNamedParams($params = array()) {
 		$newParams = array();
 		foreach($params as $key => $val) {
@@ -76,6 +236,13 @@ class Router {
 		return $newParams;
 	}
 	
+	/**
+	 * matchRule function.
+	 * 
+	 * @access private
+	 * @param mixed $rule
+	 * @return bool
+	 */
 	private function matchRule($rule) {
 		$paramBuffer = array();
 		$this->command = $this->arrayClean($this->command);
@@ -171,6 +338,14 @@ class Router {
 			$this->params = $commands;
 		}
 	}*/
+	/**
+	 * _parseURI function.
+	 *
+	 * Parses the URI
+	 * 
+	 * @access private
+	 * @return void
+	 */
 	private function _parseURI() {
 
 		for($i= 0; $i < sizeof($this->scriptName); $i++) {

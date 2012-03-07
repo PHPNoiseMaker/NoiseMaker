@@ -1,16 +1,45 @@
 <?php
 require_once('lib/Router/Router.php');
 require_once('lib/Core/Exceptions.php');
+/**
+ * Dispatcher class.
+ */
 class Dispatcher {
+	/**
+	 * router
+	 * Instance or router that will eventually be passed to Controller
+	 * 
+	 * @var mixed
+	 * @access private
+	 */
 	private $router;
+	/**
+	 * controller
+	 * Instance of the Controller Class
+	 * 
+	 * @var mixed
+	 * @access private
+	 */
 	private $controller;
 	
+	/**
+	 * __construct function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function __construct() {
 		$this->router = new Router();
 		include_once 'lib/Router/Routes.php';
 		$this->router->init();
 	}
 	
+	/**
+	 * dispatch function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function dispatch() {
 		try {
 			$controller = $this->router->getController();

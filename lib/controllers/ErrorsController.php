@@ -1,6 +1,18 @@
 <?php
 require_once('Controllers/AppController.php');
+/**
+ * ErrorsController class.
+ * 
+ * @extends AppController
+ */
 class ErrorsController extends AppController {
+	/**
+	 * _messages
+	 * 
+	 * @var mixed
+	 * @access protected
+	 * @static
+	 */
 	protected static $_messages = array(
 	    // Informational 1xx
 	    100 => 'Continue',
@@ -54,6 +66,13 @@ class ErrorsController extends AppController {
 	    505 => 'HTTP Version Not Supported',
 	    509 => 'Bandwidth Limit Exceeded'
 	);
+	/**
+	 * index function.
+	 * 
+	 * @access public
+	 * @param mixed $params (default: null)
+	 * @return void
+	 */
 	public function index($params = null) {
 		$this->view = 'error';
 		
