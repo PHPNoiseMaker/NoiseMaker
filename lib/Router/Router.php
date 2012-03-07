@@ -51,78 +51,78 @@ class Router {
 		}
 		return $array; 
 	}
-	private function matchRules() {
+	private function matchRules($rule) {
 		$matched = false;
 		$paramBuffer = array();
 		$this->command = $this->arrayClean($this->command);
 		$commandCount = count($this->command);
-		foreach($this->rules as $ruleKey => $ruleTarget) {
-			$parsedRule = $this->arrayClean(explode('/', $ruleKey));
-			$parsedRuleCount = count($parsedRule);
-			if(
-				$parsedRuleCount == $commandCount
-				|| (
-					isset($parsedRule[$parsedRuleCount])
-					&& $parsedRule[$parsedRuleCount] == '*'
-				)
-					
-			) {
+		
+		$parsedRule = $this->arrayClean(explode('/', $rule));
+		$parsedRuleCount = count($parsedRule);
+		if(
+			$parsedRuleCount == $commandCount
+			|| (
+				isset($parsedRule[$parsedRuleCount])
+				&& $parsedRule[$parsedRuleCount] == '*'
+			)
 				
+		) {
 			
-				$i = 0;
-				foreach ($parsedRule as $parsedKey => $parsedValue) {
-					
-					if(isset($this->command[$i])) {
-						
-						if(strpos($parsedValue, ':') === 0) {
-							$varName = substr($parsedValue, 1);
-							$position = array_search($varName, $ruleTarget['pass']);
-							if($position !== false) {
-								$paramsBuffer[$position] = $this->command[$i];
-							}
-							$this->params = $paramsBuffer;
-							
-							$matched = true;
-							
-						
-						} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
-							
-							$this->controller = $ruleTarget['target']['controller'];
-							$this->action = $ruleTarget['target']['action'];
-							
-							foreach($ruleTarget['target'] as $ruleTargetKey => $ruleTargetVal) {
-								if(
-									$ruleTargetKey !== 'action'
-									&& $ruleTargetKey !== 'controller'
-								)
-								$this->params[] = $ruleTargetVal;
-							}
-							$matched = true;
-							
-						}
-					}
-					$i++;
-				}
-				if(
-					isset($parsedRule[$parsedRuleCount])
-					&& $parsedRule[$parsedRuleCount] == '*'
-				) {
-					for($a = $i - 1; $a < $commandCount; $a++) {
-						$this->params[] = $this->command[$a];
-					}
-				}
+		
+			$i = 0;
+			foreach ($parsedRule as $parsedKey => $parsedValue) {
 				
-				if(!$i) {
-					if(
-						isset($ruleTarget['target']['controller']) 
-						&& isset($ruleTarget['target']['action'])
-					) {
-						$this->controller = $ruleTarget['target']['controller'];
-						$this->action = $ruleTarget['target']['action'];
+				if(isset($this->command[$i])) {
+					
+					if(strpos($parsedValue, ':') === 0) {
+						$varName = substr($parsedValue, 1);
+						$position = array_search($varName, $this->rules[$rule]['pass']);
+						if($position !== false) {
+							$paramsBuffer[$position] = $this->command[$i];
+						}
+						$this->params = $paramsBuffer;
+						
+						$matched = true;
+						
+					
+					} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
+						
+						$this->controller = $this->rules[$rule]['target']['controller'];
+						$this->action = $this->rules[$rule]['target']['action'];
+						
+						foreach($this->rules[$rule]['target'] as $ruleTargetKey => $ruleTargetVal) {
+							if(
+								$ruleTargetKey !== 'action'
+								&& $ruleTargetKey !== 'controller'
+							)
+							$this->params[] = $ruleTargetVal;
+						}
+						$matched = true;
+						
 					}
+				}
+				$i++;
+			}
+			if(
+				isset($parsedRule[$parsedRuleCount])
+				&& $parsedRule[$parsedRuleCount] == '*'
+			) {
+				for($a = $i - 1; $a < $commandCount; $a++) {
+					$this->params[] = $this->command[$a];
+				}
+			}
+			
+			if(!$i) {
+				if(
+					isset($this->rules[$rule]['target']['controller']) 
+					&& isset($this->rules[$rule]['target']['action'])
+				) {
+					$this->controller = $this->rules[$rule]['target']['controller'];
+					$this->action = $this->rules[$rule]['target']['action'];
 				}
 			}
 		}
+		
 	return $matched;
 	}
 	private function _parseURI() {
@@ -138,7 +138,11 @@ class Router {
 		
 		
 		
-		$matched = $this->matchRules();
+		foreach($this->rules as $rule => $target) {
+			$matched = $this->matchRules($rule);
+			if($matched)
+				break;
+		}
 		
 		if(!$matched) {
 			if(count($this->command) > 1) {
