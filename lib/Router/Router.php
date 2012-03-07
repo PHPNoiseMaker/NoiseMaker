@@ -51,7 +51,7 @@ class Router {
 		}
 		return $array; 
 	}
-	private function matchRules($rule) {
+	private function matchRule($rule) {
 		$paramBuffer = array();
 		$this->command = $this->arrayClean($this->command);
 		$commandCount = sizeof($this->command);
@@ -154,7 +154,7 @@ class Router {
 		
 		
 		foreach($this->rules as $rule => $target) {
-			$matched = $this->matchRules($rule);
+			$matched = $this->matchRule($rule);
 			if($matched)
 				break;
 		}
