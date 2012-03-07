@@ -7,11 +7,14 @@ class View {
 		protected $viewVars = array();
 		
 		public function renderPage() {
-			$return = $this->renderLayout($this->loadView($this->viewVars));
-			if($return !== false) {
-				return $return;
+			try {
+				$return = $this->renderLayout($this->loadView($this->viewVars));
+				if($return !== false) {
+					return $return;
+				}
+			} catch (Exception $e) {
+				throw new $e;
 			}
-			throw new NotFoundException();
 		}
 		
 		public function set($key, $value) {
@@ -54,7 +57,7 @@ class View {
 					return $view;
 				}
 			}
-			return false;
+			throw new LayoutNotFoundException();
 		}
 		
 		protected function loadView() {
@@ -67,6 +70,7 @@ class View {
 					return $view;
 				}
 			}
+			throw new ViewNotFoundException();
 		}
 		
 		protected function _evaluate($___viewFn, $___dataForView = null) {

@@ -2,7 +2,7 @@
 require_once('Controllers/AppController.php');
 class PagesController extends AppController {
 	
-	public function index() {
+	private function index() {
 		$this->display();
 	}
 	

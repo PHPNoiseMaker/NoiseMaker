@@ -35,7 +35,17 @@ class Dispatcher {
 			$this->controller->view = $requestedAction;
 			
 			if(method_exists($this->controller, $requestedAction)) {
-				call_user_func_array(array($this->controller, $requestedAction), $params);
+				try {
+					call_user_func_array(
+						array(
+							$this->controller, 
+							$requestedAction
+						), 
+						$params
+					);
+				} catch(Exception $e) {
+					throw new $e;
+				}
 				
 			} else {
 				throw new NotFoundException();

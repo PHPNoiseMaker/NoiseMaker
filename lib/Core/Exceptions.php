@@ -63,6 +63,37 @@ class ViewNotFoundException extends HttpException {
 	}
 
 }
+class LayoutNotFoundException extends HttpException {
+
+	public function __construct($message = null, $code = 404) {
+		if (empty($message)) {
+			$message = 'View File Not Found';
+		}
+		parent::__construct($message, $code);
+	}
+
+}
+class ControllerNotFoundException extends HttpException {
+
+	public function __construct($message = null, $code = 404) {
+		if (empty($message)) {
+			$message = 'Controller Not Found';
+		}
+		parent::__construct($message, $code);
+	}
+
+}
+
+class ModelNotFoundException extends HttpException {
+
+	public function __construct($message = null, $code = 404) {
+		if (empty($message)) {
+			$message = 'Model Not Found';
+		}
+		parent::__construct($message, $code);
+	}
+
+}
 
 
 class MethodNotAllowedException extends HttpException {
