@@ -2,12 +2,11 @@
 require_once('Controllers/AppController.php');
 class PagesController extends AppController {
 	
-	private function index() {
+	public function index() {
 		$this->display();
 	}
 	
 	public function display() {
-		
 		$args = func_get_args();
 		$count = count($args);
 

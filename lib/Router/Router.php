@@ -17,8 +17,11 @@ class Router {
 		$this->_parseURI();
 	}
 	
-	public function addRule($uri, $target) {
-		$this->rules[$uri] = $target;
+	public function addRule($uri, $target, $pass = array()) {
+		$this->rules[$uri] = array(
+			'target' => $target,
+			'pass' => $pass
+		);
 	}
 	
 	public function getCommand() {
@@ -49,40 +52,74 @@ class Router {
 		return $array; 
 	}
 	private function matchRules() {
+		$matched = false;
+		$paramBuffer = array();
 		$this->command = $this->arrayClean($this->command);
 		$commandCount = count($this->command);
 		foreach($this->rules as $ruleKey => $ruleTarget) {
 			$parsedRule = $this->arrayClean(explode('/', $ruleKey));
 			$parsedRuleCount = count($parsedRule);
-			if($parsedRuleCount == $commandCount) {
+			if(
+				$parsedRuleCount == $commandCount
+				|| (
+					isset($parsedRule[$parsedRuleCount])
+					&& $parsedRule[$parsedRuleCount] == '*'
+				)
+					
+			) {
+				
 				$i = 0;
-				foreach ($parsedRule as $parsedKey => $parsedValue) {
-					if(isset($this->command[$i])) {
-						if(strcmp($parsedValue, $this->command[$i]) == 0) {
-							$this->controller = $ruleTarget['controller'];
-							unset($ruleTarget['controller']);
-							$this->action = $ruleTarget['action'];
-							unset($ruleTarget['action']);
-							foreach($ruleTarget as $ruleTargetVal) {
-								$this->params[] = $ruleTargetVal;
+				while(!$matched && $i < $parsedRuleCount) {
+					
+					foreach ($parsedRule as $parsedKey => $parsedValue) {
+						
+						if(isset($this->command[$i])) {
+							if(strpos($parsedValue, ':') === 0) {
+								$varName = substr($parsedValue, 1);
+								$position = array_search($varName, $ruleTarget['pass']);
+								if($position !== false) {
+									$paramsBuffer[$position] = $this->command[$i];
+								}
+								$this->params = $paramsBuffer;
+								$matched = true;
+							
+							} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
+								$this->controller = $ruleTarget['target']['controller'];
+								unset($ruleTarget['target']['controller']);
+								$this->action = $ruleTarget['target']['action'];
+								unset($ruleTarget['target']['action']);
+								foreach($ruleTarget['target'] as $ruleTargetVal) {
+									$this->params[] = $ruleTargetVal;
+								}
+								$matched = true;
 							}
-							for($a = $i + 1; $a < $commandCount; $a++) {
-								$this->params[] = $this->command[$a];
-							}
-							return true;
 						}
-					} 
-					$i++;
+						$i++;
+					}
 				}
+				if(
+					isset($parsedRule[$parsedRuleCount])
+					&& $parsedRule[$parsedRuleCount] == '*'
+				) {
+					for($a = $i - 1; $a < $commandCount; $a++) {
+						$this->params[] = $this->command[$a];
+					}
+				}
+				
 				if(!$i) {
-					$this->controller = $ruleTarget['controller'];
-					unset($ruleTarget['controller']);
-					$this->action = $ruleTarget['action'];
-					unset($ruleTarget['action']);
+					if(
+						isset($ruleTarget['target']['controller']) 
+						&& isset($ruleTarget['target']['action'])
+					) {
+						$this->controller = $ruleTarget['target']['controller'];
+						unset($ruleTarget['target']['controller']);
+						$this->action = $ruleTarget['target']['action'];
+						unset($ruleTarget['target']['action']);
+					}
 				}
 			}
 		}
-		return false;
+	return $matched;
 	}
 	private function _parseURI() {
 

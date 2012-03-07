@@ -33,7 +33,7 @@ class Dispatcher {
 			}
 		
 			$this->controller->view = $requestedAction;
-			
+
 			if(method_exists($this->controller, $requestedAction)) {
 				try {
 					call_user_func_array(
