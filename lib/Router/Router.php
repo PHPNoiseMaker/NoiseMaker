@@ -68,34 +68,40 @@ class Router {
 					
 			) {
 				
+			
 				$i = 0;
-				while(!$matched && $i < $parsedRuleCount) {
+				foreach ($parsedRule as $parsedKey => $parsedValue) {
 					
-					foreach ($parsedRule as $parsedKey => $parsedValue) {
+					if(isset($this->command[$i])) {
 						
-						if(isset($this->command[$i])) {
-							if(strpos($parsedValue, ':') === 0) {
-								$varName = substr($parsedValue, 1);
-								$position = array_search($varName, $ruleTarget['pass']);
-								if($position !== false) {
-									$paramsBuffer[$position] = $this->command[$i];
-								}
-								$this->params = $paramsBuffer;
-								$matched = true;
-							
-							} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
-								$this->controller = $ruleTarget['target']['controller'];
-								unset($ruleTarget['target']['controller']);
-								$this->action = $ruleTarget['target']['action'];
-								unset($ruleTarget['target']['action']);
-								foreach($ruleTarget['target'] as $ruleTargetVal) {
-									$this->params[] = $ruleTargetVal;
-								}
-								$matched = true;
+						if(strpos($parsedValue, ':') === 0) {
+							$varName = substr($parsedValue, 1);
+							$position = array_search($varName, $ruleTarget['pass']);
+							if($position !== false) {
+								$paramsBuffer[$position] = $this->command[$i];
 							}
+							$this->params = $paramsBuffer;
+							
+							$matched = true;
+							
+						
+						} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
+							
+							$this->controller = $ruleTarget['target']['controller'];
+							$this->action = $ruleTarget['target']['action'];
+							
+							foreach($ruleTarget['target'] as $ruleTargetKey => $ruleTargetVal) {
+								if(
+									$ruleTargetKey !== 'action'
+									&& $ruleTargetKey !== 'controller'
+								)
+								$this->params[] = $ruleTargetVal;
+							}
+							$matched = true;
+							
 						}
-						$i++;
 					}
+					$i++;
 				}
 				if(
 					isset($parsedRule[$parsedRuleCount])
@@ -112,9 +118,7 @@ class Router {
 						&& isset($ruleTarget['target']['action'])
 					) {
 						$this->controller = $ruleTarget['target']['controller'];
-						unset($ruleTarget['target']['controller']);
 						$this->action = $ruleTarget['target']['action'];
-						unset($ruleTarget['target']['action']);
 					}
 				}
 			}
@@ -131,7 +135,6 @@ class Router {
 		
 		$this->command = array_values($this->requestURI);
 		
-		//var_dump($this->command);
 		
 		
 		
