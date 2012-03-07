@@ -7,8 +7,8 @@ class PagesController extends AppController {
 	}
 	
 	public function display() {
+		
 		$args = func_get_args();
-		$count = count($args);
 
 		if(
 			isset($args[0])

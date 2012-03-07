@@ -62,7 +62,8 @@ class Router {
 		foreach($params as $key => $val) {
 			if(strpos($val, ':') !== false) {
 				list($name, $value) = explode(':', $val);
-				$this->namedParams[$name] = $value;
+				if(!empty($name) && !empty($value))
+					$this->namedParams[$name] = $value;
 			} else {
 				$newParams[] = $val;
 			}
