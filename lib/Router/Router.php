@@ -48,14 +48,13 @@ class Router {
 		}
 		return $array; 
 	}
-	private function matchURL() {
+	private function matchRules() {
 		$this->command = $this->arrayClean($this->command);
 		$commandCount = count($this->command);
 		foreach($this->rules as $ruleKey => $ruleTarget) {
 			$parsedRule = $this->arrayClean(explode('/', $ruleKey));
 			$parsedRuleCount = count($parsedRule);
-			if($parsedRuleCount == $commandCount || 1) {
-				
+			if($parsedRuleCount == $commandCount) {
 				$i = 0;
 				foreach ($parsedRule as $parsedKey => $parsedValue) {
 					if(isset($this->command[$i])) {
@@ -72,8 +71,14 @@ class Router {
 							}
 							return true;
 						}
-					}
+					} 
 					$i++;
+				}
+				if(!$i) {
+					$this->controller = $ruleTarget['controller'];
+					unset($ruleTarget['controller']);
+					$this->action = $ruleTarget['action'];
+					unset($ruleTarget['action']);
 				}
 			}
 		}
@@ -93,7 +98,7 @@ class Router {
 		
 		
 		
-		$matched = $this->matchURL();
+		$matched = $this->matchRules();
 		
 		if(!$matched) {
 			if(count($this->command) > 1) {
@@ -114,7 +119,7 @@ class Router {
 		}  
 		
 		if(empty($this->controller)) {
-			$this->controller = 'Pages';
+			//$this->controller = 'Pages';
 		}
 	}
 }
