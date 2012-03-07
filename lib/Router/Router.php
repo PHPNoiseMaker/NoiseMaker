@@ -18,7 +18,7 @@ class Router {
 		$this->_parseURI();
 	}
 	
-	public function addRule($uri, $target, $args = array()) {
+	public function addRule($uri, $target = array(), $args = array()) {
 		if(is_array($args)) {
 			if(empty($args)) {
 				$args['pass'] = array();
@@ -101,17 +101,23 @@ class Router {
 					if(strpos($parsedValue, ':') === 0) {
 						$varName = substr($parsedValue, 1);
 						$position = array_search($varName, $this->rules[$rule]['pass']);
-						if($position !== false) {
+						if($varName == 'controller') {
+							$this->controller = $this->command[$i];
+						} elseif ($varName == 'action') {
+							$this->action = $this->command[$i];
+						} elseif ($position !== false) {
 							$paramsBuffer[$position] = $this->command[$i];
 						}
-						$this->params = $paramsBuffer;
+						$this->params = $paramBuffer;
 						
 						
 					
 					} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
 						
-						$this->controller = $this->rules[$rule]['target']['controller'];
-						$this->action = $this->rules[$rule]['target']['action'];
+						if($this->controller === null)
+							$this->controller = $this->rules[$rule]['target']['controller'];
+						if($this->action === null)
+							$this->action = $this->rules[$rule]['target']['action'];
 						
 						foreach($this->rules[$rule]['target'] as $ruleTargetKey => $ruleTargetVal) {
 							if(
@@ -185,7 +191,7 @@ class Router {
 		}
 		
 		if(!$matched) {
-			$this->defaultRoutes();
+			//$this->defaultRoutes();
 		}  
 		
 		$this->params = $this->parseNamedParams($this->params);

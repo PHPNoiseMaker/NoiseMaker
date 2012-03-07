@@ -33,3 +33,12 @@ $this->router->addRule('/', array(
 	'controller' => 'Pages',
 	'action' => 'index'
 ));
+
+
+/**
+ * Default Route (MUST BE LAST RULE!)
+ * 
+ * @var mixed
+ * @access public
+ */
+$this->router->addRule('/:controller/:action/*');
