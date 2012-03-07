@@ -6,7 +6,7 @@ class Controller {
 	protected $params = array();
 	public $view = '';
 	
-	public function __construct($namedParams) {
+	public function __construct($namedParams = array()) {
 		$this->View = new View();
 		$this->params['named'] = $namedParams;
 	}
