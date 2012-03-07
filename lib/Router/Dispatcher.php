@@ -7,6 +7,9 @@ class Dispatcher {
 	
 	public function __construct() {
 		$this->router = new Router();
+		include_once 'lib/Router/Routes.php';
+		$this->router->init();
+		var_dump($this->router);
 	}
 	
 	public function dispatch() {
