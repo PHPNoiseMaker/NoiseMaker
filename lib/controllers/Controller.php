@@ -2,11 +2,13 @@
 require_once('lib/View/View.php');
 class Controller {
 	
-	public $View;
+	protected $View;
+	protected $params = array();
 	public $view = '';
 	
-	public function __construct() {
+	public function __construct($namedParams) {
 		$this->View = new View();
+		$this->params['named'] = $namedParams;
 	}
 	
 	public function render($controller = null) {

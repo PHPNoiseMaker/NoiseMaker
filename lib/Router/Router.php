@@ -2,6 +2,7 @@
 class Router {
 	protected $command = array();
 	protected $params = array();
+	protected $namedParams = array();
 	protected $controller;
 	protected $action;
 	protected $requestURI;
@@ -28,6 +29,10 @@ class Router {
 		return $this->command;
 	}
 	
+	public function getNamedParams() {
+		return $this->namedParams;
+	}
+	
 	public function getController() {
 		return $this->controller;
 	}
@@ -51,6 +56,20 @@ class Router {
 		}
 		return $array; 
 	}
+	
+	private function parseNamedParams($params = array()) {
+		$newParams = array();
+		foreach($params as $key => $val) {
+			if(strpos($val, ':') !== false) {
+				list($name, $value) = explode(':', $val);
+				$this->namedParams[$name] = $value;
+			} else {
+				$newParams[] = $val;
+			}
+		}
+		return $newParams;
+	}
+	
 	private function matchRule($rule) {
 		$paramBuffer = array();
 		$this->command = $this->arrayClean($this->command);
@@ -162,6 +181,8 @@ class Router {
 		if(!$matched) {
 			$this->defaultRoutes();
 		}  
+		
+		$this->params = $this->parseNamedParams($this->params);
 		
 	}
 }

@@ -25,7 +25,7 @@ class Dispatcher {
 				throw new NotFoundException();
 			}
 			
-			$this->controller = new $class();
+			$this->controller = new $class($this->router->getNamedParams());
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
 			if(empty($requestedAction)) {
@@ -57,7 +57,7 @@ class Dispatcher {
 		} catch(Exception $e) {
 			include 'lib/Controllers/ErrorsController.php';
 
-			$this->controller = new ErrorsController();
+			$this->controller = new ErrorsController($this->router->getNamedParams());
 			$requestedURI = $this->router->getURI();
 			
 			$params = array(
