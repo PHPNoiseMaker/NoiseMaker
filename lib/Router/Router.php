@@ -162,7 +162,7 @@ class Router {
 		return $this->controller !== null ? true : false;
 	}
 	
-	private function defaultRoutes() {
+	/*private function defaultRoutes() {
 		$commands = $this->arrayClean($this->command);
 		
 		if (count($commands)) {
@@ -170,7 +170,7 @@ class Router {
 			$this->action = array_shift($commands);
 			$this->params = $commands;
 		}
-	}
+	}*/
 	private function _parseURI() {
 
 		for($i= 0; $i < sizeof($this->scriptName); $i++) {
@@ -190,9 +190,9 @@ class Router {
 				break;
 		}
 		
-		if(!$matched) {
-			//$this->defaultRoutes();
-		}  
+		/*if(!$matched) {
+			$this->defaultRoutes();
+		} */ 
 		
 		$this->params = $this->parseNamedParams($this->params);
 		
