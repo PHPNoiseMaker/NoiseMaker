@@ -1,13 +1,17 @@
 <?php
 class View {
-		public $view = 'default';
+		public $view = 'index';
 		public $layout = 'default';
 		public $controller = 'Pages';
 		
 		protected $viewVars = array();
 		
 		public function renderPage() {
-			return $this->renderLayout($this->loadView($this->viewVars));
+			$return = $this->renderLayout($this->loadView($this->viewVars));
+			if($return !== false) {
+				return $return;
+			}
+			throw new NotFoundException();
 		}
 		
 		public function set($key, $value) {
@@ -63,12 +67,9 @@ class View {
 					return $view;
 				}
 			}
-			
-			return false;
 		}
 		
 		protected function _evaluate($___viewFn, $___dataForView = null) {
-			
 			if(file_exists($___viewFn)) {
 				extract($___dataForView, EXTR_SKIP);
 				ob_start();

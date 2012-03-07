@@ -8,7 +8,7 @@
 		<link rel="stylesheet" type="text/css" href="/css/prettify.css" />
 	</head>
 	<body>
-		<div class="navbar navbar-fixed-top">
+		<div class="navbar">
 		  <div class="navbar-inner">
 		    <div class="container">
 		     <a class="brand" href="/">Ender</a>
