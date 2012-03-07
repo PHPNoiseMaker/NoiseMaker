@@ -43,6 +43,9 @@ class Router {
 				unset($array[$key]);
 			}
 		}
+		if(count($array) < 1) {
+			$array = array();
+		}
 		return $array; 
 	}
 	private function matchURL() {
@@ -51,15 +54,24 @@ class Router {
 		foreach($this->rules as $ruleKey => $ruleTarget) {
 			$parsedRule = $this->arrayClean(explode('/', $ruleKey));
 			$parsedRuleCount = count($parsedRule);
-			//var_dump('cmd',$parsedRule, $this->command, $parsedRuleCount, $commandCount);
-			if($parsedRuleCount == $commandCount) {
+			if($parsedRuleCount == $commandCount || 1) {
 				
 				$i = 0;
 				foreach ($parsedRule as $parsedKey => $parsedValue) {
-					if(strcmp($parsedValue, $this->command[$i]) == 0) {
-						$this->controller = $ruleTarget['controller'];
-						$this->action = $ruleTarget['action'];
-						return true;
+					if(isset($this->command[$i])) {
+						if(strcmp($parsedValue, $this->command[$i]) == 0) {
+							$this->controller = $ruleTarget['controller'];
+							unset($ruleTarget['controller']);
+							$this->action = $ruleTarget['action'];
+							unset($ruleTarget['action']);
+							foreach($ruleTarget as $ruleTargetVal) {
+								$this->params[] = $ruleTargetVal;
+							}
+							for($a = $i + 1; $a < $commandCount; $a++) {
+								$this->params[] = $this->command[$a];
+							}
+							return true;
+						}
 					}
 					$i++;
 				}
@@ -83,7 +95,6 @@ class Router {
 		
 		$matched = $this->matchURL();
 		
-		var_dump('matched',$matched);
 		if(!$matched) {
 			if(count($this->command) > 1) {
 				$this->controller = $this->command[0];
@@ -94,16 +105,14 @@ class Router {
 					$this->controller = $this->command[0];
 				}
 			} elseif(count($this->command) == 1) {
-				$this->controller = $this->command[0];
-				$this->params[] = $this->command[0];
-				$this->controller = $this->command[0];
-					
+				$this->controller = $this->command[0];					
 				
 			} elseif ( isset($this->command[0]) && !empty($this->command[0]) ) {
 				$this->controller = $this->command[0];
 			}
 		
 		}  
+		
 		if(empty($this->controller)) {
 			$this->controller = 'Pages';
 		}
