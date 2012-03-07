@@ -52,10 +52,9 @@ class Router {
 		return $array; 
 	}
 	private function matchRules($rule) {
-		$matched = false;
 		$paramBuffer = array();
 		$this->command = $this->arrayClean($this->command);
-		$commandCount = count($this->command);
+		$commandCount = sizeof($this->command);
 		
 		$parsedRule = $this->arrayClean(explode('/', $rule));
 		$parsedRuleCount = count($parsedRule);
@@ -82,7 +81,6 @@ class Router {
 						}
 						$this->params = $paramsBuffer;
 						
-						$matched = true;
 						
 					
 					} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
@@ -97,18 +95,24 @@ class Router {
 							)
 							$this->params[] = $ruleTargetVal;
 						}
-						$matched = true;
 						
+					} elseif(
+						isset($parsedRule[$parsedRuleCount])
+						&& $parsedRule[$parsedRuleCount] != '*'
+					) {
+						return false;
 					}
 				}
 				$i++;
 			}
+			
 			if(
 				isset($parsedRule[$parsedRuleCount])
 				&& $parsedRule[$parsedRuleCount] == '*'
 			) {
-				for($a = $i - 1; $a < $commandCount; $a++) {
-					$this->params[] = $this->command[$a];
+				for($a = $i - 1; $a <= $commandCount; $a++) {
+					if(isset($this->command[$a]) && !empty($this->command[$a]))
+						$this->params[] = $this->command[$a];
 				}
 			}
 			
@@ -121,9 +125,20 @@ class Router {
 					$this->action = $this->rules[$rule]['target']['action'];
 				}
 			}
+			
 		}
 		
-	return $matched;
+		return $this->controller !== null ? true : false;
+	}
+	
+	private function defaultRoutes() {
+		$commands = $this->arrayClean($this->command);
+		
+		if (count($commands)) {
+			$this->controller = array_shift($commands);
+			$this->action = array_shift($commands);
+			$this->params = $commands;
+		}
 	}
 	private function _parseURI() {
 
@@ -145,25 +160,8 @@ class Router {
 		}
 		
 		if(!$matched) {
-			if(count($this->command) > 1) {
-				$this->controller = $this->command[0];
-				$this->action = $this->command[1];
-				for($i = 2; $i < count($this->command); $i++) {
-					if(!empty($this->command[$i]))
-						$this->params[] = $this->command[$i];
-					$this->controller = $this->command[0];
-				}
-			} elseif(count($this->command) == 1) {
-				$this->controller = $this->command[0];					
-				
-			} elseif ( isset($this->command[0]) && !empty($this->command[0]) ) {
-				$this->controller = $this->command[0];
-			}
-		
+			$this->defaultRoutes();
 		}  
 		
-		if(empty($this->controller)) {
-			//$this->controller = 'Pages';
-		}
 	}
 }
