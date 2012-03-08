@@ -273,10 +273,13 @@ class Router {
 						} elseif ($varName == 'action') {
 							$this->action = $this->command[$i];
 						} elseif ($position !== false) {
-							$paramsBuffer[$position] = $this->command[$i];
+							
+							$paramBuffer[$position] = $this->command[$i];
+							
 						}
-						$this->params = $paramBuffer;
 						
+						$this->params = $paramBuffer;
+					
 						
 					
 					} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
