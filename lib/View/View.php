@@ -1,5 +1,6 @@
 <?php
 class View {
+
 		/**
 		 * view
 		 * 
@@ -120,7 +121,7 @@ class View {
 		 * @return void
 		 */
 		public function viewExists($controller, $view) {
-			if(file_exists(ROOT . DS  . 'View/' . $controller . '/' . $view . '.ctp')) {
+			if(file_exists(ROOT . DS  . APP_DIR . DS . 'View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
 			} elseif(file_exists(ROOT . DS . 'lib/View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
@@ -136,7 +137,7 @@ class View {
 		 * @return void
 		 */
 		protected function renderLayout($content = null) {
-			$view = $this->_evaluate(ROOT . DS  . 'View/Layout/' . $this->layout . '.ctp', array('content' => $content));
+			$view = $this->_evaluate(ROOT . DS  . APP_DIR . DS . 'View/Layout/' . $this->layout . '.ctp', array('content' => $content));
 			if($view) {
 				return $view;
 			} else {
@@ -155,13 +156,14 @@ class View {
 		 * @return void
 		 */
 		protected function loadView() {
-			$view = $this->_evaluate(ROOT . DS . 'View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
-			if($view !== false) {
+			$view = $this->_evaluate(ROOT . DS . APP_DIR . DS . 'View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
+			if($view) {
 				return $view;
 			} else {
 				$view = $this->_evaluate(ROOT . DS . 'lib/View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
 				if($view !== false) {
 					return $view;
+					
 				}
 			}
 			throw new ViewNotFoundException();

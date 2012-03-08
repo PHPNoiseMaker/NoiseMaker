@@ -359,11 +359,13 @@ class Router {
 		
 		
 		
+		
 		foreach($this->rules as $rule => $target) {
 			$matched = $this->matchRule($rule);
 			if($matched)
 				break;
 		}
+
 		
 		/*if(!$matched) {
 			$this->defaultRoutes();

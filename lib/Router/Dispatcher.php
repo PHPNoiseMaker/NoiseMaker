@@ -44,10 +44,11 @@ class Dispatcher {
 		try {
 			$controller = $this->router->getController();
 			$class = $controller . 'Controller';
-			if(file_exists(ROOT . DS . 'Controllers/' . $class . '.php')) {
-				include 'Controllers/' . $class . '.php';
-		
+			if(file_exists(ROOT . DS . APP_DIR . DS . 'Controllers/' . $class . '.php')) {
+				include APP_DIR . DS . 'Controllers/' . $class . '.php';
+
 			} elseif(file_exists(ROOT . DS . 'lib/Controllers/' . $class . '.php')) {
+			
 				include 'lib/Controllers/' . $class . '.php';
 				
 			} else {
@@ -77,7 +78,8 @@ class Dispatcher {
 				}
 				
 			} else {
-				throw new NotFoundException();
+			
+			//	throw new NotFoundException();
 			}
 			
 			

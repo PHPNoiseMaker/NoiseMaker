@@ -1,5 +1,5 @@
 <?php
-require_once('Controllers/AppController.php');
+require_once('app/Controllers/AppController.php');
 /**
  * ErrorsController class.
  * 

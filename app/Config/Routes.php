@@ -20,6 +20,10 @@
 							)
 						)
 					);
+					
+					
+			Example Default Route:
+					$this->router->addRule('/:controller/:action/*');
  */
  
 
