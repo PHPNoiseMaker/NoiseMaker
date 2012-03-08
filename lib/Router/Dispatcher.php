@@ -79,7 +79,7 @@ class Dispatcher {
 				
 			} else {
 			
-			//	throw new NotFoundException();
+				throw new NotFoundException();
 			}
 			
 			
