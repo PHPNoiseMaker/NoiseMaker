@@ -29,9 +29,9 @@ class ErrorsController extends AppController {
 				$this->set('message', '');
 			}
 			if(array_key_exists('code', $params['error']))
-				$this->response->sendCode($params['error']['code']);
+				$this->response->_code = $params['error']['code'];
 			else
-				$this->response->sendCode(500);
+				$this->response->_code = 500;
 		}
 	}
 

@@ -1,10 +1,70 @@
 <?php
+/**
+ * Response class.
+ */
 class Response {
-	private $_getters = array('_messages');
-  	private $_setters = array();
+	/**
+	 * _getters
+	 * Properties allowed to be read
+	 * 
+	 * (default value: array('_messages', '_code'))
+	 * 
+	 * @var string
+	 * @access private
+	 */
+	private $_getters = array('_messages', '_code');
+  	/**
+  	 * _setters
+  	 * 
+  	 *	Properties allowed to be set
+  	 *
+  	 * (default value: array('_code'))
+  	 * 
+  	 * @var string
+  	 * @access private
+  	 */
+  	private $_setters = array('_code');
+  	
+  	
+  	/**
+  	 * _headers - array of headers to send
+  	 *
+  	 * If the key is numeric it will send the value as the header string, otherwise
+  	 * it will send it in the form "$key: $value"
+  	 * 
+  	 * (default value: array())
+  	 * 
+  	 * @var array
+  	 * @access private
+  	 */
   	private $_headers = array();
+  	
+  	
+  	/**
+  	 * _code -  The status code to send to the client
+  	 * 
+  	 * (default value: 200)
+  	 * 
+  	 * @var int
+  	 * @access private
+  	 */
+  	private $_code = 200;
+  	
+  	/**
+  	 * _body - The content of the asset
+  	 * 
+  	 * @var mixed
+  	 * @access private
+  	 */
   	private $_body;
 
+	/**
+	 * _messages - Status code definitions
+	 * 
+	 * @var mixed
+	 * @access protected
+	 * @static
+	 */
 	protected static $_messages = array(
 	    // Informational 1xx
 	    100 => 'Continue',
@@ -59,23 +119,62 @@ class Response {
 	    509 => 'Bandwidth Limit Exceeded'
 	);
 	
+	/**
+	 * __construct function.
+	 *
+	 * Start output buffering
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function __construct() {
 		ob_start();
 	}
 	
+	/**
+	 * buildAsset function.
+	 *
+	 *	Build the response to send back to the client
+	 * 
+	 * @access public
+	 * @param mixed $body
+	 * @return void
+	 */
 	public function buildAsset($body) {
+		$this->_sendCode($this->_code);
 		if(is_array($this->_headers)) {
-			foreach($this->_headers as $header) {
-				header($header);
+			foreach($this->_headers as $key => $value) {
+				if(is_int($key)) {
+					header($value);
+				} else {
+					header($key . ': ' . $value);
+				}
 			}
 		}
 		echo $body;
 	}
 	
+	/**
+	 * __destruct function.
+	 *
+	 *	Send the asset to the client
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function __destruct() {
 		ob_end_flush();
 	}
 	
+	/**
+	 * __get function.
+	 *
+	 * Overloading get function
+	 * 
+	 * @access public
+	 * @param mixed $property
+	 * @return void
+	 */
 	public function __get($property) {
 		
 	    if (in_array($property, $this->_getters)) {
@@ -92,6 +191,15 @@ class Response {
 	    }
 	}
 
+	/**
+	 * __set function.
+	 *	Overloading set function
+	 * 
+	 * @access public
+	 * @param mixed $property
+	 * @param mixed $value
+	 * @return void
+	 */
 	public function __set($property, $value) {
 		if (in_array($property, $this->_setters)) {
 			$this->$property = $value;
@@ -106,7 +214,16 @@ class Response {
 		  throw new InternalErrorException('Property "' . $property . '" is not accessible.');
 		}
 	}
-	public function sendCode($code = null) {
+	/**
+	 * _sendCode function.
+	 *
+	 *	set the header
+	 * 
+	 * @access private
+	 * @param mixed $code (default: null)
+	 * @return void
+	 */
+	private function _sendCode($code = null) {
 		if($code !== null) {
 			if(array_key_exists($code, $this->_messages)) {
 				$this->_setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[$code]);
@@ -119,6 +236,15 @@ class Response {
 	
 	}
 	
+	/**
+	 * _setHeader function.
+	 *
+	 *	add headers to the array
+	 * 
+	 * @access private
+	 * @param mixed $string
+	 * @return void
+	 */
 	private function _setHeader($string) {
 		$this->_headers[] = $string;
 	}

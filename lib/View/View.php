@@ -47,6 +47,15 @@ class View {
 		
 		
 		
+		/**
+		 * __construct function.
+		 * 
+		 * @access public
+		 * @param mixed $controller (default: null)
+		 * @param mixed $view (default: null)
+		 * @param mixed $viewVars (default: null)
+		 * @return void
+		 */
 		public function __construct($controller = null, $view = null, $viewVars = null) {
 			if($controller !== null) {
 				$this->controller = $controller;

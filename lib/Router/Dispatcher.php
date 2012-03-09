@@ -23,8 +23,20 @@ class Dispatcher {
 	private $controller;
 	
 	
+	/**
+	 * request
+	 * 
+	 * @var mixed
+	 * @access private
+	 */
 	private $request;
 	
+	/**
+	 * response
+	 * 
+	 * @var mixed
+	 * @access private
+	 */
 	private $response;
 	
 	/**
@@ -45,6 +57,13 @@ class Dispatcher {
 		$this->request->namedParams = $this->router->getNamedParams();
 	}
 	
+	/**
+	 * _loadController function.
+	 * 
+	 * @access private
+	 * @param mixed $class
+	 * @return void
+	 */
 	private function _loadController($class) {
 		if(file_exists(ROOT . DS . APP_DIR . DS . 'Controllers/' . $class . '.php')) {
 			include APP_DIR . DS . 'Controllers/' . $class . '.php';
@@ -104,13 +123,9 @@ class Dispatcher {
 			$this->controller->render($this->request->controller);
 			
 		} catch(Exception $e) {
-			//include 'lib/Controllers/ErrorsController.php';
 
-			//$this->controller = new ErrorsController($this->router, $this->request);
-			try {
-				$this->_loadController('ErrorsController');
-			} catch(Exception $e) {
-			}
+
+			$this->_loadController('ErrorsController');
 			$requestedURI = $this->request->getURI();
 			
 			$params = array(

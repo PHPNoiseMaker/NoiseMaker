@@ -1,18 +1,76 @@
 <?php
 
+/**
+ * Request class.
+ */
 class Request {
 	
+	/**
+	 * command
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $command;
+	/**
+	 * data
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $data;
 	
+	/**
+	 * queryString
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $queryString;
+	/**
+	 * params
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $params;
+	/**
+	 * namedParams
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $namedParams;
+	/**
+	 * controller
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
+	public $controller;
+	/**
+	 * action
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $action;
 	
+	/**
+	 * requestURI
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
 	public $requestURI;
 	
 	
+	/**
+	 * __construct function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function __construct() {
 		$this->requestURI = explode('/',env('REQUEST_URI'));
 		$scriptName = explode('/',env('SCRIPT_NAME'));
@@ -26,6 +84,12 @@ class Request {
 		$this->_parsePOST();
 	}
 	
+	/**
+	 * _parseGET function.
+	 * 
+	 * @access private
+	 * @return void
+	 */
 	private function _parseGET() {
 		if(isset($_GET) && is_array($_GET)) {
 			$this->command = array_shift($_GET);
@@ -36,6 +100,12 @@ class Request {
 	}
 	
 	
+	/**
+	 * _parsePOST function.
+	 * 
+	 * @access private
+	 * @return void
+	 */
 	private function _parsePOST() {
 		if(isset($_POST) && is_array($_POST)) {
 			foreach($_POST as $key => $val) {
@@ -49,6 +119,12 @@ class Request {
 		}
 	}
 	
+	/**
+	 * getClientIP function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function getClientIP() {
 		$fields = array(
 			'HTTP_CLIENT_IP', 

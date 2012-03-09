@@ -47,13 +47,43 @@ class Controller {
 	 */
 	protected $request;
 	
+	/**
+	 * response
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
 	protected $response;
 	
 	
+	/**
+	 * data
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access private
+	 */
 	private $data = array();  
 	
 		
+	/**
+	 * _getters
+	 * 
+	 * (default value: array('data'))
+	 * 
+	 * @var string
+	 * @access private
+	 */
 	private $_getters = array('data');
+  	/**
+  	 * _setters
+  	 * 
+  	 * (default value: array())
+  	 * 
+  	 * @var array
+  	 * @access private
+  	 */
   	private $_setters = array();  
 
 	
@@ -137,6 +167,13 @@ class Controller {
 	}
 	
   
+	/**
+	 * __get function.
+	 * 
+	 * @access public
+	 * @param mixed $property
+	 * @return void
+	 */
 	public function __get($property) {
 		
 	    if (in_array($property, $this->_getters)) {
@@ -153,6 +190,14 @@ class Controller {
 	    }
 	}
 
+	/**
+	 * __set function.
+	 * 
+	 * @access public
+	 * @param mixed $property
+	 * @param mixed $value
+	 * @return void
+	 */
 	public function __set($property, $value) {
 		if (in_array($property, $this->_setters)) {
 			$this->$property = $value;
