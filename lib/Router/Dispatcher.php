@@ -38,6 +38,21 @@ class Dispatcher {
 		$this->router->init($this->request->getURI());
 	}
 	
+	private function _loadController($class) {
+		if(file_exists(ROOT . DS . APP_DIR . DS . 'Controllers/' . $class . '.php')) {
+			include APP_DIR . DS . 'Controllers/' . $class . '.php';
+
+		} elseif(file_exists(ROOT . DS . 'lib/Controllers/' . $class . '.php')) {
+		
+			include 'lib/Controllers/' . $class . '.php';
+			
+		} else {
+			throw new NotFoundException();
+		}
+		
+		$this->controller = new $class($this->router, $this->request);	
+	}
+	
 	/**
 	 * dispatch function.
 	 * 
@@ -48,18 +63,7 @@ class Dispatcher {
 		try {
 			$controller = $this->router->getController();
 			$class = $controller . 'Controller';
-			if(file_exists(ROOT . DS . APP_DIR . DS . 'Controllers/' . $class . '.php')) {
-				include APP_DIR . DS . 'Controllers/' . $class . '.php';
-
-			} elseif(file_exists(ROOT . DS . 'lib/Controllers/' . $class . '.php')) {
 			
-				include 'lib/Controllers/' . $class . '.php';
-				
-			} else {
-				throw new NotFoundException();
-			}
-			
-			$this->controller = new $class($this->router, $this->request);
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
 			if(empty($requestedAction)) {
@@ -67,7 +71,12 @@ class Dispatcher {
 			}
 		
 			$this->controller->view = $requestedAction;
-
+			try {
+				$this->_loadController($class);
+			} catch(Exception $e) {
+				throw new $e;
+			}
+			
 			if(method_exists($this->controller, $requestedAction)) {
 				try {
 					call_user_func_array(
@@ -90,9 +99,13 @@ class Dispatcher {
 			$this->controller->render($controller);
 			
 		} catch(Exception $e) {
-			include 'lib/Controllers/ErrorsController.php';
+			//include 'lib/Controllers/ErrorsController.php';
 
-			$this->controller = new ErrorsController($this->router, $this->request);
+			//$this->controller = new ErrorsController($this->router, $this->request);
+			try {
+				$this->_loadController('ErrorsController');
+			} catch(Exception $e) {
+			}
 			$requestedURI = $this->request->getURI();
 			
 			$params = array(
