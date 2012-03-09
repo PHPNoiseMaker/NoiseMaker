@@ -67,15 +67,6 @@ class Router {
 	protected $requestURI;
 	
 	
-	/**
-	 * scriptName
-	 * Name of the script
-	 * 
-	 * @var mixed
-	 * @access protected
-	 */
-	protected $scriptName;
-	
 	
 	
 	/**
@@ -96,16 +87,8 @@ class Router {
 	 * @param mixed $controller (default: null)
 	 * @return void
 	 */
-	public function __construct($controller = null) {
-		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
-		$this->scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
-		
-		for($i= 0; $i < sizeof($this->scriptName); $i++) {
-			if ($this->requestURI[$i] == $this->scriptName[$i]) {
-				unset($this->requestURI[$i]);
-			}
-		}
-		
+	public function __construct() {
+	
 	}
 	
 	/**
@@ -116,8 +99,8 @@ class Router {
 	 * @access public
 	 * @return void
 	 */
-	public function init() {
-		$this->_parseURI();
+	public function init($url) {
+		$this->_parseURI($url);
 	}
 	
 	/**
@@ -193,15 +176,7 @@ class Router {
 	public function getAction() {
 		return $this->action;
 	}
-	/**
-	 * getURI function.
-	 * 
-	 * @access public
-	 * @return $requestURI
-	 */
-	public function getURI() {
-		return $this->requestURI;
-	}
+
 	
 	/**
 	 * arrayClean function.
@@ -339,15 +314,6 @@ class Router {
 		return $this->controller !== null ? true : false;
 	}
 	
-	/*private function defaultRoutes() {
-		$commands = $this->arrayClean($this->command);
-		
-		if (count($commands)) {
-			$this->controller = array_shift($commands);
-			$this->action = array_shift($commands);
-			$this->params = $commands;
-		}
-	}*/
 	/**
 	 * _parseURI function.
 	 *
@@ -356,9 +322,9 @@ class Router {
 	 * @access private
 	 * @return void
 	 */
-	private function _parseURI() {
+	private function _parseURI($url) {
 
-		$this->command = array_values($this->requestURI);
+		$this->command = array_values($url);
 		
 		$commandCount = count($this->command);
 				

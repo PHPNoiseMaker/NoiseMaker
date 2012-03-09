@@ -12,6 +12,6 @@ require_once('lib/Network/Request.php');
  * @var mixed
  * @access public
  */
-$dispatcher = new Dispatcher();
-$dispatcher->dispatch(new Request());
+$dispatcher = new Dispatcher(new Request());
+$dispatcher->dispatch();
 

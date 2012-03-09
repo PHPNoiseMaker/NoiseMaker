@@ -77,7 +77,7 @@ class Controller {
 	 */
 	
 	public function getSelf() {
-		$commandArray = $this->Router->getURI();
+		$commandArray = $this->request->getURI();
 		return '/' . implode('/', $commandArray);
 	}
 	

@@ -7,8 +7,18 @@ class Request {
 	
 	public $queryString;
 	
+	public $requestURI;
+	
 	
 	public function __construct() {
+		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
+		$scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
+		
+		for($i= 0; $i < sizeof($scriptName); $i++) {
+			if ($this->requestURI[$i] == $scriptName[$i]) {
+				unset($this->requestURI[$i]);
+			}
+		}
 		$this->_parseGET();
 		$this->_parsePOST();
 	}
@@ -34,5 +44,15 @@ class Request {
 			unset($this->data['data']);
 			$this->data = array_merge($this->data, $data);
 		}
+	}
+	
+	/**
+	 * getURI function.
+	 * 
+	 * @access public
+	 * @return $requestURI
+	 */
+	public function getURI() {
+		return $this->requestURI;
 	}
 }

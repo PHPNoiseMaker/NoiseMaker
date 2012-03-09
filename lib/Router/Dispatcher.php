@@ -22,16 +22,20 @@ class Dispatcher {
 	 */
 	private $controller;
 	
+	
+	private $request;
+	
 	/**
 	 * __construct function.
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	public function __construct() {
-		$this->router = new Router();
+	public function __construct(Request $request) {
+		$this->request = $request;
+		$this->router = new Router($request);
 		include_once 'lib/Router/Routes.php';
-		$this->router->init();
+		$this->router->init($this->request->getURI());
 	}
 	
 	/**
@@ -40,7 +44,7 @@ class Dispatcher {
 	 * @access public
 	 * @return void
 	 */
-	public function dispatch(Request $request) {
+	public function dispatch() {
 		try {
 			$controller = $this->router->getController();
 			$class = $controller . 'Controller';
@@ -55,7 +59,7 @@ class Dispatcher {
 				throw new NotFoundException();
 			}
 			
-			$this->controller = new $class($this->router, $request);
+			$this->controller = new $class($this->router, $this->request);
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
 			if(empty($requestedAction)) {
