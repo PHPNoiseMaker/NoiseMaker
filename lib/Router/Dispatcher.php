@@ -40,7 +40,7 @@ class Dispatcher {
 	 * @access public
 	 * @return void
 	 */
-	public function dispatch() {
+	public function dispatch(Request $request) {
 		try {
 			$controller = $this->router->getController();
 			$class = $controller . 'Controller';
@@ -55,7 +55,7 @@ class Dispatcher {
 				throw new NotFoundException();
 			}
 			
-			$this->controller = new $class($this->router);
+			$this->controller = new $class($this->router, $request);
 			$requestedAction = $this->router->getAction();
 			$params = $this->router->getParams();
 			if(empty($requestedAction)) {
@@ -88,7 +88,7 @@ class Dispatcher {
 		} catch(Exception $e) {
 			include 'lib/Controllers/ErrorsController.php';
 
-			$this->controller = new ErrorsController($this->router);
+			$this->controller = new ErrorsController($this->router, $request);
 			$requestedURI = $this->router->getURI();
 			
 			$params = array(

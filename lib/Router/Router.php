@@ -99,6 +99,13 @@ class Router {
 	public function __construct($controller = null) {
 		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
 		$this->scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
+		
+		for($i= 0; $i < sizeof($this->scriptName); $i++) {
+			if ($this->requestURI[$i] == $this->scriptName[$i]) {
+				unset($this->requestURI[$i]);
+			}
+		}
+		
 	}
 	
 	/**
@@ -351,15 +358,14 @@ class Router {
 	 */
 	private function _parseURI() {
 
-		for($i= 0; $i < sizeof($this->scriptName); $i++) {
-			if ($this->requestURI[$i] == $this->scriptName[$i]) {
-				unset($this->requestURI[$i]);
-			}
-		}
-		
 		$this->command = array_values($this->requestURI);
 		
-		
+		$commandCount = count($this->command);
+				
+		if(strpos($this->command[$commandCount - 1], '?') !== false) {
+			list($command) = explode('?', $this->command[$commandCount - 1]);
+			$this->command[$commandCount - 1] = $command;
+		}
 		
 		
 		

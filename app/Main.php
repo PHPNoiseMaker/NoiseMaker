@@ -1,6 +1,7 @@
 <?php
 require_once('lib/Core/bootstrap.php');
 require_once('lib/Router/Dispatcher.php');
+require_once('lib/Network/Request.php');
 
 
 /**
@@ -12,5 +13,5 @@ require_once('lib/Router/Dispatcher.php');
  * @access public
  */
 $dispatcher = new Dispatcher();
-$dispatcher->dispatch();
+$dispatcher->dispatch(new Request());
 

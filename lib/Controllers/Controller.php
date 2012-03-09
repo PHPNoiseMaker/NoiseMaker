@@ -54,17 +54,37 @@ class Controller {
 	protected $_viewVars = array();
 	
 	/**
+	 * Instance of request
+	 */
+	protected $request;
+	
+	/**
 	 * __construct function.
 	 * 
 	 * @access public
 	 * @param Router $router
 	 * @return void
 	 */
-	public function __construct(Router $router) {
+	public function __construct(Router $router, Request $request) {
 		$this->Router = $router;
+		$this->request = $request;
 		$this->params['named'] = $this->Router->getNamedParams();
 	}
 	
+	/**
+	 * Get's current route
+	 *
+	 */
+	
+	public function getSelf() {
+		$commandArray = $this->Router->getURI();
+		return '/' . implode('/', $commandArray);
+	}
+	
+	
+	/**
+	 * Initialized the View
+	 */
 	
 	private function initView($controller = null, $view = null, $viewVars = null) {
 		if($this->View === null) {
@@ -74,14 +94,14 @@ class Controller {
 	
 	
 	/**
-	 * render function.
-	 * Render's the view
+	 * render function. reserved name
+	 * Render's the view 
 	 * 
 	 * @access public
 	 * @param mixed $controller (default: null)
 	 * @return void
 	 */
-	public function render($controller = null) {
+	final public function render($controller = null) {
 		$this->initView($controller, $this->view, $this->_viewVars);
 		echo $this->View->renderPage();
 	}
@@ -95,7 +115,7 @@ class Controller {
 	 * @param mixed $value
 	 * @return void
 	 */
-	public function set($key, $value) {
+	final public function set($key, $value) {
 		$this->_viewVars[$key] = $value;
 	}
 	
@@ -109,7 +129,7 @@ class Controller {
 	 * @param mixed $location
 	 * @return void
 	 */
-	public function redirect($location) {
+	final public function redirect($location) {
 		if(!is_array($location)) {
 			header('Location: ' . $location);
 		}
