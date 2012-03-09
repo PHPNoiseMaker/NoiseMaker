@@ -226,12 +226,12 @@ class Response {
 	private function _sendCode($code = null) {
 		if($code !== null) {
 			if(array_key_exists($code, $this->_messages)) {
-				$this->_setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[$code]);
+				$this->setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[$code]);
 			} else {
-				$this->_setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[404]);
+				$this->setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[404]);
 			}
 		} else {
-			$this->_setHeader('HTTP/1.0 404 ' . $this->_messages[404]);
+			$this->setHeader('HTTP/1.0 404 ' . $this->_messages[404]);
 		}
 	
 	}
@@ -245,7 +245,13 @@ class Response {
 	 * @param mixed $string
 	 * @return void
 	 */
-	private function _setHeader($string) {
-		$this->_headers[] = $string;
+	public function setHeader($header) {
+		if(!is_array($header)) {
+			$this->_headers[] = $header;
+		} else {
+			foreach($header as $key => $val) {
+				$this->_headers[$key] = $val;
+			}
+		}
 	}
 }
