@@ -342,10 +342,6 @@ class Router {
 		}
 
 		
-		/*if(!$matched) {
-			$this->defaultRoutes();
-		} */ 
-		
 		$this->params = $this->parseNamedParams($this->params);
 		
 	}

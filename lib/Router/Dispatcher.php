@@ -36,6 +36,10 @@ class Dispatcher {
 		$this->router = new Router($request);
 		include_once 'lib/Router/Routes.php';
 		$this->router->init($this->request->getURI());
+		$this->request->controller = $this->router->getController();
+		$this->request->action = $this->router->getAction();
+		$this->request->params = $this->router->getParams();
+		$this->request->namedParams = $this->router->getNamedParams();
 	}
 	
 	private function _loadController($class) {
@@ -50,7 +54,7 @@ class Dispatcher {
 			throw new NotFoundException();
 		}
 		
-		$this->controller = new $class($this->router, $this->request);	
+		$this->controller = new $class($this->request);	
 	}
 	
 	/**
@@ -61,30 +65,28 @@ class Dispatcher {
 	 */
 	public function dispatch() {
 		try {
-			$controller = $this->router->getController();
-			$class = $controller . 'Controller';
 			
-			$requestedAction = $this->router->getAction();
-			$params = $this->router->getParams();
-			if(empty($requestedAction)) {
-				$requestedAction = 'index';
+			$class = $this->request->controller . 'Controller';
+
+			if(empty($this->request->action)) {
+				$this->request->action = 'index';
 			}
 		
-			$this->controller->view = $requestedAction;
+			$this->controller->view = $this->request->action;
 			try {
 				$this->_loadController($class);
 			} catch(Exception $e) {
 				throw new $e;
 			}
 			
-			if(method_exists($this->controller, $requestedAction)) {
+			if(method_exists($this->controller, $this->request->action)) {
 				try {
 					call_user_func_array(
 						array(
 							$this->controller, 
-							$requestedAction
+							$this->request->action
 						), 
-						$params
+						$this->request->params
 					);
 				} catch(Exception $e) {
 					throw new $e;
@@ -96,7 +98,7 @@ class Dispatcher {
 			}
 			
 			
-			$this->controller->render($controller);
+			$this->controller->render($this->request->controller);
 			
 		} catch(Exception $e) {
 			//include 'lib/Controllers/ErrorsController.php';

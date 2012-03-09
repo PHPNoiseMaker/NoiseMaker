@@ -22,17 +22,6 @@ class Controller {
 	protected $params = array();
 	
 	
-	
-	/**
-	 * Router
-	 * Grab the instance of Router for internal use.
-	 * 
-	 * @var mixed
-	 * @access private
-	 */
-	private $Router;
-	
-	
 	/**
 	 * view file to load
 	 * 
@@ -65,10 +54,9 @@ class Controller {
 	 * @param Router $router
 	 * @return void
 	 */
-	public function __construct(Router $router, Request $request) {
-		$this->Router = $router;
+	public function __construct(Request $request) {
 		$this->request = $request;
-		$this->params['named'] = $this->Router->getNamedParams();
+		$this->params['named'] = $this->request->namedParams;
 	}
 	
 	/**
