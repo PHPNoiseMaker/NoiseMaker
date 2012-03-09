@@ -47,6 +47,14 @@ class Controller {
 	 */
 	protected $request;
 	
+	
+	private $data = array();  
+	
+		
+	private $_getters = array('data');
+  	private $_setters = array();  
+
+	
 	/**
 	 * __construct function.
 	 * 
@@ -57,6 +65,7 @@ class Controller {
 	public function __construct(Request $request) {
 		$this->request = $request;
 		$this->params['named'] = $this->request->namedParams;
+		$this->data = $request->data;
 	}
 	
 	/**
@@ -123,4 +132,37 @@ class Controller {
 		}
 		return false;
 	}
+	
+  
+	public function __get($property) {
+		
+	    if (in_array($property, $this->_getters)) {
+	    	return $this->$property;
+	    } else if (method_exists($this, '_get_' . $property)) {
+	    	return call_user_func(array($this, '_get_' . $property));
+	    } else if (
+		    in_array($property, $this->_setters) 
+		    || method_exists($this, '_set_' . $property)
+	    ) {
+	    	throw new InternalErrorException('Property "' . $property . '" is write-only.');
+	    } else {
+	    	throw new InternalErrorException('Property "' . $property . '" is not accessible.');
+	    }
+	}
+
+	public function __set($property, $value) {
+		if (in_array($property, $this->_setters)) {
+			$this->$property = $value;
+		} else if (method_exists($this, '_set_' . $property)) {
+			call_user_func(array($this, '_set_' . $property), $value);
+		} else if (
+			in_array($property, $this->_getters) 
+			|| method_exists($this, '_get_' . $property)
+		) {
+		  throw new InternalErrorException('Property "' . $property . '" is read-only.');
+		} else {
+		  throw new InternalErrorException('Property "' . $property . '" is not accessible.');
+		}
+	}
+
 }
