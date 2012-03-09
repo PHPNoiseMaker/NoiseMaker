@@ -11,8 +11,8 @@ class Request {
 	
 	
 	public function __construct() {
-		$this->requestURI = explode('/', $_SERVER['REQUEST_URI']);
-		$scriptName = explode('/',$_SERVER['SCRIPT_NAME']);
+		$this->requestURI = explode('/',env('REQUEST_URI'));
+		$scriptName = explode('/',env('SCRIPT_NAME'));
 		
 		for($i= 0; $i < sizeof($scriptName); $i++) {
 			if ($this->requestURI[$i] == $scriptName[$i]) {

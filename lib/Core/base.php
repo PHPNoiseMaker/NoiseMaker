@@ -3,7 +3,9 @@
  * Functions which are globally available
  */
  
-
+/**
+ * Gets environment variables, or returns FASLE if not found
+ */
 function env($string = null) {
 	$return = null;
 	if($string !== null) {
@@ -18,4 +20,11 @@ function env($string = null) {
 	}
 	return false;
 	
+}
+
+/**
+ * wrapper function for htmlspecialchars
+ */
+function h($string = null) {
+	return htmlspecialchars($string);
 }

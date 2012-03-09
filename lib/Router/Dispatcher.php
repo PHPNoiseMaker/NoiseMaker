@@ -92,8 +92,8 @@ class Dispatcher {
 		} catch(Exception $e) {
 			include 'lib/Controllers/ErrorsController.php';
 
-			$this->controller = new ErrorsController($this->router, $request);
-			$requestedURI = $this->router->getURI();
+			$this->controller = new ErrorsController($this->router, $this->request);
+			$requestedURI = $this->request->getURI();
 			
 			$params = array(
 				'error' => array(
