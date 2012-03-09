@@ -94,9 +94,9 @@ class Dispatcher {
 				$this->request->action = 'index';
 			}
 		
-			$this->controller->view = $this->request->action;
 			try {
 				$this->_loadController($class);
+				$this->controller->view = $this->request->action;
 			} catch(Exception $e) {
 				throw new $e;
 			}

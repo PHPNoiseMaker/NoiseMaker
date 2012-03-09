@@ -65,7 +65,7 @@ class Response {
 	 * @access protected
 	 * @static
 	 */
-	protected static $_messages = array(
+	protected $_messages = array(
 	    // Informational 1xx
 	    100 => 'Continue',
 	    101 => 'Switching Protocols',
