@@ -25,14 +25,17 @@ class Dispatcher {
 	
 	private $request;
 	
+	private $response;
+	
 	/**
 	 * __construct function.
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	public function __construct(Request $request) {
+	public function __construct(Request $request, Response $response) {
 		$this->request = $request;
+		$this->response = $response;
 		$this->router = new Router($request);
 		include_once 'lib/Router/Routes.php';
 		$this->router->init($this->request->getURI());
@@ -54,7 +57,7 @@ class Dispatcher {
 			throw new NotFoundException();
 		}
 		
-		$this->controller = new $class($this->request);	
+		$this->controller = new $class($this->request, $this->response);	
 	}
 	
 	/**

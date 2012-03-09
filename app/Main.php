@@ -2,6 +2,7 @@
 require_once('lib/Core/bootstrap.php');
 require_once('lib/Router/Dispatcher.php');
 require_once('lib/Network/Request.php');
+require_once('lib/Network/Response.php');
 
 
 /**
@@ -12,6 +13,6 @@ require_once('lib/Network/Request.php');
  * @var mixed
  * @access public
  */
-$dispatcher = new Dispatcher(new Request());
+$dispatcher = new Dispatcher(new Request(), new Response());
 $dispatcher->dispatch();
 

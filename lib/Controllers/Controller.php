@@ -47,6 +47,8 @@ class Controller {
 	 */
 	protected $request;
 	
+	protected $response;
+	
 	
 	private $data = array();  
 	
@@ -62,8 +64,9 @@ class Controller {
 	 * @param Router $router
 	 * @return void
 	 */
-	public function __construct(Request $request) {
+	public function __construct(Request $request, Response $response) {
 		$this->request = $request;
+		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
 		$this->data = $request->data;
 	}
@@ -100,7 +103,7 @@ class Controller {
 	 */
 	final public function render($controller = null) {
 		$this->initView($controller, $this->view, $this->_viewVars);
-		echo $this->View->renderPage();
+		$this->response->buildAsset($this->View->renderPage());
 	}
 	
 	/**
