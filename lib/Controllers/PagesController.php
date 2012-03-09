@@ -35,7 +35,7 @@ class PagesController extends AppController {
 		} else {
 			$page = 'index';
 		}
-		if($this->View->viewExists('Pages', $page)) {
+		if(View::viewExists('Pages', $page)) {
 			$this->view = $page;
 			
 		} else {

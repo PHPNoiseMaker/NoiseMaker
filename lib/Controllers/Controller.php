@@ -8,7 +8,7 @@ class Controller {
 	 * @var mixed
 	 * @access protected
 	 */
-	protected $View;
+	protected $View = null;
 	
 	
 	/**
@@ -44,6 +44,16 @@ class Controller {
 	public $view = '';
 	
 	/**
+	 * view variables to pass
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	protected $_viewVars = array();
+	
+	/**
 	 * __construct function.
 	 * 
 	 * @access public
@@ -51,10 +61,17 @@ class Controller {
 	 * @return void
 	 */
 	public function __construct(Router $router) {
-		$this->View = new View();
 		$this->Router = $router;
 		$this->params['named'] = $this->Router->getNamedParams();
 	}
+	
+	
+	private function initView($controller = null, $view = null, $viewVars = null) {
+		if($this->View === null) {
+			$this->View = new View($controller, $view, $viewVars);
+		}
+	}
+	
 	
 	/**
 	 * render function.
@@ -65,9 +82,7 @@ class Controller {
 	 * @return void
 	 */
 	public function render($controller = null) {
-		
-		$this->View->setView($this->view);
-		$this->View->setController($controller);
+		$this->initView($controller, $this->view, $this->_viewVars);
 		echo $this->View->renderPage();
 	}
 	
@@ -81,7 +96,7 @@ class Controller {
 	 * @return void
 	 */
 	public function set($key, $value) {
-		$this->View->set($key, $value);
+		$this->_viewVars[$key] = $value;
 	}
 	
 	/**

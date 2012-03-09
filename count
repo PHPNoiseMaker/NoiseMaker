@@ -1,2 +1,2 @@
 #!/bin/bash
-perl Vendor/cloc.pl  --exclude-dir=Vendor .
+perl app/Vendor/cloc.pl  --exclude-dir=Vendor .

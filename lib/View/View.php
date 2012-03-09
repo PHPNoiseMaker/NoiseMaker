@@ -9,7 +9,7 @@ class View {
 		 * @var string
 		 * @access public
 		 */
-		public $view = 'index';
+		protected $view = 'index';
 		
 		
 		
@@ -21,7 +21,7 @@ class View {
 		 * @var string
 		 * @access public
 		 */
-		public $layout = 'default';
+		protected $layout = 'default';
 		
 		
 		
@@ -45,6 +45,23 @@ class View {
 		 */
 		protected $viewVars = array();
 		
+		
+		
+		public function __construct($controller = null, $view = null, $viewVars = null) {
+			if($controller !== null) {
+				$this->controller = $controller;
+			}
+			if($view !== null) {
+				$this->view = $view;
+			}
+			if($view !== null) {
+				$this->viewVars = $viewVars;
+			}
+		}
+		
+		
+		
+		
 		/**
 		 * renderPage function.
 		 * 
@@ -61,18 +78,7 @@ class View {
 				throw new $e;
 			}
 		}
-		
-		/**
-		 * set function.
-		 * 
-		 * @access public
-		 * @param mixed $key
-		 * @param mixed $value
-		 * @return void
-		 */
-		public function set($key, $value) {
-			$this->viewVars[$key] = $value;
-		}
+
 		
 		/**
 		 * reset function.
@@ -120,7 +126,7 @@ class View {
 		 * @param mixed $view
 		 * @return void
 		 */
-		public function viewExists($controller, $view) {
+		public static function viewExists($controller, $view) {
 			if(file_exists(ROOT . DS  . APP_DIR . DS . 'View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
 			} elseif(file_exists(ROOT . DS . 'lib/View/' . $controller . '/' . $view . '.ctp')) {
