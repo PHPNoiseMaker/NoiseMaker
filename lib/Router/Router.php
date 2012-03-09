@@ -176,7 +176,7 @@ class Router {
 	public function getAction() {
 		return $this->action;
 	}
-
+	
 	
 	/**
 	 * arrayClean function.
