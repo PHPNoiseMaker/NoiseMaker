@@ -101,6 +101,7 @@ class Router {
 	 */
 	public function init($url) {
 		$this->_parseURI($url);
+		$this->params = $this->parseNamedParams($this->params);
 	}
 	
 	/**
@@ -327,22 +328,15 @@ class Router {
 		$this->command = array_values($url);
 		
 		$commandCount = count($this->command);
-				
+			
 		if(strpos($this->command[$commandCount - 1], '?') !== false) {
 			list($command) = explode('?', $this->command[$commandCount - 1]);
 			$this->command[$commandCount - 1] = $command;
 		}
-		
-		
-		
 		foreach($this->rules as $rule => $target) {
 			$matched = $this->matchRule($rule);
 			if($matched)
 				break;
 		}
-
-		
-		$this->params = $this->parseNamedParams($this->params);
-		
 	}
 }
