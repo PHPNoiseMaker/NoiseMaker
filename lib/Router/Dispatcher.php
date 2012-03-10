@@ -76,7 +76,7 @@ class Dispatcher {
 			throw new NotFoundException();
 		}
 		
-		$this->controller = new $class(&$this->request, &$this->response);	
+		$this->controller = new $class($this->request, $this->response);	
 	}
 	
 	/**
