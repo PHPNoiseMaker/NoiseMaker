@@ -161,8 +161,9 @@ class Controller {
 	 */
 	final public function redirect($location) {
 		if(!is_array($location)) {
-			ob_end_clean();
-			header('Location: ' . $location);
+			$this->response->setHeader(array('Location' => $location));
+			$this->response->_code = 301;		
+			$this->response->buildAsset();
 			exit;
 		}
 		return false;

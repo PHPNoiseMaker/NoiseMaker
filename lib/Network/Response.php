@@ -128,7 +128,7 @@ class Response {
 	 * @return void
 	 */
 	public function __construct() {
-		ob_start();
+		//ob_start();
 	}
 	
 	/**
@@ -164,7 +164,7 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
-		ob_end_flush();
+		//ob_end_flush();
 	}
 
 	
