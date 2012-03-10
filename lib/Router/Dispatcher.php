@@ -45,10 +45,10 @@ class Dispatcher {
 	 * @access public
 	 * @return void
 	 */
-	public function __construct(Request $request, Response $response) {
+	public function __construct(Request &$request, Response &$response) {
 		$this->request = $request;
 		$this->response = $response;
-		$this->router = new Router($request);
+		$this->router = new Router(&$this->request);
 		include_once 'lib/Router/Routes.php';
 		$this->router->init($this->request->getURI());
 		$this->request->controller = $this->router->getController();
@@ -76,7 +76,7 @@ class Dispatcher {
 			throw new NotFoundException();
 		}
 		
-		$this->controller = new $class($this->request, $this->response);	
+		$this->controller = new $class(&$this->request, &$this->response);	
 	}
 	
 	/**
@@ -101,14 +101,14 @@ class Dispatcher {
 				throw new $e;
 			}
 			
-			if(method_exists($this->controller, $this->request->action)) {
+			if(method_exists(&$this->controller, &$this->request->action)) {
 				try {
 					call_user_func_array(
 						array(
-							$this->controller, 
-							$this->request->action
+							&$this->controller, 
+							&$this->request->action
 						), 
-						$this->request->params
+						&$this->request->params
 					);
 				} catch(Exception $e) {
 					throw new $e;
@@ -120,7 +120,7 @@ class Dispatcher {
 			}
 			
 			
-			$this->controller->render($this->request->controller);
+			$this->controller->render(&$this->request->controller);
 			
 		} catch(Exception $e) {
 

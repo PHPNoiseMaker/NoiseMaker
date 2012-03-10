@@ -64,6 +64,35 @@ class Request {
 	 */
 	public $requestURI;
 	
+	/**
+	 * _detectors - Thanks to CakePHP 2.0
+	 * 
+     * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
+	 * @link          http://cakephp.org CakePHP(tm) Project
+	 * @since         CakePHP(tm) v 2.0
+	 * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+	 * @var mixed
+	 * @access protected
+	 */
+	protected $_detectors = array(
+		'get' => array('env' => 'REQUEST_METHOD', 'value' => 'GET'),
+		'post' => array('env' => 'REQUEST_METHOD', 'value' => 'POST'),
+		'put' => array('env' => 'REQUEST_METHOD', 'value' => 'PUT'),
+		'delete' => array('env' => 'REQUEST_METHOD', 'value' => 'DELETE'),
+		'head' => array('env' => 'REQUEST_METHOD', 'value' => 'HEAD'),
+		'options' => array('env' => 'REQUEST_METHOD', 'value' => 'OPTIONS'),
+		'ssl' => array('env' => 'HTTPS', 'value' => 1),
+		'ajax' => array('env' => 'HTTP_X_REQUESTED_WITH', 'value' => 'XMLHttpRequest'),
+		'flash' => array('env' => 'HTTP_USER_AGENT', 'pattern' => '/^(Shockwave|Adobe) Flash/'),
+		'mobile' => array('env' => 'HTTP_USER_AGENT', 'options' => array(
+			'Android', 'AvantGo', 'BlackBerry', 'DoCoMo', 'Fennec', 'iPod', 'iPhone', 'iPad',
+			'J2ME', 'MIDP', 'NetFront', 'Nokia', 'Opera Mini', 'Opera Mobi', 'PalmOS', 'PalmSource',
+			'portalmmm', 'Plucker', 'ReqwirelessWeb', 'SonyEricsson', 'Symbian', 'UP\\.Browser',
+			'webOS', 'Windows CE', 'Windows Phone OS', 'Xiino'
+		)),
+		'requested' => array('param' => 'requested', 'value' => 1)
+	);
+	
 	
 	/**
 	 * __construct function.
@@ -156,4 +185,47 @@ class Request {
 	public function getURI() {
 		return $this->requestURI;
 	}
+	
+	
+	/**
+	 * is function.
+	 *
+	 * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
+	 * @link          http://cakephp.org CakePHP(tm) Project
+	 * @since         CakePHP(tm) v 2.0
+	 * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+	 * 
+	 * @access public
+	 * @param mixed $type
+	 * @return void
+	 */
+	public function is($type) {
+		$type = strtolower($type);
+		if (!isset($this->_detectors[$type])) {
+			return false;
+		}
+		$detect = $this->_detectors[$type];
+		if (isset($detect['env'])) {
+			if (isset($detect['value'])) {
+				return env($detect['env']) == $detect['value'];
+			}
+			if (isset($detect['pattern'])) {
+				return (bool)preg_match($detect['pattern'], env($detect['env']));
+			}
+			if (isset($detect['options'])) {
+				$pattern = '/' . implode('|', $detect['options']) . '/i';
+				return (bool)preg_match($pattern, env($detect['env']));
+			}
+		}
+		if (isset($detect['param'])) {
+			$key = $detect['param'];
+			$value = $detect['value'];
+			return isset($this->params[$key]) ? $this->params[$key] == $value : false;
+		}
+		if (isset($detect['callback']) && is_callable($detect['callback'])) {
+			return call_user_func($detect['callback'], $this);
+		}
+		return false;
+	}
+	
 }
