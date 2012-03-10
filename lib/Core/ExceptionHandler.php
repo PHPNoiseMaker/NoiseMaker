@@ -24,7 +24,7 @@ class ExceptionHandler {
 		);
 		$controller->displayException($params);
 		$controller->render('Errors');
-		exit;
+		//exit;
 	}
 	
 	/**
@@ -52,6 +52,6 @@ class ExceptionHandler {
 		);
 		$controller->displayError($params);
 		$controller->render('Errors');
-		exit;
+		//exit;
 	}
 }

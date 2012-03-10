@@ -165,7 +165,7 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
-		//ob_end_flush();
+		exit;
 	}
 
 	
