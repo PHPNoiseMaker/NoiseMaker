@@ -11,7 +11,7 @@ class ExceptionHandler {
 				'code' => $e->getCode()
 			)
 		);
-		$controller->index($params);
+		$controller->displayException($params);
 		$controller->render('Errors');
 		exit;
 	}
@@ -28,7 +28,7 @@ class ExceptionHandler {
 				'line' => $errline
 			)
 		);
-		$controller->index($params);
+		$controller->displayError($params);
 		$controller->render('Errors');
 		exit;
 	}
