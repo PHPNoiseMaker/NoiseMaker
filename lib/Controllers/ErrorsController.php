@@ -32,6 +32,14 @@ class ErrorsController extends AppController {
 				$this->set('uri', '');
 			}
 			
+			$this->set('url', $this->request->selfURL());
+			if(isset($params['error']['code'])) {
+				$this->set('code', $params['error']['code']);
+
+			} else {
+				$this->set('code', '');
+			}
+			
 			if(array_key_exists('code', $params['error']))
 				$this->response->_code = $params['error']['code'];
 			else

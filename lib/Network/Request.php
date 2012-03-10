@@ -186,6 +186,32 @@ class Request {
 		return $this->requestURI;
 	}
 	
+	public function selfURL() {
+		$port = env('SERVER_PORT');
+		$serverName = env('SERVER_NAME');
+		$requestURI = env('REQUEST_URI');
+		
+		if(env('HTTPS') !== false) {
+			if(env('HTTPS') == 'on') {
+				$s = 's';
+			} else {
+				$s = '';
+			}
+		} else {
+			$s = '';
+		}
+		$strleft = function ($s1, $s2) {
+			return substr($s1, 0, strpos($s1, $s2));
+		};
+		
+		$protocol = $strleft(strtolower(env('SERVER_PROTOCOL')), '/') . $s;
+		
+		
+		if($port == '80' || $port == '443') {
+			$port = '';
+		}
+		return $protocol . '://' . $serverName . $port . $requestURI;
+	}	
 	
 	/**
 	 * is function.

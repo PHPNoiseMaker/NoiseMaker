@@ -1,14 +1,6 @@
-<div class="page-header">
-	<h3>Error!</h3>
-</div>
-<div class="row">
-	<div class="span12">
+<div class="alert alert-error">
 	
-		<h3>I can't find the link you want :s</h3>
-		
-		<?php
-			echo $message;
-		?>
-	</div>
+	<span style="font-size:16px;"><?php echo $code ?>: <?php echo h($message); ?></span>
+	<h5><i class="icon-exclamation-sign"></i> I'm sorry, but the page you requested ( <i><?php echo h($url); ?></i> ) could not be loaded.</h5>
 	
 </div>
