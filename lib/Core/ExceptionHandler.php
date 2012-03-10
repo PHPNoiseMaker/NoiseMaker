@@ -16,7 +16,7 @@ class ExceptionHandler {
 		exit;
 	}
 	
-	public static function handleError($errorNumber, $errorMsg, $errfile, $errline) {
+	public static function handleError($errorNumber, $errorMsg, $errorFile, $errorLine) {
 		require_once 'lib/Controllers/ErrorsController.php';
 		$controller = new ErrorsController(new Request(), new Response());
 		
@@ -24,8 +24,8 @@ class ExceptionHandler {
 			'error' => array(
 				'message' => $errorMsg,
 				'code' => $errorNumber,
-				'file' => $errfile,
-				'line' => $errline
+				'file' => $errorFile,
+				'line' => $errorLine
 			)
 		);
 		$controller->displayError($params);
