@@ -8,6 +8,13 @@ require_once 'app/Controllers/AppController.php';
 class ErrorsController extends AppController {
 
 	
+	/**
+	 * displayException function.
+	 * 
+	 * @access public
+	 * @param mixed $params (default: null)
+	 * @return void
+	 */
 	public function displayException($params = null) {
 		$this->view = 'exception';
 		
@@ -27,6 +34,13 @@ class ErrorsController extends AppController {
 		}
 	}
 	
+	/**
+	 * displayError function.
+	 * 
+	 * @access public
+	 * @param mixed $params (default: null)
+	 * @return void
+	 */
 	public function displayError($params = null) {
 		$this->view = 'error';
 		
