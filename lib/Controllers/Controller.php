@@ -133,7 +133,7 @@ class Controller {
 	 */
 	final public function render($controller = null) {
 		$this->initView($controller, $this->view, $this->_viewVars);
-		$this->response->buildAsset($this->View->renderPage());
+		$this->response->buildAsset($this->View->renderPage())->send();
 	}
 	
 	/**
@@ -161,11 +161,27 @@ class Controller {
 	 */
 	final public function redirect($location) {
 		if(!is_array($location)) {
+			ob_end_clean();
 			header('Location: ' . $location);
+			exit;
 		}
 		return false;
 	}
 	
+	/**
+	 * getModelName function.
+	 * 
+	 * @access public
+	 * @static
+	 * @param mixed $controller
+	 * @return void
+	 */
+	public static function getModelName($controller) {
+	    if( ($pos = strpos($controller, 'Controller')) && $pos !== false) {
+			return ucfirst(Inflect::singularize(substr($controller, 0, $pos)));
+		}
+		return false;
+    }
   
 	/**
 	 * __get function.

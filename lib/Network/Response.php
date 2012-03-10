@@ -151,20 +151,22 @@ class Response {
 				}
 			}
 		}
-		echo $body;
+		$this->_body = $body;
+		return $this;
 	}
 	
+	
 	/**
-	 * __destruct function.
-	 *
-	 *	Send the asset to the client
+	 * send function.
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	public function __destruct() {
+	public function send() {
+		echo $this->_body;
 		ob_end_flush();
 	}
+
 	
 	/**
 	 * __get function.
