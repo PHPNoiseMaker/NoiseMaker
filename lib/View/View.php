@@ -201,6 +201,7 @@ class View {
 		
 				return ob_get_clean();
 			}
+			//throw new ViewNotFoundException();
 			return false;
 			
 		}

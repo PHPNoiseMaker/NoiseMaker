@@ -94,7 +94,7 @@ class Controller {
 	 * @param Router $router
 	 * @return void
 	 */
-	public function __construct(Request $request, Response $response) {
+	public function __construct(Request &$request, Response &$response) {
 		$this->request = $request;
 		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
@@ -113,7 +113,7 @@ class Controller {
 	
 	
 	/**
-	 * Initialized the View
+	 * Initialize the View
 	 */
 	
 	private function initView($controller = null, $view = null, $viewVars = null) {

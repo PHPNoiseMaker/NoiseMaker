@@ -18,16 +18,20 @@ class ErrorsController extends AppController {
 		$this->view = 'error';
 		
 		if(is_array($params)) {
-			if(
-				isset($params['error']['message'])
-			) {
-				
-					$this->set('message', $params['error']['message']);
-				
-				
+			if(isset($params['error']['message'])) {
+				$this->set('message', $params['error']['message']);
+
 			} else {
 				$this->set('message', '');
 			}
+			
+			if(isset($params['error']['uri'])) {
+				$this->set('uri', $params['error']['uri']);
+
+			} else {
+				$this->set('uri', '');
+			}
+			
 			if(array_key_exists('code', $params['error']))
 				$this->response->_code = $params['error']['code'];
 			else

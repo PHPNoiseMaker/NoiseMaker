@@ -12,3 +12,6 @@ if (!defined('ROOT')) {
 
 require_once('lib/Utility/Inflect.php');
 require_once 'lib/Core/base.php';
+require_once 'lib/Core/ExceptionHandler.php';
+
+set_exception_handler(array("ExceptionHandler", "handleException"));

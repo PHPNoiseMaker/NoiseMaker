@@ -86,58 +86,38 @@ class Dispatcher {
 	 * @return void
 	 */
 	public function dispatch() {
-		try {
-			
-			$class = $this->request->controller . 'Controller';
-
-			if(empty($this->request->action)) {
-				$this->request->action = 'index';
-			}
 		
+		$class = $this->request->controller . 'Controller';
+
+		if(empty($this->request->action)) {
+			$this->request->action = 'index';
+		}
+	
+
+		$this->_loadController($class);
+		$this->controller->view = $this->request->action;
+		
+		
+		if(method_exists(&$this->controller, &$this->request->action)) {
 			try {
-				$this->_loadController($class);
-				$this->controller->view = $this->request->action;
+				call_user_func_array(
+					array(
+						&$this->controller, 
+						&$this->request->action
+					), 
+					&$this->request->params
+				);
 			} catch(Exception $e) {
 				throw new $e;
 			}
 			
-			if(method_exists(&$this->controller, &$this->request->action)) {
-				try {
-					call_user_func_array(
-						array(
-							&$this->controller, 
-							&$this->request->action
-						), 
-						&$this->request->params
-					);
-				} catch(Exception $e) {
-					throw new $e;
-				}
-				
-			} else {
-			
-				throw new NotFoundException();
-			}
-			
-			
-			$this->controller->render(&$this->request->controller);
-			
-		} catch(Exception $e) {
-
-
-			$this->_loadController('ErrorsController');
-			$requestedURI = $this->request->getURI();
-			
-			$params = array(
-				'error' => array(
-					'message' => $e->getMessage(),
-					'code' => $e->getCode(),
-					'uri' =>  $requestedURI
-				)
-			);
-			$this->controller->index($params);
-			$this->controller->render('Errors');
+		} else {
+		
+			throw new NotFoundException();
 		}
+		
+		$this->controller->render($this->request->controller);
+		
 		
 	}
 
