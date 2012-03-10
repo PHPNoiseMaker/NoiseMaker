@@ -2,6 +2,12 @@
 /**
  * Exceptions file.
  *
+ *	Borrowed from CakePHP (AWESOME Framework!)
+ * 		Please go check them out; Without them this project would not be possible.
+ *		I have learned a great deal from their code, website and coding style.
+ *		
+ *
+ *
  * PHP 5
  *
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
