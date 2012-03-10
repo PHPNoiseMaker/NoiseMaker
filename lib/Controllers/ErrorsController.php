@@ -1,5 +1,5 @@
 <?php
-require_once('app/Controllers/AppController.php');
+require_once 'app/Controllers/AppController.php';
 /**
  * ErrorsController class.
  * 
@@ -18,20 +18,13 @@ class ErrorsController extends AppController {
 		$this->view = 'error';
 		
 		if(is_array($params)) {
-			if(isset($params['error']['message'])) {
-				$this->set('message', $params['error']['message']);
+			if(isset($params['error'])) {
+				$this->set('error', $params['error']);
 
 			} else {
-				$this->set('message', '');
+				$this->set('error', '');
 			}
-			
 			$this->set('url', $this->request->selfURL());
-			if(isset($params['error']['code'])) {
-				$this->set('code', $params['error']['code']);
-
-			} else {
-				$this->set('code', '');
-			}
 			
 			if(array_key_exists('code', $params['error']))
 				$this->response->_code = $params['error']['code'];

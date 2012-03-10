@@ -140,7 +140,7 @@ class Response {
 	 * @param mixed $body
 	 * @return void
 	 */
-	public function buildAsset($body) {
+	public function buildAsset($body = null) {
 		$this->_sendCode($this->_code);
 		if(is_array($this->_headers)) {
 			foreach($this->_headers as $key => $value) {
@@ -152,6 +152,7 @@ class Response {
 			}
 		}
 		$this->_body = $body;
+
 		return $this;
 	}
 	

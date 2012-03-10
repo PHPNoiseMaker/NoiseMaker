@@ -15,3 +15,4 @@ require_once 'lib/Core/base.php';
 require_once 'lib/Core/ExceptionHandler.php';
 
 set_exception_handler(array("ExceptionHandler", "handleException"));
+set_error_handler(array("ExceptionHandler", "handleError"));
