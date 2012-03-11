@@ -1,6 +1,7 @@
 <?php
 App::uses('Router', 'Router');
 App::import('Exceptions', 'Core');
+App::uses('ObjectRegistry', 'Utility');
 
 /**
  * Dispatcher class.
@@ -66,7 +67,7 @@ class Dispatcher {
 	 */
 	private function _loadController($class) {
 		App::uses($class, 'Controller');
-		$this->controller = new $class($this->request, $this->response);	
+		$this->controller = ObjectRegistry::storeObject($class, new $class($this->request, $this->response));	
 	}
 	
 	/**
