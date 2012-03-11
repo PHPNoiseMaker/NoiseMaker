@@ -87,28 +87,32 @@ class Dispatcher {
 		$this->_loadController($class);
 		$this->controller->view = $this->request->action;
 		
+		$this->controller->beforeFilter();
 		
 		if(method_exists($this->controller, $this->request->action)) {
-			try {
-				call_user_func_array(
-					array(
-						$this->controller, 
-						$this->request->action
-					), 
-					$this->request->params
-				);
-			} catch(Exception $e) {
-				throw new $e;
+			$ref = new ReflectionClass(get_class($this->controller));
+			$method = $ref->getMethod($this->request->action);
+			if($method->isPrivate()) {
+				throw new MethodNotAllowedException('Trying to access a private method!');
 			}
-			
+			if($method->isProtected()) {
+				throw new MethodNotAllowedException('Trying to access a protected method!');
+			}
+			call_user_func_array(
+				array(
+					$this->controller, 
+					$this->request->action
+				), 
+				$this->request->params
+			);
+			$this->controller->afterFilter();
+	
 		} else {
 		
-			throw new NotFoundException();
+			throw new ActionNotFoundException();
 		}
 		
-		$this->controller->render($this->request->controller);
-		
-		
+		$this->controller->render($this->request->controller);		
 	}
 
 }

@@ -197,11 +197,10 @@ class View {
 				extract($___dataForView, EXTR_SKIP);
 				ob_start();
 		
-				include $___viewFn;
+				include_once $___viewFn;
 		
 				return ob_get_clean();
 			}
-			//throw new ViewNotFoundException();
 			return false;
 			
 		}

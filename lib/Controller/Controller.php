@@ -298,5 +298,22 @@ class Controller {
 		  //throw new InternalErrorException('Property "' . $property . '" is not accessible.');
 		}
 	}
-
+	
+	/**
+	 * beforeFilter function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function beforeFilter() {
+	}
+	
+	/**
+	 * afterFilter function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function afterFilter() {
+	}
 }

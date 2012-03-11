@@ -119,6 +119,17 @@ class ModelNotFoundException extends HttpException {
 
 }
 
+class ActionNotFoundException extends HttpException {
+
+	public function __construct($message = null, $code = 404) {
+		if (empty($message)) {
+			$message = 'Action Not Found';
+		}
+		parent::__construct($message, $code);
+	}
+
+}
+
 class ClassNotFoundException extends HttpException {
 
 	public function __construct($message = null, $code = 404) {
