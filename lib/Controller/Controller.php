@@ -131,7 +131,58 @@ class Controller {
 		
 		$this->constructModels();
 	}
+	/**
+	 * __get function.
+	 * 
+	 * @access public
+	 * @param mixed $property
+	 * @return void
+	 */
+	public function __get($property) {
+		
+	    if (in_array($property, $this->_getters)) {
+	    	return $this->$property;
+	    } else if (method_exists($this, '_get_' . $property)) {
+	    	return call_user_func(array($this, '_get_' . $property));
+	    } else if (
+		    in_array($property, $this->_setters) 
+		    || method_exists($this, '_set_' . $property)
+	    ) {
+	    	throw new InternalErrorException('Property "' . $property . '" is write-only.');
+	    } else {
+	    	throw new InternalErrorException('Property "' . $property . '" is not accessible.');
+	    }
+	}
+
+	/**
+	 * __set function.
+	 * 
+	 * @access public
+	 * @param mixed $property
+	 * @param mixed $value
+	 * @return void
+	 */
+	public function __set($property, $value) {
+		if (in_array($property, $this->_setters)) {
+			$this->{$property} = $value;
+		} else if (method_exists($this, '_set_' . $property)) {
+			call_user_func(array($this, '_set_' . $property), $value);
+		} else if (
+			in_array($property, $this->_getters) 
+			|| method_exists($this, '_get_' . $property)
+		) {
+		  throw new InternalErrorException('Property "' . $property . '" is read-only.');
+		} else {
+		  //throw new InternalErrorException('Property "' . $property . '" is not accessible.');
+		}
+	}
 	
+	/**
+	 * constructModels function.
+	 * 
+	 * @access private
+	 * @return void
+	 */
 	private function constructModels() {
 		if($this->uses !== false) {
 			if(is_array($this->uses)) {
@@ -255,51 +306,6 @@ class Controller {
 		}	
 	}
   
-	/**
-	 * __get function.
-	 * 
-	 * @access public
-	 * @param mixed $property
-	 * @return void
-	 */
-	public function __get($property) {
-		
-	    if (in_array($property, $this->_getters)) {
-	    	return $this->$property;
-	    } else if (method_exists($this, '_get_' . $property)) {
-	    	return call_user_func(array($this, '_get_' . $property));
-	    } else if (
-		    in_array($property, $this->_setters) 
-		    || method_exists($this, '_set_' . $property)
-	    ) {
-	    	throw new InternalErrorException('Property "' . $property . '" is write-only.');
-	    } else {
-	    	throw new InternalErrorException('Property "' . $property . '" is not accessible.');
-	    }
-	}
-
-	/**
-	 * __set function.
-	 * 
-	 * @access public
-	 * @param mixed $property
-	 * @param mixed $value
-	 * @return void
-	 */
-	public function __set($property, $value) {
-		if (in_array($property, $this->_setters)) {
-			$this->{$property} = $value;
-		} else if (method_exists($this, '_set_' . $property)) {
-			call_user_func(array($this, '_set_' . $property), $value);
-		} else if (
-			in_array($property, $this->_getters) 
-			|| method_exists($this, '_get_' . $property)
-		) {
-		  throw new InternalErrorException('Property "' . $property . '" is read-only.');
-		} else {
-		  //throw new InternalErrorException('Property "' . $property . '" is not accessible.');
-		}
-	}
 	
 	/**
 	 * beforeFilter function.

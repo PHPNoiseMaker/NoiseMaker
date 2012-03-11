@@ -87,14 +87,17 @@ class App {
 			$path = implode(DS, explode('/', $path));
 		}
 		if(file_exists($file = ROOT . DS . APP_DIR . DS . $path . DS . $class . '.php')) {
-			if(!$check_only) {
+			$file = substr($file, strlen(ROOT . DS));
+			if(!$check_only && !array_search($file, self::$_openFiles)) {
 				include_once APP_DIR . DS . $path . DS . $class . '.php';
 				self::$_openFiles[] = $file;
 			}
 
 		} elseif(file_exists($file = ROOT . DS . 'lib' . DS . $path . DS . $class . '.php')) {
-			if(!$check_only) {
+			$file = substr($file, strlen(ROOT . DS));
+			if(!$check_only && !array_search($file, self::$_openFiles)) {
 				include_once 'lib' . DS . $path . DS . $class . '.php';
+				
 				self::$_openFiles[] = $file;
 			}
 			
@@ -119,5 +122,9 @@ class App {
 		
 		return true;
 	
+	}
+	
+	public static function getOpenFiles() {
+		return array_values(self::$_openFiles);
 	}
 }

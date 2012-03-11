@@ -14,7 +14,8 @@ require_once('lib/Core/App.php');
 
 App::uses('Inflect', 'Utility');
 App::import('base', 'Core');
-App::import('ExceptionHandler', 'Core');
+App::import('ExceptionHandler', 'Errors');
+App::import('Exceptions', 'Errors');
 
 
 set_exception_handler(array("ExceptionHandler", "handleException"));

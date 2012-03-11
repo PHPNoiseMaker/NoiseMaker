@@ -1,5 +1,6 @@
 <?php
 App::uses('Router', 'Router');
+App::import('Routes', 'Router');
 App::uses('ObjectRegistry', 'Utility');
 /**
  * Dispatcher class.
@@ -48,7 +49,6 @@ class Dispatcher {
 	public function __construct() {
 		$this->request = ObjectRegistry::getObject('Request');
 		$this->response = ObjectRegistry::getObject('Response');
-		App::import('Routes', 'Router');
 		Router::init($this->request->getURI());
 		$this->request->controller = Router::getController();
 		$this->request->action = Router::getAction();
@@ -84,11 +84,10 @@ class Dispatcher {
 	
 
 		$this->_loadController($class);
-		$this->controller->view = $this->request->action;
 		
-		$this->controller->beforeFilter();
 		
 		if(method_exists($this->controller, $this->request->action)) {
+			
 			$ref = new ReflectionClass(get_class($this->controller));
 			$method = $ref->getMethod($this->request->action);
 
@@ -103,6 +102,10 @@ class Dispatcher {
 			if(isset($error)) {
 				throw new MethodNotAllowedException($error);
 			}
+			
+			$this->controller->view = $this->request->action;
+		
+			$this->controller->beforeFilter();
 			
 			call_user_func_array(
 				array(

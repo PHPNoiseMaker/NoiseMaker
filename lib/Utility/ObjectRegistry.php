@@ -113,5 +113,9 @@ class ObjectRegistry {
 	public static function storeObject($key, $value) {
 		return self::getInstance()->set($key, $value);
 	}
+	
+	public static function getObjects() {
+		return array_keys(self::$_objects);
+	}
 
 }

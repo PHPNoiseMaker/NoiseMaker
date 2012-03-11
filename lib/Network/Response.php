@@ -165,6 +165,8 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
+		var_dump(ObjectRegistry::getObjects());
+		var_dump(App::getOpenFiles());
 		exit;
 	}
 
