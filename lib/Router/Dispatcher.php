@@ -92,13 +92,19 @@ class Dispatcher {
 		if(method_exists($this->controller, $this->request->action)) {
 			$ref = new ReflectionClass(get_class($this->controller));
 			$method = $ref->getMethod($this->request->action);
+
 			if($method->isPrivate()) {
-				throw new MethodNotAllowedException('Trying to access a private method!');
+				$error = 'Trying to access a private method!';
 			}
 			if($method->isProtected()) {
-				throw new MethodNotAllowedException('Trying to access a protected method!');
+				$error = 'Trying to access a protected method!';
 			}
 			unset($ref, $method);
+			
+			if(isset($error)) {
+				throw new MethodNotAllowedException($error);
+			}
+			
 			call_user_func_array(
 				array(
 					$this->controller, 
