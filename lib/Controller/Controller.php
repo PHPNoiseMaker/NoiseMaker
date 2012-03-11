@@ -11,6 +11,20 @@ class Controller {
 	 * @access public
 	 */
 	public $name = null;
+	
+	
+	
+	/**
+	 * uses
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access public
+	 */
+	public $uses = array();
+	
+	
 	/**
 	 * View (Class)
 	 * 
@@ -113,7 +127,25 @@ class Controller {
 		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
 		$this->data = $request->data;
+		
+		$this->constructModels();
 	}
+	
+	private function constructModels() {
+		if($this->uses !== false) {
+			if(is_array($this->uses)) {
+				if(sizeof($this->uses) === 0) {
+					$this->uses[] = $this->getModelName();
+				}
+				foreach($this->uses as $model) {
+					$this->_loadModel($this->getModelName($model));
+				}
+			} else {
+				trigger_error('$this->uses must be an array!');
+			}
+		}
+	}
+	
 	
 	/**
 	 * Get's current route
@@ -191,7 +223,7 @@ class Controller {
 	 * @param mixed $controller
 	 * @return void
 	 */
-	public function getDefaultModelName($controller = null) {
+	final public function getModelName($controller = null) {
 		if(is_object($controller)) {
 			$controllerName = $controller->name;
 		}
@@ -208,6 +240,17 @@ class Controller {
 		}
 		return false;
     }
+    
+    
+    private function _loadModel($class) {
+		App::import($class, 'Model');
+		$this->_setters[] = $class;
+		$this->{$class} = new $class();
+		
+		if(($key = array_search($class, $this->_setters)) !== false) {
+			unset($this->_setters[$key]);
+		}	
+	}
   
 	/**
 	 * __get function.
@@ -242,7 +285,7 @@ class Controller {
 	 */
 	public function __set($property, $value) {
 		if (in_array($property, $this->_setters)) {
-			$this->$property = $value;
+			$this->{$property} = $value;
 		} else if (method_exists($this, '_set_' . $property)) {
 			call_user_func(array($this, '_set_' . $property), $value);
 		} else if (
@@ -251,7 +294,7 @@ class Controller {
 		) {
 		  throw new InternalErrorException('Property "' . $property . '" is read-only.');
 		} else {
-		  throw new InternalErrorException('Property "' . $property . '" is not accessible.');
+		  //throw new InternalErrorException('Property "' . $property . '" is not accessible.');
 		}
 	}
 

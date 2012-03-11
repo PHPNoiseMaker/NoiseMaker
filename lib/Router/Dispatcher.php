@@ -65,7 +65,7 @@ class Dispatcher {
 	 * @return void
 	 */
 	private function _loadController($class) {
-		App::import($class, 'Controllers');
+		App::import($class, 'Controller');
 		$this->controller = new $class($this->request, $this->response);	
 	}
 	

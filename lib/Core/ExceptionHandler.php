@@ -13,7 +13,7 @@ class ExceptionHandler {
 	 * @return void
 	 */
 	public static function handleException(Exception $e) {
-		App::import('ErrorsController', 'Controllers');
+		App::import('ErrorsController', 'Controller');
 		$controller = new ErrorsController(new Request(), new Response());
 		
 		$params = array(
@@ -39,7 +39,7 @@ class ExceptionHandler {
 	 * @return void
 	 */
 	public static function handleError($errorNumber, $errorMsg, $errorFile, $errorLine) {
-		App::import('ErrorsController', 'Controllers');
+		App::import('ErrorsController', 'Controller');
 		$controller = new ErrorsController(new Request(), new Response());
 		
 		$params = array(

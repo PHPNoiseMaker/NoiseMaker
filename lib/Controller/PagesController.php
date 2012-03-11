@@ -1,5 +1,5 @@
 <?php
-require_once('app/Controllers/AppController.php');
+App::import('AppController', 'Controller');
 /**
  * PagesController class.
  * 
@@ -7,6 +7,7 @@ require_once('app/Controllers/AppController.php');
  */
 class PagesController extends AppController {
 	
+	public $uses = false;
 	/**
 	 * index function.
 	 * 
@@ -15,8 +16,7 @@ class PagesController extends AppController {
 	 */
 	public function index() {
 		$this->display();
-	}
-	
+	}	
 	/**
 	 * display function.
 	 * 
@@ -24,7 +24,6 @@ class PagesController extends AppController {
 	 * @return void
 	 */
 	public function display() {
-		
 		$args = func_get_args();
 
 		if(

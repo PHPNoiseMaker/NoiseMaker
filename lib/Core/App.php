@@ -7,15 +7,27 @@ class App {
 		}
 		if(file_exists(ROOT . DS . APP_DIR . DS . $path . DS . $class . '.php')) {
 			if(!$check_only)
-				include APP_DIR . DS . $path . DS . $class . '.php';
+				include_once APP_DIR . DS . $path . DS . $class . '.php';
 
 		} elseif(file_exists(ROOT . DS . 'lib' . DS . $path . DS . $class . '.php')) {
 			if(!$check_only)
-				include 'lib' . DS . $path . DS . $class . '.php';
+				include_once 'lib' . DS . $path . DS . $class . '.php';
 			
 		} else {
-			if(!$check_only)
-				throw new ClassNotFoundException();
+			if(!$check_only) {
+				switch($path) {
+					case 'Controller':
+						throw new ControllerNotFoundException();
+						break;
+					case 'Model':
+						throw new ModelNotFoundException();
+						break;
+					default:
+						throw new ClassNotFoundException();
+						break;
+				}
+				
+			}
 			else
 				return false;
 		}

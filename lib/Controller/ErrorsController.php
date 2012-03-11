@@ -1,5 +1,5 @@
 <?php
-require_once 'app/Controllers/AppController.php';
+App::import('AppController', 'Controller');
 /**
  * ErrorsController class.
  * 
@@ -7,7 +7,7 @@ require_once 'app/Controllers/AppController.php';
  */
 class ErrorsController extends AppController {
 
-	
+	public $uses = false;
 	/**
 	 * displayException function.
 	 * 
