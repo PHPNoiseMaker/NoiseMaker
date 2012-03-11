@@ -13,7 +13,7 @@ class ExceptionHandler {
 	 * @return void
 	 */
 	public static function handleException(Exception $e) {
-		require_once 'lib/Controllers/ErrorsController.php';
+		App::import('ErrorsController', 'Controllers');
 		$controller = new ErrorsController(new Request(), new Response());
 		
 		$params = array(
@@ -39,7 +39,7 @@ class ExceptionHandler {
 	 * @return void
 	 */
 	public static function handleError($errorNumber, $errorMsg, $errorFile, $errorLine) {
-		require_once 'lib/Controllers/ErrorsController.php';
+		App::import('ErrorsController', 'Controllers');
 		$controller = new ErrorsController(new Request(), new Response());
 		
 		$params = array(

@@ -48,13 +48,12 @@ class Dispatcher {
 	public function __construct(Request $request, Response $response) {
 		$this->request = $request;
 		$this->response = $response;
-		$this->router = new Router($this->request);
-		include_once 'lib/Router/Routes.php';
-		$this->router->init($this->request->getURI());
-		$this->request->controller = $this->router->getController();
-		$this->request->action = $this->router->getAction();
-		$this->request->params = $this->router->getParams();
-		$this->request->namedParams = $this->router->getNamedParams();
+		App::import('Routes', 'Router');
+		Router::init($this->request->getURI());
+		$this->request->controller = Router::getController();
+		$this->request->action = Router::getAction();
+		$this->request->params = Router::getParams();
+		$this->request->namedParams = Router::getNamedParams();
 	}
 	
 	/**
@@ -65,17 +64,7 @@ class Dispatcher {
 	 * @return void
 	 */
 	private function _loadController($class) {
-		if(file_exists(ROOT . DS . APP_DIR . DS . 'Controllers/' . $class . '.php')) {
-			include APP_DIR . DS . 'Controllers/' . $class . '.php';
-
-		} elseif(file_exists(ROOT . DS . 'lib/Controllers/' . $class . '.php')) {
-		
-			include 'lib/Controllers/' . $class . '.php';
-			
-		} else {
-			throw new NotFoundException();
-		}
-		
+		App::import($class, 'Controllers');
 		$this->controller = new $class($this->request, $this->response);	
 	}
 	

@@ -10,9 +10,12 @@ if (!defined('ROOT')) {
 	define('ROOT', dirname(dirname(dirname(__FILE__))));
 }
 
-require_once('lib/Utility/Inflect.php');
-require_once 'lib/Core/base.php';
-require_once 'lib/Core/ExceptionHandler.php';
+require_once('lib/Core/App.php');
+
+App::import('Inflect', 'Utility');
+App::import('base', 'Core');
+App::import('ExceptionHandler', 'Core');
+
 
 set_exception_handler(array("ExceptionHandler", "handleException"));
 set_error_handler(array("ExceptionHandler", "handleError"));

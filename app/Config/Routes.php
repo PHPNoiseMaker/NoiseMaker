@@ -3,12 +3,12 @@
  * Route Definitions
  			
  			Example Base URL Route:
-					$this->router->addRule('/', array(
+					Router::addRule('/', array(
 						'controller' => 'Pages',
 						'action' => 'index'
 					));
 			Example Custom Route:		
-					$this->router->addRule(
+					Router::addRule(
 						'/page/:page_id/view',
 						array(
 							'controller' => 'Pages',
@@ -23,7 +23,7 @@
 					
 					
 			Example Default Route:
-					$this->router->addRule('/:controller/:action/*');
+					Router::addRule('/:controller/:action/*');
  */
  
 
@@ -33,10 +33,21 @@
  * @var mixed
  * @access public
  */
-$this->router->addRule('/', array(
+Router::addRule('/', array(
 	'controller' => 'Pages',
 	'action' => 'index'
 ));
+
+Router::addRule(
+	'/page/:page_id/',
+	array(
+		'controller' => 'Pages',
+		'action' => 'display'
+	),
+	array(
+		'pass' => array('page_id')
+	)
+);
 
 
 /**
@@ -45,4 +56,4 @@ $this->router->addRule('/', array(
  * @var mixed
  * @access public
  */
-$this->router->addRule('/:controller/:action/*');
+Router::addRule('/:controller/:action/*');

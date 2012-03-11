@@ -9,7 +9,7 @@ class Router {
 	 * @var array
 	 * @access protected
 	 */
-	protected $command = array();
+	protected static $command = array();
 	
 	
 	
@@ -22,7 +22,7 @@ class Router {
 	 * @var array
 	 * @access protected
 	 */
-	protected $params = array();
+	protected static $params = array();
 	
 	
 	/**
@@ -34,7 +34,7 @@ class Router {
 	 * @var array
 	 * @access protected
 	 */
-	protected $namedParams = array();
+	protected static $namedParams = array();
 	
 	
 	/**
@@ -44,7 +44,7 @@ class Router {
 	 * @var mixed
 	 * @access protected
 	 */
-	protected $controller;
+	protected static $controller;
 	
 	
 	/**
@@ -53,7 +53,7 @@ class Router {
 	 * @var mixed
 	 * @access protected
 	 */
-	protected $action;
+	protected static $action;
 	
 	
 	
@@ -64,7 +64,7 @@ class Router {
 	 * @var mixed
 	 * @access protected
 	 */
-	protected $requestURI;
+	protected static $requestURI;
 	
 	
 	
@@ -78,7 +78,7 @@ class Router {
 	 * @var array
 	 * @access protected
 	 */
-	protected $rules = array();
+	protected static $rules = array();
 	
 	/**
 	 * __construct function.
@@ -99,9 +99,9 @@ class Router {
 	 * @access public
 	 * @return void
 	 */
-	public function init($url) {
-		$this->_parseURI($url);
-		$this->params = $this->parseNamedParams($this->params);
+	public static function init($url) {
+		self::_parseURI($url);
+		self::$params = self::parseNamedParams(self::$params);
 	}
 	
 	/**
@@ -115,13 +115,13 @@ class Router {
 	 * @param array $args (default: array())
 	 * @return void
 	 */
-	public function addRule($uri, $target = array(), $args = array()) {
+	public static function addRule($uri, $target = array(), $args = array()) {
 		if(is_array($args)) {
 			if(empty($args)) {
 				$args['pass'] = array();
 			}
 		}
-		$this->rules[$uri] = array(
+		self::$rules[$uri] = array(
 			'target' => $target,
 			'pass' => $args['pass']
 		);
@@ -136,8 +136,8 @@ class Router {
 	 * @access public
 	 * @return $command
 	 */
-	public function getCommand() {
-		return $this->command;
+	public static function getCommand() {
+		return self::$command;
 	}
 	
 	/**
@@ -146,8 +146,8 @@ class Router {
 	 * @access public
 	 * @return $namedParams
 	 */
-	public function getNamedParams() {
-		return $this->namedParams;
+	public static function getNamedParams() {
+		return self::$namedParams;
 	}
 	
 	/**
@@ -156,8 +156,8 @@ class Router {
 	 * @access public
 	 * @return $controller
 	 */
-	public function getController() {
-		return $this->controller;
+	public static function getController() {
+		return self::$controller;
 	}
 	/**
 	 * getParams function.
@@ -165,8 +165,8 @@ class Router {
 	 * @access public
 	 * @return $params
 	 */
-	public function getParams() {
-		return $this->params;
+	public static function getParams() {
+		return self::$params;
 	}
 	/**
 	 * getAction function.
@@ -174,8 +174,8 @@ class Router {
 	 * @access public
 	 * @return $action
 	 */
-	public function getAction() {
-		return $this->action;
+	public static function getAction() {
+		return self::$action;
 	}
 	
 	
@@ -186,7 +186,7 @@ class Router {
 	 * @param array $array
 	 * @return void
 	 */
-	private function arrayClean($array) {
+	private static function arrayClean($array) {
 		foreach($array as $key => $value) {
 			if (strlen($value) == 0) {
 				unset($array[$key]);
@@ -205,13 +205,13 @@ class Router {
 	 * @param array $params (default: array())
 	 * @return array $newParams
 	 */
-	private function parseNamedParams($params = array()) {
+	private static function parseNamedParams($params = array()) {
 		$newParams = array();
 		foreach($params as $key => $val) {
 			if(strpos($val, ':') !== false) {
 				list($name, $value) = explode(':', $val);
 				if(!empty($name) && !empty($value))
-					$this->namedParams[$name] = $value;
+					self::$namedParams[$name] = $value;
 			} else {
 				$newParams[] = $val;
 			}
@@ -226,12 +226,12 @@ class Router {
 	 * @param mixed $rule
 	 * @return bool
 	 */
-	private function matchRule($rule) {
+	private static function matchRule($rule) {
 		$paramBuffer = array();
-		$this->command = $this->arrayClean($this->command);
-		$commandCount = sizeof($this->command);
+		self::$command = self::arrayClean(self::$command);
+		$commandCount = sizeof(self::$command);
 		
-		$parsedRule = $this->arrayClean(explode('/', $rule));
+		$parsedRule = self::arrayClean(explode('/', $rule));
 		$parsedRuleCount = count($parsedRule);
 		if(
 			$parsedRuleCount == $commandCount
@@ -246,38 +246,38 @@ class Router {
 			$i = 0;
 			foreach ($parsedRule as $parsedKey => $parsedValue) {
 				
-				if(isset($this->command[$i])) {
+				if(isset(self::$command[$i])) {
 					
 					if(strpos($parsedValue, ':') === 0) {
 						$varName = substr($parsedValue, 1);
-						$position = array_search($varName, $this->rules[$rule]['pass']);
+						$position = array_search($varName, self::$rules[$rule]['pass']);
 						if($varName == 'controller') {
-							$this->controller = $this->command[$i];
+							self::$controller = self::$command[$i];
 						} elseif ($varName == 'action') {
-							$this->action = $this->command[$i];
+							self::$action = self::$command[$i];
 						} elseif ($position !== false) {
 							
-							$paramBuffer[$position] = $this->command[$i];
+							$paramBuffer[$position] = self::$command[$i];
 							
 						}
 						
-						$this->params = $paramBuffer;
+						self::$params = $paramBuffer;
 					
 						
 					
-					} elseif(strcmp($parsedValue, $this->command[$i]) === 0) {
+					} elseif(strcmp($parsedValue, self::$command[$i]) === 0) {
 						
-						if($this->controller === null)
-							$this->controller = $this->rules[$rule]['target']['controller'];
-						if($this->action === null)
-							$this->action = $this->rules[$rule]['target']['action'];
+						if(self::$controller === null)
+							self::$controller = self::$rules[$rule]['target']['controller'];
+						if(self::$action === null)
+							self::$action = self::$rules[$rule]['target']['action'];
 						
-						foreach($this->rules[$rule]['target'] as $ruleTargetKey => $ruleTargetVal) {
+						foreach(self::$rules[$rule]['target'] as $ruleTargetKey => $ruleTargetVal) {
 							if(
 								$ruleTargetKey !== 'action'
 								&& $ruleTargetKey !== 'controller'
 							)
-							$this->params[] = $ruleTargetVal;
+							self::$params[] = $ruleTargetVal;
 						}
 						
 					} elseif(
@@ -295,24 +295,24 @@ class Router {
 				&& $parsedRule[$parsedRuleCount] == '*'
 			) {
 				for($a = $i - 1; $a <= $commandCount; $a++) {
-					if(isset($this->command[$a]) && !empty($this->command[$a]))
-						$this->params[] = $this->command[$a];
+					if(isset(self::$command[$a]) && !empty(self::$command[$a]))
+						self::$params[] = self::$command[$a];
 				}
 			}
 			
 			if(!$i) {
 				if(
-					isset($this->rules[$rule]['target']['controller']) 
-					&& isset($this->rules[$rule]['target']['action'])
+					isset(self::$rules[$rule]['target']['controller']) 
+					&& isset(self::$rules[$rule]['target']['action'])
 				) {
-					$this->controller = $this->rules[$rule]['target']['controller'];
-					$this->action = $this->rules[$rule]['target']['action'];
+					self::$controller = self::$rules[$rule]['target']['controller'];
+					self::$action = self::$rules[$rule]['target']['action'];
 				}
 			}
 			
 		}
 		
-		return $this->controller !== null ? true : false;
+		return (self::$controller !== null) ? true : false;
 	}
 	
 	/**
@@ -323,18 +323,18 @@ class Router {
 	 * @access private
 	 * @return void
 	 */
-	private function _parseURI($url) {
+	private static function _parseURI($url) {
 
-		$this->command = array_values($url);
+		self::$command = array_values($url);
 		
-		$commandCount = count($this->command);
+		$commandCount = count(self::$command);
 			
-		if(strpos($this->command[$commandCount - 1], '?') !== false) {
-			list($command) = explode('?', $this->command[$commandCount - 1]);
-			$this->command[$commandCount - 1] = $command;
+		if(strpos(self::$command[$commandCount - 1], '?') !== false) {
+			list($command) = explode('?', self::$command[$commandCount - 1]);
+			self::$command[$commandCount - 1] = $command;
 		}
-		foreach($this->rules as $rule => $target) {
-			$matched = $this->matchRule($rule);
+		foreach(self::$rules as $rule => $target) {
+			$matched = self::matchRule($rule);
 			if($matched)
 				break;
 		}
