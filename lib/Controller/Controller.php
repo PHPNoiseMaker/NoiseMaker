@@ -1,5 +1,6 @@
 <?php
 App::uses('View', 'View');
+App::uses('ObjectRegistry', 'Utility');
 class Controller {
 	
 	/**
@@ -246,7 +247,7 @@ class Controller {
 		App::uses($class, 'Model');
 		$this->_setters[] = $class;
 		
-		$this->{$class} = new $class();
+		$this->{$class} = ObjectRegistry::storeObject($class, new $class());
 		
 		if(($key = array_search($class, $this->_setters)) !== false) {
 			unset($this->_setters[$key]);

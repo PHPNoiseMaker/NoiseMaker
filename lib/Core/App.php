@@ -7,9 +7,39 @@
  */
 class App {
 	
+	/**
+	 * _openFiles
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access protected
+	 * @static
+	 */
 	protected static $_openFiles = array();
 	
+	/**
+	 * _map
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access protected
+	 * @static
+	 */
 	protected static $_map = array();
+	
+	
+	/**
+	 * __clone function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function __clone() {
+	
+	}
+	
 	
 	/**
 	 * autoLoad function.
