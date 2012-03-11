@@ -249,6 +249,7 @@ class Controller {
 		
 		$this->{$class} = ObjectRegistry::storeObject($class, new $class());
 		
+		
 		if(($key = array_search($class, $this->_setters)) !== false) {
 			unset($this->_setters[$key]);
 		}	
