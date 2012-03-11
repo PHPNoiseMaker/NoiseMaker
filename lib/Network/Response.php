@@ -165,11 +165,12 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
-		var_dump((memory_get_peak_usage(true)) / 1024 / 1024);
+		/*var_dump((memory_get_peak_usage(true)) / 1024 / 1024);
 		var_dump($_SERVER);
 		var_dump($_ENV);
 		var_dump(ObjectRegistry::getObjects());
 		var_dump(App::getOpenFiles());
+		var_dump(ObjectRegistry::getObject('Request'));*/
 		exit;
 	}
 
