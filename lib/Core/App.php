@@ -88,14 +88,15 @@ class App {
 		}
 		if(file_exists($file = ROOT . DS . APP_DIR . DS . $path . DS . $class . '.php')) {
 			$file = substr($file, strlen(ROOT . DS));
-			if(!$check_only && !array_search($file, self::$_openFiles)) {
+			
+			if(!$check_only && array_search($file, self::$_openFiles) === false) {
 				include_once APP_DIR . DS . $path . DS . $class . '.php';
 				self::$_openFiles[] = $file;
 			}
 
 		} elseif(file_exists($file = ROOT . DS . 'lib' . DS . $path . DS . $class . '.php')) {
 			$file = substr($file, strlen(ROOT . DS));
-			if(!$check_only && !array_search($file, self::$_openFiles)) {
+			if(!$check_only && array_search($file, self::$_openFiles) === false) {
 				include_once 'lib' . DS . $path . DS . $class . '.php';
 				
 				self::$_openFiles[] = $file;
