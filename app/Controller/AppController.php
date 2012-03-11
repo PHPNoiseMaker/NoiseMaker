@@ -1,5 +1,5 @@
 <?php
-require_once 'lib' . DS . 'Controller' . DS . 'Controller.php';
+App::uses('Controller', 'Controller');
 class AppController extends Controller {
 
 }

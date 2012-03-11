@@ -1,8 +1,8 @@
 <?php
 require_once('lib/Core/bootstrap.php');
-App::import('Dispatcher', 'Router');
-App::import('Request', 'Network');
-App::import('Response', 'Network');
+App::uses('Dispatcher', 'Router');
+App::uses('Request', 'Network');
+App::uses('Response', 'Network');
 
 
 /**

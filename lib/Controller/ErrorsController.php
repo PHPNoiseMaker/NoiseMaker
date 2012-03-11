@@ -1,5 +1,5 @@
 <?php
-App::import('AppController', 'Controller');
+App::uses('AppController', 'Controller');
 /**
  * ErrorsController class.
  * 

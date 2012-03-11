@@ -1,5 +1,5 @@
 <?php
-App::import('View', 'View');
+App::uses('View', 'View');
 class Controller {
 	
 	/**
@@ -243,7 +243,7 @@ class Controller {
     
     
     private function _loadModel($class) {
-		App::import($class, 'Model');
+		App::uses($class, 'Model');
 		$this->_setters[] = $class;
 		
 		$this->{$class} = new $class();

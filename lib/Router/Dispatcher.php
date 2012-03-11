@@ -1,5 +1,5 @@
 <?php
-App::import('Router', 'Router');
+App::uses('Router', 'Router');
 App::import('Exceptions', 'Core');
 
 /**
@@ -65,7 +65,7 @@ class Dispatcher {
 	 * @return void
 	 */
 	private function _loadController($class) {
-		App::import($class, 'Controller');
+		App::uses($class, 'Controller');
 		$this->controller = new $class($this->request, $this->response);	
 	}
 	

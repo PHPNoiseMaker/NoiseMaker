@@ -1,5 +1,5 @@
 <?php
-App::import('AppController', 'Controller');
+App::uses('AppController', 'Controller');
 /**
  * PagesController class.
  * 
@@ -16,7 +16,8 @@ class PagesController extends AppController {
 	 */
 	public function index() {
 		$this->display();
-	}	
+	}
+	
 	/**
 	 * display function.
 	 * 

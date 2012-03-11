@@ -12,10 +12,11 @@ if (!defined('ROOT')) {
 
 require_once('lib/Core/App.php');
 
-App::import('Inflect', 'Utility');
+App::uses('Inflect', 'Utility');
 App::import('base', 'Core');
 App::import('ExceptionHandler', 'Core');
 
 
 set_exception_handler(array("ExceptionHandler", "handleException"));
 set_error_handler(array("ExceptionHandler", "handleError"));
+spl_autoload_register(array('App', 'autoLoad'));
