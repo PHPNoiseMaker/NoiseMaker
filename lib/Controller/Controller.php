@@ -190,7 +190,9 @@ class Controller {
 					$this->uses[] = $this->getModelName();
 				}
 				foreach($this->uses as $model) {
-					$this->_loadModel($this->getModelName($model));
+					if(!$this->_loadModel($this->getModelName($model))) {
+						trigger_error('Could not load the model!');
+					}
 				}
 			} else {
 				trigger_error('$this->uses must be an array!');
@@ -293,17 +295,32 @@ class Controller {
 		return false;
     }
     
-    
+    /**
+     * _loadModel function.
+     * 
+     * @access private
+     * @param mixed $class
+     * @return void
+     */
     private function _loadModel($class) {
 		App::uses($class, 'Model');
 		$this->_setters[] = $class;
+		$modelRef = new ReflectionClass($class);
 		
-		$this->{$class} = ObjectRegistry::storeObject($class, new $class());
+		if($modelRef->isAbstract() || $modelRef->isInterface()) {
+			return false;
+		}
 		
+		$this->{$class} = ObjectRegistry::storeObject($class, $modelRef->newInstance());
 		
 		if(($key = array_search($class, $this->_setters)) !== false) {
 			unset($this->_setters[$key]);
-		}	
+		}
+		
+		if($this->{$class} instanceof Model) {
+			return true;
+		}
+		return false;
 	}
   
 	

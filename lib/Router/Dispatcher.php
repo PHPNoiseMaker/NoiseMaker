@@ -1,5 +1,6 @@
 <?php
 App::uses('Router', 'Router');
+App::uses('Controller', 'Controller');
 App::import('Routes', 'Router');
 App::uses('ObjectRegistry', 'Utility');
 /**
@@ -65,7 +66,18 @@ class Dispatcher {
 	 */
 	private function _loadController($class) {
 		App::uses($class, 'Controller');
-		$this->controller = ObjectRegistry::storeObject($class, new $class());	
+		$controllerRef = new ReflectionClass($class);
+		
+		if($controllerRef->isAbstract() || $controllerRef->isInterface()) {
+			return false;
+		}
+		
+		$this->controller = ObjectRegistry::storeObject($class, $controllerRef->newInstance());
+		
+		if($this->controller instanceof Controller) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -83,7 +95,9 @@ class Dispatcher {
 		}
 	
 
-		$this->_loadController($class);
+		if( !$this->_loadController($class) ) {
+			throw new ControllerNotFoundException();
+		}
 		
 		
 		if(method_exists($this->controller, $this->request->action)) {
