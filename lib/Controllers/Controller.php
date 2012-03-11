@@ -3,6 +3,15 @@ require_once('lib/View/View.php');
 class Controller {
 	
 	/**
+	 * name
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var mixed
+	 * @access public
+	 */
+	public $name = null;
+	/**
 	 * View (Class)
 	 * 
 	 * @var mixed
@@ -95,6 +104,11 @@ class Controller {
 	 * @return void
 	 */
 	public function __construct(Request $request, Response $response) {
+		if($this->name === null) {
+			$class = get_class($this);
+			$this->name = substr($class, 0, strpos($class, 'Controller'));
+			unset($class);
+		}
 		$this->request = $request;
 		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
