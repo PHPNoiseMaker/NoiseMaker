@@ -1,6 +1,7 @@
 <?php
-require_once('lib/Router/Router.php');
-require_once('lib/Core/Exceptions.php');
+App::import('Router', 'Router');
+App::import('Exceptions', 'Core');
+
 /**
  * Dispatcher class.
  */

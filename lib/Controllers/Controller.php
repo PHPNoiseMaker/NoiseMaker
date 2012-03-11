@@ -1,5 +1,5 @@
 <?php
-require_once('lib/View/View.php');
+App::import('View', 'View');
 class Controller {
 	
 	/**
@@ -191,9 +191,20 @@ class Controller {
 	 * @param mixed $controller
 	 * @return void
 	 */
-	public static function getModelName($controller) {
-	    if( ($pos = strpos($controller, 'Controller')) && $pos !== false) {
-			return ucfirst(Inflect::singularize(substr($controller, 0, $pos)));
+	public function getDefaultModelName($controller = null) {
+		if(is_object($controller)) {
+			$controllerName = $controller->name;
+		}
+		if(is_string($controller)) {
+		    $controllerName = $controller;
+		}
+		if($controller === null) {
+			$controllerName = $this->name;
+		}
+		if( ($pos = strpos($controllerName, 'Controller')) && $pos !== false) {
+			return ucfirst(Inflect::singularize(substr($controllerName, 0, $pos)));
+		} else {
+			return ucfirst(Inflect::singularize($controllerName));
 		}
 		return false;
     }
