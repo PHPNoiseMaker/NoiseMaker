@@ -98,6 +98,7 @@ class Dispatcher {
 			if($method->isProtected()) {
 				throw new MethodNotAllowedException('Trying to access a protected method!');
 			}
+			unset($ref, $method);
 			call_user_func_array(
 				array(
 					$this->controller, 
