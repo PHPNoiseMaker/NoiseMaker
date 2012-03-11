@@ -1,8 +1,6 @@
 <?php
 App::uses('Router', 'Router');
-App::import('Exceptions', 'Core');
 App::uses('ObjectRegistry', 'Utility');
-
 /**
  * Dispatcher class.
  */
@@ -47,9 +45,9 @@ class Dispatcher {
 	 * @access public
 	 * @return void
 	 */
-	public function __construct(Request $request, Response $response) {
-		$this->request = $request;
-		$this->response = $response;
+	public function __construct() {
+		$this->request = ObjectRegistry::getObject('Request');
+		$this->response = ObjectRegistry::getObject('Response');
 		App::import('Routes', 'Router');
 		Router::init($this->request->getURI());
 		$this->request->controller = Router::getController();
@@ -67,7 +65,7 @@ class Dispatcher {
 	 */
 	private function _loadController($class) {
 		App::uses($class, 'Controller');
-		$this->controller = ObjectRegistry::storeObject($class, new $class($this->request, $this->response));	
+		$this->controller = ObjectRegistry::storeObject($class, new $class());	
 	}
 	
 	/**
@@ -119,7 +117,6 @@ class Dispatcher {
 		
 			throw new ActionNotFoundException();
 		}
-		
 		$this->controller->render($this->request->controller);		
 	}
 

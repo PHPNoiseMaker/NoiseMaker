@@ -3,6 +3,8 @@ require_once('lib/Core/bootstrap.php');
 App::uses('Dispatcher', 'Router');
 App::uses('Request', 'Network');
 App::uses('Response', 'Network');
+App::uses('ObjectRegistry', 'Utility');
+App::import('Exceptions', 'Core');
 
 
 /**
@@ -13,6 +15,12 @@ App::uses('Response', 'Network');
  * @var mixed
  * @access public
  */
-$dispatcher = new Dispatcher(new Request(), new Response());
-$dispatcher->dispatch();
+ObjectRegistry::storeObject('Request', new Request());
+ObjectRegistry::storeObject('Response', new Response());
+
+
+ObjectRegistry::storeObject(
+	'Dispatcher', 
+	new Dispatcher()
+)->dispatch();
 

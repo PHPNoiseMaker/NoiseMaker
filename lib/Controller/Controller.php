@@ -118,16 +118,16 @@ class Controller {
 	 * @param Router $router
 	 * @return void
 	 */
-	public function __construct(Request $request, Response $response) {
+	public function __construct() {
 		if($this->name === null) {
 			$class = get_class($this);
 			$this->name = substr($class, 0, strpos($class, 'Controller'));
 			unset($class);
 		}
-		$this->request = $request;
-		$this->response = $response;
+		$this->request = ObjectRegistry::getObject('Request');
+		$this->response = ObjectRegistry::getObject('Response');
 		$this->params['named'] = $this->request->namedParams;
-		$this->data = $request->data;
+		$this->data = $this->request->data;
 		
 		$this->constructModels();
 	}
