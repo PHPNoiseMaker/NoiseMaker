@@ -1,6 +1,21 @@
 <?php
 
+/**
+ * App class.
+ *	Responsible for loading most files.
+ *
+ */
 class App {
+	/**
+	 * import function.
+	 * 
+	 * @access public
+	 * @static
+	 * @param mixed $class
+	 * @param mixed $path (default: null)
+	 * @param bool $check_only (default: false)
+	 * @return void
+	 */
 	public static function import($class, $path = null, $check_only = false) {
 		if(strpos('/', $path) !== false) {
 			$path = implode(DS, explode('/', $path));
