@@ -245,6 +245,7 @@ class Controller {
     private function _loadModel($class) {
 		App::import($class, 'Model');
 		$this->_setters[] = $class;
+		
 		$this->{$class} = new $class();
 		
 		if(($key = array_search($class, $this->_setters)) !== false) {
