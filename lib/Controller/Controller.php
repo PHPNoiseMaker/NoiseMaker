@@ -302,15 +302,11 @@ class Controller {
      * @return void
      */
     private function _loadModel($class) {
-		App::uses($class, 'Model');
+
+		App::uses('ObjectRegistry', 'Utility');
 		$this->_setters[] = $class;
-		$modelRef = new ReflectionClass($class);
+		$this->{$class} = ObjectRegistry::init($class);
 		
-		if($modelRef->isAbstract() || $modelRef->isInterface()) {
-			return false;
-		}
-		
-		$this->{$class} = $modelRef->newInstance();
 		
 		if(($key = array_search($class, $this->_setters)) !== false) {
 			unset($this->_setters[$key]);
