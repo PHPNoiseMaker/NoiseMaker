@@ -1,6 +1,5 @@
 <?php
 App::uses('View', 'View');
-App::uses('ObjectRegistry', 'Utility');
 class Controller {
 	
 	/**
@@ -118,14 +117,14 @@ class Controller {
 	 * @param Router $router
 	 * @return void
 	 */
-	public function __construct() {
+	public function __construct(Request $request, Response $response) {
 		if($this->name === null) {
 			$class = get_class($this);
 			$this->name = substr($class, 0, strpos($class, 'Controller'));
 			unset($class);
 		}
-		$this->request = ObjectRegistry::getObject('Request');
-		$this->response = ObjectRegistry::getObject('Response');
+		$this->request = $request;
+		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
 		$this->data = $this->request->data;
 		
@@ -311,7 +310,7 @@ class Controller {
 			return false;
 		}
 		
-		$this->{$class} = ObjectRegistry::storeObject($class, $modelRef->newInstance());
+		$this->{$class} = $modelRef->newInstance();
 		
 		if(($key = array_search($class, $this->_setters)) !== false) {
 			unset($this->_setters[$key]);

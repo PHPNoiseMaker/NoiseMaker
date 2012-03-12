@@ -2,7 +2,6 @@
 App::uses('Router', 'Router');
 App::uses('Controller', 'Controller');
 App::import('Routes', 'Router');
-App::uses('ObjectRegistry', 'Utility');
 /**
  * Dispatcher class.
  */
@@ -47,9 +46,9 @@ class Dispatcher {
 	 * @access public
 	 * @return void
 	 */
-	public function __construct() {
-		$this->request = ObjectRegistry::getObject('Request');
-		$this->response = ObjectRegistry::getObject('Response');
+	public function __construct(Request $request, Response $response) {
+		$this->request = $request;
+		$this->response = $response;
 		Router::init($this->request->getURI());
 		$this->request->controller = Router::getController();
 		$this->request->action = Router::getAction();
@@ -72,7 +71,7 @@ class Dispatcher {
 			return false;
 		}
 		
-		$this->controller = ObjectRegistry::storeObject($class, $controllerRef->newInstance());
+		$this->controller = $controllerRef->newInstance($this->request, $this->response);
 		
 		if($this->controller instanceof Controller) {
 			return true;

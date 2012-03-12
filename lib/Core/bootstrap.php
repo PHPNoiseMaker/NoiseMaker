@@ -13,6 +13,8 @@ if (!defined('ROOT')) {
 require_once('lib/Core/App.php');
 
 App::uses('Inflect', 'Utility');
+App::import('Config', 'Core');
+App::import('Config', 'Config');
 App::import('base', 'Core');
 App::import('ExceptionHandler', 'Errors');
 App::import('Exceptions', 'Errors');

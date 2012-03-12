@@ -53,9 +53,6 @@ class App {
 		if(!isset(self::$_map[$class])) {
 			return false;
 		}
-		if(array_key_exists(self::$_map[$class], self::$_openFiles)) {
-			throw new Exception('File already open!');
-		}
 		return self::import($class, self::$_map[$class]);
 	}
 	
@@ -89,14 +86,14 @@ class App {
 		if(file_exists($file = ROOT . DS . APP_DIR . DS . $path . DS . $class . '.php')) {
 			$file = substr($file, strlen(ROOT . DS));
 			
-			if(!$check_only && array_search($file, self::$_openFiles) === false) {
+			if(!$check_only) {
 				include_once APP_DIR . DS . $path . DS . $class . '.php';
 				self::$_openFiles[] = $file;
 			}
 
 		} elseif(file_exists($file = ROOT . DS . 'lib' . DS . $path . DS . $class . '.php')) {
 			$file = substr($file, strlen(ROOT . DS));
-			if(!$check_only && array_search($file, self::$_openFiles) === false) {
+			if(!$check_only) {
 				include_once 'lib' . DS . $path . DS . $class . '.php';
 				
 				self::$_openFiles[] = $file;
