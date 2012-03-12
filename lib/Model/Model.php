@@ -33,7 +33,7 @@ class Model {
 		if(isset($this->{$name})) {
 			return $this->{$name};
 		}
-		throw new ModelNotFoundException('Trying to load a non-assosiated model!');
+		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
 	
 	public function __construct() {
