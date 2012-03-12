@@ -125,14 +125,16 @@ class ObjectRegistry {
 	public static function init($class) {
 		if (!array_key_exists($class, self::$_objects)) {
 			App::uses($class, 'Model');
-			$modelRef = new ReflectionClass($class);
-			
-			if($modelRef->isAbstract() || $modelRef->isInterface()) {
-				return false;
-			}
-			$model = self::storeObject($class, $modelRef->newInstance());
-			if($model instanceOf Model) {
-				return $model;
+			if(class_exists($class)) {
+				$modelRef = new ReflectionClass($class);
+				
+				if($modelRef->isAbstract() || $modelRef->isInterface()) {
+					return false;
+				}
+				$model = self::storeObject($class, $modelRef->newInstance());
+				if($model instanceOf Model) {
+					return $model;
+				}
 			}
 			return false;
 		}
