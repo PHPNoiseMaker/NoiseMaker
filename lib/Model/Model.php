@@ -17,11 +17,7 @@ class Model {
 		'hasAndBelongsToMany' => array()
 	);
 	public function __construct() {
-		foreach($this->_associations as $key => $value) {
-			
-			$this->_associations[$key] = array_values($this->{$key});
-			
-		}
+		
 	}
 	public function __isset($name) {
 		
