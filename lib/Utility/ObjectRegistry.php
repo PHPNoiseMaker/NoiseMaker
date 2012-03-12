@@ -122,7 +122,7 @@ class ObjectRegistry {
 	 * @param mixed $class
 	 * @return void
 	 */
-	public static function init($class) {
+	public static function init($class, $relationship = null) {
 		if (!array_key_exists($class, self::$_objects)) {
 			App::uses($class, 'Model');
 			if(class_exists($class)) {

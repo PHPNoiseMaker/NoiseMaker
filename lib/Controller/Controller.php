@@ -128,7 +128,7 @@ class Controller {
 		$this->params['named'] = $this->request->namedParams;
 		$this->data = $this->request->data;
 		
-		$this->constructModels();
+		$this->_constructModels();
 	}
 	/**
 	 * __get function.
@@ -182,7 +182,7 @@ class Controller {
 	 * @access private
 	 * @return void
 	 */
-	private function constructModels() {
+	private function _constructModels() {
 		if($this->uses !== false) {
 			if(is_array($this->uses)) {
 				if(sizeof($this->uses) === 0) {
@@ -197,6 +197,29 @@ class Controller {
 				trigger_error('$this->uses must be an array!');
 			}
 		}
+	}
+	 /**
+     * _loadModel function.
+     * 
+     * @access private
+     * @param mixed $class
+     * @return void
+     */
+    private function _loadModel($class) {
+
+		App::uses('ObjectRegistry', 'Utility');
+		$this->_setters[] = $class;
+		$this->{$class} = ObjectRegistry::init($class);
+		
+		
+		if(($key = array_search($class, $this->_setters)) !== false) {
+			unset($this->_setters[$key]);
+		}
+		
+		if($this->{$class} instanceof Model) {
+			return true;
+		}
+		return false;
 	}
 	
 	
@@ -294,29 +317,7 @@ class Controller {
 		return false;
     }
     
-    /**
-     * _loadModel function.
-     * 
-     * @access private
-     * @param mixed $class
-     * @return void
-     */
-    private function _loadModel($class) {
-
-		App::uses('ObjectRegistry', 'Utility');
-		$this->_setters[] = $class;
-		$this->{$class} = ObjectRegistry::init($class);
-		
-		
-		if(($key = array_search($class, $this->_setters)) !== false) {
-			unset($this->_setters[$key]);
-		}
-		
-		if($this->{$class} instanceof Model) {
-			return true;
-		}
-		return false;
-	}
+   
   
 	
 	/**

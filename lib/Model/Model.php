@@ -10,21 +10,28 @@ class Model {
 	
 	public $hasAndBelongsToMany = array();
 	
+	private $_associations = array(
+		'belongsTo' => array(),
+		'hasMany' => array(),
+		'hasOne' => array(),
+		'hasAndBelongsToMany' => array()
+	);
+	public function __construct() {
+		foreach($this->_associations as $key => $value) {
+			
+			$this->_associations[$key] = array_values($this->{$key});
+			
+		}
+	}
 	public function __isset($name) {
-		if(array_search($name, $this->belongsTo) !== false) {
-			$this->{$name} = ObjectRegistry::init($name);
-			return true;
+		
+		foreach($this->_associations as $key => $relationship) {
+			if(array_search($name, $this->{$key}) !== false) {
+				$this->{$name} = ObjectRegistry::init($name, $relationship);
+				break;
+			}
 		}
-		if(array_search($name, $this->hasMany) !== false) {
-			$this->{$name} = ObjectRegistry::init($name);
-			return true;
-		}
-		if(array_search($name, $this->hasOne) !== false) {
-			$this->{$name} = ObjectRegistry::init($name);
-			return true;
-		}
-		if(array_search($name, $this->hasAndBelongsToMany) !== false) {
-			$this->{$name} = ObjectRegistry::init($name);
+		if(isset($this->{$name}) && $this->{$name} instanceOf Model) {
 			return true;
 		}
 		return false;
@@ -33,12 +40,10 @@ class Model {
 		if(isset($this->{$name})) {
 			return $this->{$name};
 		}
+		
 		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
-	
-	public function __construct() {
-		
-	}
+
 	
 	private function _constructAssociations() {
 		
