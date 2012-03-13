@@ -5,6 +5,13 @@ class DboSource extends DataSource{
 	
 	protected $_params = array();
 	
+	protected $_order = null;
+	
+	protected $_limit = null;
+	
+	protected $_fields = null;
+	
+	
 	public function __construct($config, $connect = true) {
 		parent::__construct($config);
 		if($connect) {
@@ -47,7 +54,10 @@ class DboSource extends DataSource{
 		return $this->_handle->fetch();
 	}
 	
-	public function fetchResults() {
+	public function fetchResults($model = null) {
+		if($model !== null) {
+			var_dump($this->describe($model));
+		}
 		$columns = array();
 		$this->_handle->execute($this->_params);
 		for($i = 0; $i < $this->_handle->columnCount(); $i++) {
@@ -64,6 +74,7 @@ class DboSource extends DataSource{
 			}
 			
 		}
+		$this->_handle->closeCursor();
 		return $result;
 	}
 	

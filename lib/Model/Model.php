@@ -14,6 +14,8 @@ class Model {
 	
 	public $_table = null;
 	
+	public $_name = null;
+	
 	public $_dbConfig = 'default';
 	
 	private $_associations = array(
@@ -23,9 +25,11 @@ class Model {
 		'hasAndBelongsToMany' => array()
 	);
 	public function __construct() {
+		if($this->_name === null || !isset($this->_name)) {
+			$this->_name = get_class($this);
+		}
 		if($this->_table === null || !isset($this->_table)) {
-			$class = get_class($this);
-			$this->_table = Inflect::pluralize(strtolower($class));
+			$this->_table = Inflect::pluralize(strtolower($this->_name));
 		}
 	}
 	public function __isset($name) {

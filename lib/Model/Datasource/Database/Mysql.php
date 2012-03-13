@@ -42,7 +42,8 @@ class Mysql extends DboSource{
 	
 	
 	public function describe(Model &$model) {
-		$DBH = $this->_connection->query('DESCRIBE `' . $model->_table . '`');
+		$DBH = $this->_connection->prepare('DESCRIBE `' . $model->_table .'`');
+		$DBH->execute();
 		$DBH->setFetchMode(PDO::FETCH_ASSOC);
 		$class = get_class($model);
 		$schema = array(
@@ -52,6 +53,7 @@ class Mysql extends DboSource{
 			$field = array_shift($row);
 			$schema[$class][$field] = $row;
 		}
+		$DBH->closeCursor();
 		return $schema;
 	}
 }
