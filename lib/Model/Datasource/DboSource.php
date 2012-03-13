@@ -19,6 +19,8 @@ class DboSource extends DataSource{
 	
 	protected $_conditions = 'WHERE 1=1';
 	
+	protected $quote = '`';
+	
 	public function buildStatement($type) {
 		switch($type) {
 			case 'select':
@@ -102,16 +104,37 @@ class DboSource extends DataSource{
 		return $this->_handle->fetch();
 	}
 	
+	public function releaseResources() {
+		$this->_params = array();
+		$this->_order = null;
+		$this->_limit = null;
+		$this->_joins = null;
+		$this->_fields = '*';
+		$this->_table = null;
+		$this->_alias = null;
+		$this->_conditions = 'WHERE 1=1';	
+	}
+	
 	public function read(Model &$model, $queryData = array()) {
+		$this->releaseResources();
 		if(is_array($queryData)) {
 			$this->_table = $model->_table;
-			$this->_alias = '`' . $model->_name . '`';
+			$this->_alias = $this->quote . $model->_name . $this->quote;
 			
 			if(isset($queryData['limit'])) {
-				$this->_limit = 'LIMIT 0,' . $queryData['limit'];
+				if(is_int($queryData['limit']))
+					$this->_limit = 'LIMIT 0,' . $queryData['limit'];
+				elseif (is_string($queryData['limit'])) {
+					if(strpos($queryData['limit'], ',') !== false) {
+						list($start, $end) = explode(',', $queryData['limit']);
+						$this->_limit = "LIMIT {$start}, {$end}";
+					} else {
+						$this->_limit = 'LIMIT 0, ' . (int) $queryData['limit'];
+					}
+				}
 			}
 			
-			if(isset($queryData['order']) && !empty($queryData['Order'])) {
+			if(isset($queryData['order'])) {
 				if(is_array($queryData['order'])) {
 					if($this->_order === null) {
 						$this->_order = 'ORDER BY ' . $queryData['order'][0];
@@ -124,13 +147,105 @@ class DboSource extends DataSource{
 				}
 			}
 			
+			if(isset($queryData['fields'])) {
+				
+				if(is_array($queryData['fields'])) {
+					$this->_fields = '';
+					foreach($queryData['fields'] as $field) {
+						if($this->fieldBelongsToModel($field, $model->_name)) {
+							$this->_fields .= $this->fieldQuote($field) . ',';
+						}
+					}
+				
+					/*$this->_fields = $this->fieldQuote($queryData['fields'][0]);
+					for($i = 1; $i < count($queryData['fields']); $i++) {
+						$this->_fields .= ',' . $this->fieldQuote($queryData['fields'][$i]);
+					}*/
+				} else {
+					$this->_fields = $this->fieldQuote($queryData['fields']);
+				}
+				if(substr($this->_fields, strlen($this->_fields) - 1) == ',') {
+					$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
+				}
+			}
+			
+			if(isset($queryData['conditions'])) {
+				$this->_conditions = $this->parseConditions($queryData['conditions']);
+			}
+			
+			
+			
 			$sql = $this->buildStatement('select');
-			//return $sql;
+			
+			var_dump($this->_params);
+			return $sql;
+			
 			$this->prepare($sql, $this->_params);
 			return $this->fetchResults();
 			
 		}
 		trigger_error('Query data must be an array…');
+	}
+	
+	public function parseConditions($conditions) {
+		$return = '';
+		
+		if(is_array($conditions)) {
+			foreach($conditions as $key => $val) {
+				$return .= $this->parseConditions($val);
+			}
+		} else {
+			if(strpos($conditions, '>=') !== false) {
+				list($field, $value) = explode('>=', $conditions);
+				$value = trim($value);
+				$this->_params[] = str_replace('\'', '', $value);
+				$return .= '(' . $this->fieldQuote($field) . ' >= ? )';
+			} elseif(strpos($conditions, '<=') !== false) {
+				list($field, $value) = explode('<=', $conditions);
+				$value = trim($value);
+				$this->_params[] = str_replace('\'', '', $value);
+				$return .= '(' . $this->fieldQuote($field) . ' <= ? )';
+			} elseif(strpos($conditions, '!=') !== false) {
+				list($field, $value) = explode('!=', $conditions);
+				$value = trim($value);
+				if($value === null || strtolower($value) === 'null' ) {
+					$return .= '(' . $this->fieldQuote($field) . ' IS NOT NULL )';
+				} else {
+					$this->_params[] = str_replace('\'', '', $value);
+					$return .= '(' . $this->fieldQuote($field) . ' != ? )';
+				}
+			} elseif(strpos($conditions, '=') !== false) {
+				list($field, $value) = explode('=', $conditions);
+				$value = trim($value);
+				$this->_params[] = str_replace('\'', '', $value);
+				$return .= '(' . $this->fieldQuote($field) . ' = ? )';
+			}
+		}
+		return 'WHERE ' . $return;
+	}
+	
+	public function fieldBelongsToModel($field, $model) {
+		if(strpos($field, '.') !== false) {
+			list($extractedModel, $field) = explode('.', $field);
+			if($model === $extractedModel) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public function fieldQuote($field) {
+		if(strpos($field, '.') !== false) {
+			list($model, $field) = explode('.', $field);
+			return $this->quote 
+				   . $model 
+				   . $this->quote 
+				   . '.' . $this->quote 
+				   . $field 
+				   . $this->quote;
+		} else {
+			return $this->quote . $field . $this->quote;
+		}
 	}
 	
 	public function fetchResults() {
