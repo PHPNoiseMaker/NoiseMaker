@@ -41,10 +41,17 @@ class Mysql extends DboSource{
 	}
 	
 	
-	public function describe() {
-		$DBH = $this->_connection->query('DESCRIBE `' . $this->_table . '`');
+	public function describe(Model &$model) {
+		$DBH = $this->_connection->query('DESCRIBE `' . $model->_table . '`');
+		$DBH->setFetchMode(PDO::FETCH_ASSOC);
+		$class = get_class($model);
+		$schema = array(
+			$class => array()
+		);
 		while($row = $DBH->fetch()) {
-			$this->_schema[$this->_table][] = $row;
+			$field = array_shift($row);
+			$schema[$class][$field] = $row;
 		}
+		return $schema;
 	}
 }

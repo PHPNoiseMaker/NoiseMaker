@@ -8,10 +8,6 @@ class DataSource {
 	
 	protected $_config = array();
 	
-	public $_schema = null;
-	
-	public $_table;
-	
 	protected $_baseConfig = array();
 	
 	public function __construct($config) {

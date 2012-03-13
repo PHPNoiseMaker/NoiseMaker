@@ -127,7 +127,6 @@ class Controller {
 		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
 		$this->data = $this->request->data;
-		
 		$this->_constructModels();
 	}
 	/**

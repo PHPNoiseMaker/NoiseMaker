@@ -1,5 +1,7 @@
 <?php
 App::uses('ObjectRegistry', 'Utility');
+App::uses('ConnectionManager', 'Model');
+
 class Model {
 
 	public $belongsTo = array();
@@ -10,6 +12,10 @@ class Model {
 	
 	public $hasAndBelongsToMany = array();
 	
+	public $_table = null;
+	
+	public $_dbConfig = 'default';
+	
 	private $_associations = array(
 		'belongsTo' => array(),
 		'hasMany' => array(),
@@ -17,7 +23,10 @@ class Model {
 		'hasAndBelongsToMany' => array()
 	);
 	public function __construct() {
-		
+		if($this->_table === null || !isset($this->_table)) {
+			$class = get_class($this);
+			$this->_table = Inflect::pluralize(strtolower($class));
+		}
 	}
 	public function __isset($name) {
 		
@@ -41,9 +50,6 @@ class Model {
 	}
 
 	
-	private function _constructAssociations() {
-		
-	}
 	
 	private function _loadModel($class) {
 
