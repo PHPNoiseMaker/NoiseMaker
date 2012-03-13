@@ -30,10 +30,21 @@ class DboSource extends DataSource{
 			case 'object':
 				$fetch = PDO::FETCH_OBJ;
 				break;
+			case 'num':
+				$fetch = PDO::FETCH_NUM;
+				break;
+			case 'bound':
+				$fetch = PDO::FETCH_BOUND;
+				break;
 		}
 		$this->_handle->setFetchMode($fetch);
 	}
-	
+	public function getColumnMeta($column) {
+		return $this->_handle->getColumnMeta($column);
+	}
+	public function columnCount() {
+		return $this->_handle->columnCount();
+	}
 	public function fetch() {
 		return $this->_handle->fetch();
 	}
