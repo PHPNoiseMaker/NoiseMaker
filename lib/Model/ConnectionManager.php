@@ -59,8 +59,6 @@ class ConnectionManager {
 	private static function loadDatasource($name) {
 		if (!array_key_exists($name, self::$_dataSources)) {
 			$conInfo = self::getConnectionInfo($name);
-			var_dump($conInfo);
-			var_dump('Model' . DS . 'Datasource' . DS . self::$_config->{$name}['datasource']);
 			App::uses($conInfo['classname'], 'Model' . DS . 'Datasource' . DS . $conInfo['package']);
 			if(class_exists($conInfo['classname'])) {
 				return self::add($name, new $conInfo['classname'](self::$_config->{$name}));

@@ -153,6 +153,17 @@ class MethodNotAllowedException extends HttpException {
 
 }
 
+class MissingConnectionException extends HttpException {
+
+	public function __construct($message = null, $code = 500) {
+		if (empty($message)) {
+			$message = 'Missing Database Connection!';
+		}
+		parent::__construct($message, $code);
+	}
+
+}
+
 
 class InternalErrorException extends HttpException {
 

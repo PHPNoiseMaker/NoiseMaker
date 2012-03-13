@@ -167,9 +167,9 @@ class Response {
 		echo $this->_body;
 		if(Config::getConfig('debug') > 0) {
 			var_dump((memory_get_peak_usage(true)) / 1024 / 1024);
-			var_dump($_SERVER);
-			var_dump($_ENV);	
-			var_dump(Config::getConfigs());
+			//var_dump($_SERVER);
+			//var_dump($_ENV);	
+			//var_dump(Config::getConfigs());
 			App::uses('ObjectRegistry', 'Utility');
 			var_dump(ObjectRegistry::getObjects());
 			var_dump(App::getOpenFiles());
