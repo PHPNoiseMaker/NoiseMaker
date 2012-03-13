@@ -197,26 +197,38 @@ class DboSource extends DataSource{
 		trigger_error('Query data must be an array…');
 	}
 	
-	public function parseConditions($conditions) {
+	public function parseConditions($conditions, $command = true) {
 		$return = '';
 		
 		if(is_array($conditions)) {
+			
 			foreach($conditions as $key => $val) {
-				$return .= $this->parseConditions($val);
+				$return .= $this->parseConditionKey($key, $val);
 			}
 		} else {
-			if(strpos($conditions, '>=') !== false) {
-				list($field, $value) = explode('>=', $conditions);
+			$return .= $this->parseConditionKey($conditions);
+		}
+		if($command !== false) {
+			$return = 'WHERE 1=1 ' . $return;
+		}
+		return  $return;
+	}
+	
+	public function parseConditionKey($key, $value = false) {
+		$return = '';
+		if($value === false) {
+			if(strpos($key, '>=') !== false) {
+				list($field, $value) = explode('>=', $key);
 				$value = trim($value);
 				$this->_params[] = str_replace('\'', '', $value);
 				$return .= '(' . $this->fieldQuote($field) . ' >= ? )';
-			} elseif(strpos($conditions, '<=') !== false) {
-				list($field, $value) = explode('<=', $conditions);
+			} elseif(strpos($key, '<=') !== false) {
+				list($field, $value) = explode('<=', $key);
 				$value = trim($value);
 				$this->_params[] = str_replace('\'', '', $value);
 				$return .= '(' . $this->fieldQuote($field) . ' <= ? )';
-			} elseif(strpos($conditions, '!=') !== false) {
-				list($field, $value) = explode('!=', $conditions);
+			} elseif(strpos($key, '!=') !== false) {
+				list($field, $value) = explode('!=', $key);
 				$value = trim($value);
 				if($value === null || strtolower($value) === 'null' ) {
 					$return .= '(' . $this->fieldQuote($field) . ' IS NOT NULL )';
@@ -224,14 +236,63 @@ class DboSource extends DataSource{
 					$this->_params[] = str_replace('\'', '', $value);
 					$return .= '(' . $this->fieldQuote($field) . ' != ? )';
 				}
-			} elseif(strpos($conditions, '=') !== false) {
-				list($field, $value) = explode('=', $conditions);
+			} elseif(strpos($key, '=') !== false) {
+				list($field, $value) = explode('=', $key);
 				$value = trim($value);
 				$this->_params[] = str_replace('\'', '', $value);
-				$return .= '(' . $this->fieldQuote($field) . ' = ? )';
+				if($value === null || strtolower($value) === 'null' ) {
+					$return .= '(' . $this->fieldQuote($field) . ' IS NULL )';
+				} else {
+					$this->_params[] = str_replace('\'', '', $value);
+					$return .= '(' . $this->fieldQuote($field) . ' != ? )';
+				}
+			}
+		} else {
+			$lastTwoChars = substr($key, strlen($key) - 2);
+			switch($lastTwoChars) {
+				case '>=':
+					$trimKey = true;
+					break;
+				case '<=':
+					$trimKey = true;
+					break;
+				case '!=':
+					$trimKey = true;
+					break;
+				default:
+					$trimKey = false;
+					break;
+				
+			}
+			if($trimKey)
+				$key = substr($key, 0, strlen($key) - 2);
+			if($lastTwoChars === '>=') {
+				$value = trim($value);
+				$this->_params[] = str_replace('\'', '', $value);
+				$return .= '(' . $this->fieldQuote($key) . ' >= ? )';
+			} elseif($lastTwoChars === '<=') {
+				$value = trim($value);
+				$this->_params[] = str_replace('\'', '', $value);
+				$return .= '(' . $this->fieldQuote($key) . ' <= ? )';
+			} elseif($lastTwoChars === '!=') {
+				$value = trim($value);
+				if($value === null || strtolower($value) === 'null' ) {
+					$return .= '(' . $this->fieldQuote($key) . ' IS NOT NULL )';
+				} else {
+					$this->_params[] = str_replace('\'', '', $value);
+					$return .= '(' . $this->fieldQuote($key) . ' != ? )';
+				}
+			} else {
+				$value = trim($value);
+				if($value === null || strtolower($value) === 'null' ) {
+					$return .= '(' . $this->fieldQuote($key) . ' IS NULL )';
+				} else {
+					$this->_params[] = str_replace('\'', '', $value);
+					$return .= '(' . $this->fieldQuote($key) . ' != ? )';
+				}
 			}
 		}
-		return 'WHERE ' . $return;
+		return $return;
 	}
 	
 	public function fieldBelongsToModel($field, $model) {
@@ -248,13 +309,13 @@ class DboSource extends DataSource{
 		if(strpos($field, '.') !== false) {
 			list($model, $field) = explode('.', $field);
 			return $this->quote 
-				   . $model 
+				   . trim($model) 
 				   . $this->quote 
 				   . '.' . $this->quote 
-				   . $field 
+				   . trim($field) 
 				   . $this->quote;
 		} else {
-			return $this->quote . $field . $this->quote;
+			return $this->quote . trim($field) . $this->quote;
 		}
 	}
 	
