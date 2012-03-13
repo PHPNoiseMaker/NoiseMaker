@@ -24,11 +24,21 @@ class DboSource extends DataSource{
 	public function buildStatement($type) {
 		switch($type) {
 			case 'select':
-				return "SELECT {$this->_fields} FROM `{$this->_table}` AS {$this->_alias} {$this->_joins} {$this->_conditions} {$this->_order} {$this->_limit}";
+				$query = "SELECT {$this->_fields} "
+					   . "FROM `{$this->_table}` AS {$this->_alias}"
+					   . " {$this->_joins}"
+					   . " {$this->_conditions}"
+					   . " {$this->_order}"
+					   . " {$this->_limit}";
+				return $query;
 			
 			case 'update':
 				$placeHolders = $this->createPlaceHolders();
-				return "UPDATE {$this->_table} AS {$this->_alias} {$this->_joins} SET ({$this->_fields}) VALUES ({$placeHolders}";
+				$query = "UPDATE {$this->_table} AS {$this->_alias}"
+					   . " {$this->_joins}"
+					   . " SET ({$this->_fields})"
+					   . " VALUES ({$placeHolders}";
+				return $query;
 			
 			case 'insert':
 				$placeHolders = $this->createPlaceHolders();
