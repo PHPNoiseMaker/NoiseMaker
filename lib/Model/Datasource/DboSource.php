@@ -3,6 +3,8 @@ App::uses('DataSource', 'Model/Datasource');
 class DboSource extends DataSource{ 
 	protected $_handle = null;
 	
+	protected $_params = array();
+	
 	public function __construct($config, $connect = true) {
 		parent::__construct($config);
 		if($connect) {
@@ -10,7 +12,8 @@ class DboSource extends DataSource{
 		}
 	}
 	
-	public function prepare($sql) {
+	public function prepare($sql, $params = array()) {
+		$this->_params = $params;
 		$this->_handle = $this->_connection->prepare($sql);
 	}
 	
@@ -39,14 +42,29 @@ class DboSource extends DataSource{
 		}
 		$this->_handle->setFetchMode($fetch);
 	}
-	public function getColumnMeta($column) {
-		return $this->_handle->getColumnMeta($column);
-	}
-	public function columnCount() {
-		return $this->_handle->columnCount();
-	}
+
 	public function fetch() {
 		return $this->_handle->fetch();
+	}
+	
+	public function fetchResults() {
+		$columns = array();
+		$this->_handle->execute($this->_params);
+		for($i = 0; $i < $this->_handle->columnCount(); $i++) {
+			$meta = $this->_handle->getColumnMeta($i);
+			$columns[$i] = $meta;
+			
+		}
+		
+		$result = array();
+		while($row = $this->_handle->fetch(PDO::FETCH_NUM)) {
+			$result[] = array();
+			foreach($row as $key => $val) {
+				$result[count($result) - 1][$columns[$key]['table']][$columns[$key]['name']] = $val;
+			}
+			
+		}
+		return $result;
 	}
 	
 }
