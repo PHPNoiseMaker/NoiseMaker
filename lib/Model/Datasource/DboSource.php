@@ -169,12 +169,12 @@ class DboSource extends DataSource{
 
 				} elseif(!empty($queryData['fields'])) {
 					$this->_fields = $this->fieldQuote($queryData['fields']);
-				} else {
-					$this->_fields = '*';
 				}
 				if(substr($this->_fields, strlen($this->_fields) - 1) == ',') {
 					$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
 				}
+			}  else {
+				$this->_fields = '*';
 			}
 			
 			if(isset($queryData['conditions'])) {
