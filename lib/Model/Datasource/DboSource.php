@@ -305,9 +305,9 @@ class DboSource extends DataSource{
 		return $out;
 	}
 	public function _parseKey($key, $value) {
-		$operators = array('!=', '=', '>=', '<=', '<', '>');
+		$operators = array('!=', '=', '>=', '<=', '<', '>', 'LIKE');
 		foreach ($operators as $operator) {
-			if(strpos($key, $operator) !== false) {
+			if(strpos(strtoupper($key), $operator) !== false) {
 				$key = trim(substr($key, 0, strlen($key) - strlen($operator)));
 				$key = $this->fieldQuote($key);
 				
