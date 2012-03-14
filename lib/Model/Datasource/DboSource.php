@@ -184,7 +184,7 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
-
+			//var_dump($sql);
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
@@ -202,7 +202,7 @@ class DboSource extends DataSource{
 		}
 		
 		if(is_array($conditions) && !empty($conditions)) {
-			$out = $this->conditionKeysToString($conditions, $quoteValues);
+			$out = $this->parseConditionArray($conditions, $quoteValues);
 			return $command . implode(' AND ', $out);
 			
 		} elseif(empty($command)) {
@@ -211,6 +211,56 @@ class DboSource extends DataSource{
 		return  $command . $this->fieldQuote($conditions);
 	}
 	
+	public function parseConditionArray($conditions, $quoteValues = true) {
+		$out = array();
+		$data = null;
+		$bool = array('and', 'or', 'not', 'and not', 'or not', 'xor', '||', '&&');
+
+		foreach ($conditions as $key => $value) {
+			$join = ' AND ';
+			$not = null;
+
+
+			if (is_numeric($key) && empty($value)) {
+				continue;
+			} elseif (is_numeric($key) && is_string($value)) {
+				$out[] = $not . $this->fieldQuote($value);
+			} elseif ((is_numeric($key) && is_array($value)) || in_array(strtolower(trim($key)), $bool)) {
+				if (in_array(strtolower(trim($key)), $bool)) {
+					$join = ' ' . strtoupper($key) . ' ';
+				} else {
+					$key = $join;
+				}
+				$value = $this->parseConditionArray($value, $quoteValues);
+
+				if (strpos($join, 'NOT') !== false) {
+					if (strtoupper(trim($key)) === 'NOT') {
+						$key = ' AND ' . trim($key);
+					}
+					$not = ' NOT ';
+				}
+
+				if (empty($value[1])) {
+					if ($not) {
+						$out[] = $not . '( ' . $value[0] . ' )';
+					} else {
+						$out[] = $value[0] ;
+					}
+				} else {
+					$out[] = '(' . $not . '(' . implode(') ' . strtoupper($key) . ' (', $value) . ' ))';
+				}
+			} else {
+				
+				$data = $this->_parseKey(trim($key), $value);
+				if ($data != null) {
+					$out[] = $data;
+					$data = null;
+				}
+			}
+			 
+		}
+		return $out;
+	}
 
 	
 	/**	
@@ -266,7 +316,6 @@ class DboSource extends DataSource{
 				}
 			} else {
 				if (is_array($value) && !empty($value) && !$valueInsert) {
-					$keys = array_keys($value);
 					if ($keys === array_values($keys)) {
 						$count = count($value);
 						if ($count === 1 && !preg_match("/\s+NOT$/", $key)) {
@@ -280,6 +329,7 @@ class DboSource extends DataSource{
 						}
 						$data .= ')';
 					} else {
+						
 						$ret = $this->conditionKeysToString($value, $quoteValues);
 						if (count($ret) > 1) {
 							$data = '(' . implode(') AND (', $ret) . ')';
@@ -303,7 +353,7 @@ class DboSource extends DataSource{
 		return $out;
 	}
 	public function _parseKey($key, $value) {
-		$operators = array('!=', '=', '>=', '<=', '<', '>', 'LIKE');
+		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
 			if(strpos(strtoupper($key), $operator) !== false) {
 				$key = trim(substr($key, 0, strlen($key) - strlen($operator)));
