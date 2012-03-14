@@ -184,11 +184,9 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
-			
-			//var_dump($this->_params);
-			//return $sql;
-			
+
 			$this->prepare($sql, $this->_params);
+			
 			return $this->fetchResults();
 			
 		}
@@ -213,7 +211,7 @@ class DboSource extends DataSource{
 		return  $command . $this->fieldQuote($conditions);
 	}
 	
-	
+
 	
 	/**	
 	 * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -311,6 +309,7 @@ class DboSource extends DataSource{
 				$key = trim(substr($key, 0, strlen($key) - strlen($operator)));
 				$key = $this->fieldQuote($key);
 				
+				
 				if($operator == '!=') {
 					if(empty($value) || $value === null || $value == 'null') {
 						return $key . ' IS NOT NULL';
@@ -326,11 +325,11 @@ class DboSource extends DataSource{
 			}
 		}
 		$this->_params[] = $value;
-		return $key . " = ?";
+		return $this->fieldQuote($key) . " = ?";
 		
 	}
 	public function value($value, $column = null) {
-		return $value;
+		return $this->_handle->quote($value);
 	}
 	
 	public function parseConditionKey($key, $value = false) {
