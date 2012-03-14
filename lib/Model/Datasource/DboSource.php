@@ -11,13 +11,13 @@ class DboSource extends DataSource{
 	
 	protected $_joins = null;
 	
-	protected $_fields = '*';
+	protected $_fields = null;
 	
 	protected $_table = null;
 	
 	protected $_alias = null;
 	
-	protected $_conditions = 'WHERE 1=1';
+	protected $_conditions = null;
 	
 	protected $quote = '`';
 	
@@ -119,10 +119,10 @@ class DboSource extends DataSource{
 		$this->_order = null;
 		$this->_limit = null;
 		$this->_joins = null;
-		$this->_fields = '*';
+		$this->_fields = null;
 		$this->_table = null;
 		$this->_alias = null;
-		$this->_conditions = 'WHERE 1=1';	
+		$this->_conditions = null;	
 	}
 	
 	public function read(Model &$model, $queryData = array()) {
@@ -166,13 +166,11 @@ class DboSource extends DataSource{
 							$this->_fields .= $this->fieldQuote($field) . ',';
 						}
 					}
-				
-					/*$this->_fields = $this->fieldQuote($queryData['fields'][0]);
-					for($i = 1; $i < count($queryData['fields']); $i++) {
-						$this->_fields .= ',' . $this->fieldQuote($queryData['fields'][$i]);
-					}*/
-				} else {
+
+				} elseif(!empty($queryData['fields'])) {
 					$this->_fields = $this->fieldQuote($queryData['fields']);
+				} else {
+					$this->_fields = '*';
 				}
 				if(substr($this->_fields, strlen($this->_fields) - 1) == ',') {
 					$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
@@ -188,7 +186,7 @@ class DboSource extends DataSource{
 			$sql = $this->buildStatement('select');
 			
 			var_dump($this->_params);
-			return $sql;
+			//return $sql;
 			
 			$this->prepare($sql, $this->_params);
 			return $this->fetchResults();
@@ -197,101 +195,146 @@ class DboSource extends DataSource{
 		trigger_error('Query data must be an array…');
 	}
 	
-	public function parseConditions($conditions, $command = true) {
-		$return = '';
+	
+	public function parseConditions($conditions, $where = true, $quoteValues = true, $model = null) {
+		$command = '';
 		
-		if(is_array($conditions)) {
+		if($where) {
+			$command = ' WHERE ';
+		}
+		
+		if(is_array($conditions) && !empty($conditions)) {
+			$out = $this->conditionKeysToString($conditions, $quoteValues, $model);
+			return $command . implode(' AND ', $out);
 			
-			foreach($conditions as $key => $val) {
-				$return .= $this->parseConditionKey($key, $val);
+		} elseif(empty($command)) {
+			return $command . '1 = 1';
+		}
+		return  $command . $this->fieldQuote($conditions);
+	}
+	
+	
+	
+	/**	
+	 * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
+	 * @link          http://cakephp.org CakePHP(tm) Project
+	 * @package       Cake.Model.Datasource
+	 * @since         CakePHP(tm) v 0.10.0.1076
+	 * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+	 */
+	public function conditionKeysToString($conditions, $quoteValues = true, $model = null) {
+		$out = array();
+		$data = $columnType = null;
+		$bool = array('and', 'or', 'not', 'and not', 'or not', 'xor', '||', '&&');
+
+		foreach ($conditions as $key => $value) {
+			$join = ' AND ';
+			$not = null;
+
+			if (is_array($value)) {
+				$valueInsert = (
+					!empty($value) &&
+					(substr_count($key, '?') === count($value) || substr_count($key, ':') === count($value))
+				);
 			}
-		} else {
-			$return .= $this->parseConditionKey($conditions);
+
+			if (is_numeric($key) && empty($value)) {
+				continue;
+			} elseif (is_numeric($key) && is_string($value)) {
+				$out[] = $not . $this->fieldQuote($value);
+			} elseif ((is_numeric($key) && is_array($value)) || in_array(strtolower(trim($key)), $bool)) {
+				if (in_array(strtolower(trim($key)), $bool)) {
+					$join = ' ' . strtoupper($key) . ' ';
+				} else {
+					$key = $join;
+				}
+				$value = $this->conditionKeysToString($value, $quoteValues, $model);
+
+				if (strpos($join, 'NOT') !== false) {
+					if (strtoupper(trim($key)) === 'NOT') {
+						$key = 'AND ' . trim($key);
+					}
+					$not = 'NOT ';
+				}
+
+				if (empty($value[1])) {
+					if ($not) {
+						$out[] = $not . '(' . $value[0] . ')';
+					} else {
+						$out[] = $value[0] ;
+					}
+				} else {
+					$out[] = '(' . $not . '(' . implode(') ' . strtoupper($key) . ' (', $value) . '))';
+				}
+			} else {
+				if (is_array($value) && !empty($value) && !$valueInsert) {
+					$keys = array_keys($value);
+					if ($keys === array_values($keys)) {
+						$count = count($value);
+						if ($count === 1 && !preg_match("/\s+NOT$/", $key)) {
+							$data = $this->fieldQuote($key) . ' = (';
+						} else {
+							$data = $this->fieldQuote($key) . ' IN (';
+						}
+						if ($quoteValues) {
+							
+							$data .= implode(', ', $this->value($value));
+						}
+						$data .= ')';
+					} else {
+						$ret = $this->conditionKeysToString($value, $quoteValues, $model);
+						if (count($ret) > 1) {
+							$data = '(' . implode(') AND (', $ret) . ')';
+						} elseif (isset($ret[0])) {
+							$data = $ret[0];
+						}
+					}
+				} elseif (is_numeric($key) && !empty($value)) {
+					$data = $this->fieldQuote($value);
+				} else {
+					$data = $this->_parseKey($model, trim($key), $value);
+				}
+
+				if ($data != null) {
+					$out[] = $data;
+					$data = null;
+				}
+			}
+			 
 		}
-		if($command !== false) {
-			$return = 'WHERE 1=1 ' . $return;
+		return $out;
+	}
+	public function _parseKey($model, $key, $value) {
+		$operators = array('!=', '=', '>=', '<=', '<', '>');
+		foreach ($operators as $operator) {
+			if(strpos($key, $operator) !== false) {
+				$key = trim(substr($key, 0, strlen($key) - strlen($operator)));
+				$key = $this->fieldQuote($key);
+				
+				if($operator == '!=') {
+					if(empty($value) || $value === null || $value == 'null') {
+						return $key . ' IS NOT NULL';
+					}
+				}
+				if($operator == '=') {
+					if(empty($value) || $value === null || $value == 'null') {
+						return $key . ' IS NULL';
+					}
+				}
+				$this->_params[] = $value;
+				return $key . " {$operator} ?";
+			}
 		}
-		return  $return;
+		$this->_params[] = $value;
+		return $key . " = ?";
+		
+	}
+	public function value($value, $column = null) {
+		return $value;
 	}
 	
 	public function parseConditionKey($key, $value = false) {
-		$return = '';
-		if($value === false) {
-			if(strpos($key, '>=') !== false) {
-				list($field, $value) = explode('>=', $key);
-				$value = trim($value);
-				$this->_params[] = str_replace('\'', '', $value);
-				$return .= '(' . $this->fieldQuote($field) . ' >= ? )';
-			} elseif(strpos($key, '<=') !== false) {
-				list($field, $value) = explode('<=', $key);
-				$value = trim($value);
-				$this->_params[] = str_replace('\'', '', $value);
-				$return .= '(' . $this->fieldQuote($field) . ' <= ? )';
-			} elseif(strpos($key, '!=') !== false) {
-				list($field, $value) = explode('!=', $key);
-				$value = trim($value);
-				if($value === null || strtolower($value) === 'null' ) {
-					$return .= '(' . $this->fieldQuote($field) . ' IS NOT NULL )';
-				} else {
-					$this->_params[] = str_replace('\'', '', $value);
-					$return .= '(' . $this->fieldQuote($field) . ' != ? )';
-				}
-			} elseif(strpos($key, '=') !== false) {
-				list($field, $value) = explode('=', $key);
-				$value = trim($value);
-				$this->_params[] = str_replace('\'', '', $value);
-				if($value === null || strtolower($value) === 'null' ) {
-					$return .= '(' . $this->fieldQuote($field) . ' IS NULL )';
-				} else {
-					$this->_params[] = str_replace('\'', '', $value);
-					$return .= '(' . $this->fieldQuote($field) . ' != ? )';
-				}
-			}
-		} else {
-			$lastTwoChars = substr($key, strlen($key) - 2);
-			switch($lastTwoChars) {
-				case '>=':
-					$trimKey = true;
-					break;
-				case '<=':
-					$trimKey = true;
-					break;
-				case '!=':
-					$trimKey = true;
-					break;
-				default:
-					$trimKey = false;
-					break;
-				
-			}
-			if($trimKey)
-				$key = substr($key, 0, strlen($key) - 2);
-			if($lastTwoChars === '>=') {
-				$value = trim($value);
-				$this->_params[] = str_replace('\'', '', $value);
-				$return .= '(' . $this->fieldQuote($key) . ' >= ? )';
-			} elseif($lastTwoChars === '<=') {
-				$value = trim($value);
-				$this->_params[] = str_replace('\'', '', $value);
-				$return .= '(' . $this->fieldQuote($key) . ' <= ? )';
-			} elseif($lastTwoChars === '!=') {
-				$value = trim($value);
-				if($value === null || strtolower($value) === 'null' ) {
-					$return .= '(' . $this->fieldQuote($key) . ' IS NOT NULL )';
-				} else {
-					$this->_params[] = str_replace('\'', '', $value);
-					$return .= '(' . $this->fieldQuote($key) . ' != ? )';
-				}
-			} else {
-				$value = trim($value);
-				if($value === null || strtolower($value) === 'null' ) {
-					$return .= '(' . $this->fieldQuote($key) . ' IS NULL )';
-				} else {
-					$this->_params[] = str_replace('\'', '', $value);
-					$return .= '(' . $this->fieldQuote($key) . ' != ? )';
-				}
-			}
-		}
+		$return = array();
 		return $return;
 	}
 	
