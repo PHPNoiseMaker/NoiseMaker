@@ -185,7 +185,7 @@ class DboSource extends DataSource{
 			
 			$sql = $this->buildStatement('select');
 			
-			var_dump($this->_params);
+			//var_dump($this->_params);
 			//return $sql;
 			
 			$this->prepare($sql, $this->_params);
@@ -196,7 +196,7 @@ class DboSource extends DataSource{
 	}
 	
 	
-	public function parseConditions($conditions, $where = true, $quoteValues = true, $model = null) {
+	public function parseConditions($conditions, $where = true, $quoteValues = true) {
 		$command = '';
 		
 		if($where) {
@@ -204,7 +204,7 @@ class DboSource extends DataSource{
 		}
 		
 		if(is_array($conditions) && !empty($conditions)) {
-			$out = $this->conditionKeysToString($conditions, $quoteValues, $model);
+			$out = $this->conditionKeysToString($conditions, $quoteValues);
 			return $command . implode(' AND ', $out);
 			
 		} elseif(empty($command)) {
@@ -222,7 +222,7 @@ class DboSource extends DataSource{
 	 * @since         CakePHP(tm) v 0.10.0.1076
 	 * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
 	 */
-	public function conditionKeysToString($conditions, $quoteValues = true, $model = null) {
+	public function conditionKeysToString($conditions, $quoteValues = true) {
 		$out = array();
 		$data = $columnType = null;
 		$bool = array('and', 'or', 'not', 'and not', 'or not', 'xor', '||', '&&');
@@ -248,7 +248,7 @@ class DboSource extends DataSource{
 				} else {
 					$key = $join;
 				}
-				$value = $this->conditionKeysToString($value, $quoteValues, $model);
+				$value = $this->conditionKeysToString($value, $quoteValues);
 
 				if (strpos($join, 'NOT') !== false) {
 					if (strtoupper(trim($key)) === 'NOT') {
@@ -282,7 +282,7 @@ class DboSource extends DataSource{
 						}
 						$data .= ')';
 					} else {
-						$ret = $this->conditionKeysToString($value, $quoteValues, $model);
+						$ret = $this->conditionKeysToString($value, $quoteValues);
 						if (count($ret) > 1) {
 							$data = '(' . implode(') AND (', $ret) . ')';
 						} elseif (isset($ret[0])) {
@@ -292,7 +292,7 @@ class DboSource extends DataSource{
 				} elseif (is_numeric($key) && !empty($value)) {
 					$data = $this->fieldQuote($value);
 				} else {
-					$data = $this->_parseKey($model, trim($key), $value);
+					$data = $this->_parseKey(trim($key), $value);
 				}
 
 				if ($data != null) {
@@ -304,7 +304,7 @@ class DboSource extends DataSource{
 		}
 		return $out;
 	}
-	public function _parseKey($model, $key, $value) {
+	public function _parseKey($key, $value) {
 		$operators = array('!=', '=', '>=', '<=', '<', '>');
 		foreach ($operators as $operator) {
 			if(strpos($key, $operator) !== false) {
