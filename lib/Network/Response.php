@@ -165,7 +165,7 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
-		if (Config::getConfig('debug') > 0) {
+		if (Config::getConfig('debug') > 1) {
 			var_dump((memory_get_peak_usage(true)) / 1024 / 1024);
 			//var_dump($_SERVER);
 			//var_dump($_ENV);	

@@ -63,7 +63,7 @@ class DboSource extends DataSource{
 		}
 	}
 	
-	private function createPlaceHolders($type) {
+	private function createPlaceHolders($type = '_fields') {
 		switch($type) {
 			default:
 				$type = '_fields';
@@ -307,7 +307,7 @@ class DboSource extends DataSource{
 					$this->_params[] = $value;
 					return $key . " {$operator} ?";
 				} else {
-					return $key . " {$operator} " . $this->fieldQuote($value);
+					return $key . " {$operator} " . $value;
 				}
 			}
 		}
@@ -315,7 +315,7 @@ class DboSource extends DataSource{
 			$this->_params[] = $value;
 			return $this->fieldQuote($key) . " = ?";
 		} else {
-			return $this->fieldQuote($key) . " = " . $this->fieldQuote($value);
+			return $this->fieldQuote($key) . " = " . $value;
 		}
 		
 	}
@@ -338,7 +338,7 @@ class DboSource extends DataSource{
 							'table' => $this->fieldQuote($model->{$associatedModel}->_table),
 							'alias' => $this->fieldQuote($targetAlias),
 							'conditions' => $this->parseConditions(array(
-								$model->_name . '.' . $settings['foreign_key'] => $targetAlias . '.' . $model->{$associatedModel}->_primaryKey
+								$model->_name . '.' . $settings['foreign_key'] => $this->fieldQuote($targetAlias . '.' . $model->{$associatedModel}->_primaryKey),
 							), false, false)
 						);
 						$this->_joins .= ' ' . $this->buildJoinStatement($data);
@@ -373,6 +373,11 @@ class DboSource extends DataSource{
 		} else {
 			return $this->quote . trim($field) . $this->quote;
 		}
+	}
+	
+	public function placeHold($value) {
+		$this->_params[] = $value;
+		return '?';
 	}
 	
 	public function fetchResults() {
