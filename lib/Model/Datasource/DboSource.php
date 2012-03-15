@@ -23,9 +23,11 @@ class DboSource extends DataSource{
 	
 	protected $quote = '`';
 	
+	protected $_results = array();
+	
 	
 	public function buildJoinStatement($data) {
-		return trim("{$data['type']} JOIN {$data['table']} {$data['alias']} ON ({$data['conditions']})");
+		return trim("{$data['type']} JOIN {$data['table']} AS {$data['alias']} ON ({$data['conditions']})");
 	}
 	
 	
@@ -131,7 +133,7 @@ class DboSource extends DataSource{
 		$this->_fields = null;
 		$this->_table = null;
 		$this->_alias = null;
-		$this->_conditions = null;	
+		$this->_conditions = null;
 	}
 	
 	public function read(Model &$model, $queryData = array()) {
@@ -186,6 +188,19 @@ class DboSource extends DataSource{
 				$this->_fields = '*';
 			}
 			
+			
+			//Joins MUST be done before conditions. Order matters.
+			
+			// Joins
+			
+			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
+				$this->fetchAssociatedData($model, $queryData['recursive']);
+			}
+			
+			
+			
+			// Conditions
+			
 			if (isset($queryData['conditions'])) {
 				$this->_conditions = $this->parseConditions($queryData['conditions']);
 			}
@@ -197,31 +212,32 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
+			var_dump($sql);
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
 			
 		}
-		trigger_error('Query data must be an array…');
+		trigger_error('Query data must be an array...');
 	}
 	
 	
-	public function parseConditions($conditions, $where = true) {		
+	public function parseConditions($conditions, $where = true, $params = true) {		
 		if ($where) {
 			$where = ' WHERE ';
 		}
 		
 		if (is_array($conditions) && !empty($conditions)) {
-			$out = $this->parseConditionArray($conditions);
+			$out = $this->parseConditionArray($conditions, $params);
 			return $where . implode(' AND ', $out);
 			
 		} elseif (empty($where)) {
 			return $where . '1 = 1';
 		}
-		return  $where . $this->fieldQuote($conditions);
+		return  $where . $this->fieldQuote($conditions, $params);
 	}
 	
-	public function parseConditionArray($conditions) {
+	public function parseConditionArray($conditions, $params = false) {
 		$out = array();
 		$commands = array('AND', 'XOR', 'NOT', 'OR', '||', '&&');
 	
@@ -242,8 +258,8 @@ class DboSource extends DataSource{
 				} else {
 					$key = $join;
 				}
-				$value = $this->parseConditionArray($value);
-	
+				$value = $this->parseConditionArray($value, $params);
+
 				if (strpos($join, $commands[2]) !== false) {
 					if (strtoupper(trim($key)) === $commands[2]) {
 						$key = ' ' . $commands[0] . ' ' . strtoupper(trim($key));
@@ -262,14 +278,14 @@ class DboSource extends DataSource{
 					$out[] = '(' . $not . '(' . implode($implode, $value) . ' ))';
 				}
 			} else {
-				$out[] = $this->_parseKey(trim($key), $value);	
+				$out[] = $this->_parseKey(trim($key), $value, $params);	
 			}
 			 
 		}
 		return $out;
 	}
 	
-	public function _parseKey($key, $value) {
+	public function _parseKey($key, $value, $params = false) {
 		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
 			if (strpos(strtoupper($key), $operator) !== false) {
@@ -287,15 +303,50 @@ class DboSource extends DataSource{
 						return $key . ' IS NULL';
 					}
 				}
-				$this->_params[] = $value;
-				return $key . " {$operator} ?";
+				if ($params) {
+					$this->_params[] = $value;
+					return $key . " {$operator} ?";
+				} else {
+					return $key . " {$operator} " . $this->fieldQuote($value);
+				}
 			}
 		}
-		$this->_params[] = $value;
-		
-		return $this->fieldQuote($key) . " = ?";
+		if ($params) {
+			$this->_params[] = $value;
+			return $this->fieldQuote($key) . " = ?";
+		} else {
+			return $this->fieldQuote($key) . " = " . $this->fieldQuote($value);
+		}
 		
 	}
+	
+	
+	public function fetchAssociatedData(Model $model, $recursive = -1) {
+		foreach ($model->_associations as $association => $value) {
+			foreach ($value as $associatedModel => $relationship)
+			if($association === 'hasOne') {
+				$targetAlias = $model->{$associatedModel}->_name;
+				$defaults = array(
+					'type' => 'LEFT',
+					'foreign_key' => strtolower($targetAlias) . '_id',
+				);
+				$settings = array_merge($defaults, $relationship);
+				
+				$data = array(
+					'type' => $settings['type'],
+					'table' => $this->fieldQuote($model->{$associatedModel}->_table),
+					'alias' => $this->fieldQuote($targetAlias),
+					'conditions' => $this->parseConditions(array(
+						$model->_name . '.' . $settings['foreign_key'] => $targetAlias . '.' . $model->{$associatedModel}->_primaryKey
+					), false, false)
+				);
+				$this->_joins .= $this->buildJoinStatement($data);
+			
+			}
+		}
+	}
+	
+	
 	
 	public function fieldBelongsToModel($field, $model) {
 		if (strpos($field, '.') !== false) {

@@ -18,6 +18,8 @@ class Model {
 	
 	public $_dbConfig = 'default';
 	
+	public $_primaryKey = 'id';
+	
 	private $_associations = null;
 	public function __construct() {
 		if ($this->_name === null || !isset($this->_name)) {
