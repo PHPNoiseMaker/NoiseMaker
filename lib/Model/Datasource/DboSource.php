@@ -21,6 +21,12 @@ class DboSource extends DataSource{
 	
 	protected $quote = '`';
 	
+	
+	public function buildJoinStatement($data) {
+		return trim("{$data['type']} JOIN {$data['table']} {$data['alias']} ON ({$data['conditions']})");
+	}
+	
+	
 	public function buildStatement($type) {
 		switch($type) {
 			case 'select':
@@ -262,96 +268,6 @@ class DboSource extends DataSource{
 		return $out;
 	}
 
-	
-	/**	
-	 * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
-	 * @link          http://cakephp.org CakePHP(tm) Project
-	 * @package       Cake.Model.Datasource
-	 * @since         CakePHP(tm) v 0.10.0.1076
-	 * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
-	 */
-	public function conditionKeysToString($conditions, $quoteValues = true) {
-		$out = array();
-		$data = $columnType = null;
-		$bool = array('and', 'or', 'not', 'and not', 'or not', 'xor', '||', '&&');
-
-		foreach ($conditions as $key => $value) {
-			$join = ' AND ';
-			$not = null;
-
-			if (is_array($value)) {
-				$valueInsert = (
-					!empty($value) &&
-					(substr_count($key, '?') === count($value) || substr_count($key, ':') === count($value))
-				);
-			}
-
-			if (is_numeric($key) && empty($value)) {
-				continue;
-			} elseif (is_numeric($key) && is_string($value)) {
-				$out[] = $not . $this->fieldQuote($value);
-			} elseif ((is_numeric($key) && is_array($value)) || in_array(strtolower(trim($key)), $bool)) {
-				if (in_array(strtolower(trim($key)), $bool)) {
-					$join = ' ' . strtoupper($key) . ' ';
-				} else {
-					$key = $join;
-				}
-				$value = $this->conditionKeysToString($value, $quoteValues);
-
-				if (strpos($join, 'NOT') !== false) {
-					if (strtoupper(trim($key)) === 'NOT') {
-						$key = 'AND ' . trim($key);
-					}
-					$not = 'NOT ';
-				}
-
-				if (empty($value[1])) {
-					if ($not) {
-						$out[] = $not . '(' . $value[0] . ')';
-					} else {
-						$out[] = $value[0] ;
-					}
-				} else {
-					$out[] = '(' . $not . '(' . implode(') ' . strtoupper($key) . ' (', $value) . '))';
-				}
-			} else {
-				if (is_array($value) && !empty($value) && !$valueInsert) {
-					if ($keys === array_values($keys)) {
-						$count = count($value);
-						if ($count === 1 && !preg_match("/\s+NOT$/", $key)) {
-							$data = $this->fieldQuote($key) . ' = (';
-						} else {
-							$data = $this->fieldQuote($key) . ' IN (';
-						}
-						if ($quoteValues) {
-							
-							$data .= implode(', ', $this->value($value));
-						}
-						$data .= ')';
-					} else {
-						
-						$ret = $this->conditionKeysToString($value, $quoteValues);
-						if (count($ret) > 1) {
-							$data = '(' . implode(') AND (', $ret) . ')';
-						} elseif (isset($ret[0])) {
-							$data = $ret[0];
-						}
-					}
-				} elseif (is_numeric($key) && !empty($value)) {
-					$data = $this->fieldQuote($value);
-				} else {
-					$data = $this->_parseKey(trim($key), $value);
-				}
-
-				if ($data != null) {
-					$out[] = $data;
-					$data = null;
-				}
-			}
-			 
-		}
-		return $out;
-	}
 	public function _parseKey($key, $value) {
 		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
@@ -382,10 +298,6 @@ class DboSource extends DataSource{
 		return $this->_handle->quote($value);
 	}
 	
-	public function parseConditionKey($key, $value = false) {
-		$return = array();
-		return $return;
-	}
 	
 	public function fieldBelongsToModel($field, $model) {
 		if(strpos($field, '.') !== false) {
