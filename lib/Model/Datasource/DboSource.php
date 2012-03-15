@@ -19,6 +19,8 @@ class DboSource extends DataSource{
 	
 	protected $_conditions = null;
 	
+	protected $_groupBy = null;
+	
 	protected $quote = '`';
 	
 	
@@ -34,6 +36,7 @@ class DboSource extends DataSource{
 					   . "FROM `{$this->_table}` AS {$this->_alias}"
 					   . " {$this->_joins}"
 					   . " {$this->_conditions}"
+					   . " {$this->_groupBy}"
 					   . " {$this->_order}"
 					   . " {$this->_limit}";
 				return $query;
@@ -187,9 +190,14 @@ class DboSource extends DataSource{
 				$this->_conditions = $this->parseConditions($queryData['conditions']);
 			}
 			
+			if (isset($queryData['group'])) {
+				$this->buildGroupBy($queryData['group']);
+			}
+			
 			
 			
 			$sql = $this->buildStatement('select');
+			var_dump($sql);
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
@@ -289,7 +297,6 @@ class DboSource extends DataSource{
 		return $this->fieldQuote($key) . " = ?";
 		
 	}
-	
 	
 	public function fieldBelongsToModel($field, $model) {
 		if (strpos($field, '.') !== false) {

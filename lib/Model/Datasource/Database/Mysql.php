@@ -40,6 +40,21 @@ class Mysql extends DboSource{
 		return $this->connected;
 	}
 	
+	public function buildGroupBy($fields) {
+		if(is_array($fields)) {
+			foreach($fields as $field) {
+				$this->buildGroupBy($field);
+			}
+		} else {
+			if($this->_groupBy === null) {
+				$this->_groupBy = 'GROUP BY ' . $this->fieldQuote($fields);
+			} else {
+				$this->_groupBy .= ', ' . $this->fieldQuote($fields);
+			}
+		}
+	
+	}
+	
 	
 	public function describe(Model &$model) {
 		$DBH = $this->_connection->prepare('DESCRIBE `' . $model->_table .'`');
