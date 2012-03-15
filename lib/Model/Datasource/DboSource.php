@@ -252,7 +252,7 @@ class DboSource extends DataSource{
 					$not = ' ' . $commands[2] . ' ';
 				}
 			
-				if (empty($value[1])) {
+				if (count($value) <= 1) {
 					if ($not) {
 						$out[] = $not . '( ' . $value[0] . ' )';
 					} else {
