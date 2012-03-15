@@ -332,13 +332,18 @@ class DboSource extends DataSource{
 							'foreign_key' => strtolower($targetAlias) . '_id',
 						);
 						$settings = array_merge($defaults, $relationship);
-						
+						$joinKey = $model->_name . '.' . $settings['foreign_key'];
+						$joinValue = $this->fieldQuote(
+							$targetAlias 
+							. '.' 
+							. $model->{$associatedModel}->_primaryKey
+						);
 						$data = array(
 							'type' => strtoupper($settings['type']),
 							'table' => $this->fieldQuote($model->{$associatedModel}->_table),
 							'alias' => $this->fieldQuote($targetAlias),
 							'conditions' => $this->parseConditions(array(
-								$model->_name . '.' . $settings['foreign_key'] => $this->fieldQuote($targetAlias . '.' . $model->{$associatedModel}->_primaryKey),
+								$joinKey => $joinValue,
 							), false, false)
 						);
 						$this->_joins .= ' ' . $this->buildJoinStatement($data);

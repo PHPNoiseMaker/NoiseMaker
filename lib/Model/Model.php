@@ -78,7 +78,19 @@ class Model {
 		
 		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
-
+	
+	public function find($type = 'all', $query) {
+		if (!is_array($query)) {
+			trigger_error('Query data must be an array…');
+		}
+		$db = ConnectionManager::getDataSource('default');
+		return $db->read($this, $query);
+	}
+	
+	public function getLastStatement() {
+		$db = ConnectionManager::getDataSource('default');
+		return $db->_lastStatement;
+	}
 	
 	
 	private function _loadModel($class) {
