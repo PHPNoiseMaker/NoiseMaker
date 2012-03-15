@@ -35,27 +35,34 @@ class Model {
 	
 	public function buildAssociationData() {
 		$associations = array('belongsTo', 'hasMany', 'hasOne', 'hasAndBelongsToMany');
+		$this->_associations = array();
 		foreach ($associations as $association) {
 			if (is_array($this->{$association})) {
 				foreach ($this->{$association} as $key => $value) {
+					if(!array_key_exists($association, $this->_associations)) {
+						$this->_associations[$association] = array();
+					}
 					if (is_string($key) && is_array($value)) {
-						$this->_associations[$association] = array($key => $value);
+						array_push($this->_associations[$association], array($key => $value));
 					} elseif(is_numeric($key) && is_string($value)) {
-						$this->_associations[$association] = array($value => array());
+						array_push($this->_associations[$association], array($value => array()));
 					}
 				}
 			} else {
-				$this->_associations[$association] = array($this->{$association} => array());
+				array_push($this->_associations[$association], array($this->{$association} => array()));
 			}
 		}		
 	}
 	
 	public function __isset($name) {
+		
 		foreach($this->_associations as $key => $association) {
-			foreach ($association as $key => $relationship) {
-				if ($name === $key) {
-					$this->{$name} = ObjectRegistry::init($key);
-					break;
+			foreach ($association as $model) {
+				foreach ($model as $key => $relationship) {
+					if ($name === $key) {
+						$this->{$name} = ObjectRegistry::init($key);
+						break;
+					}
 				}
 			}
 		}

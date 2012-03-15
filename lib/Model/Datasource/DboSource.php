@@ -23,7 +23,7 @@ class DboSource extends DataSource{
 	
 	protected $quote = '`';
 	
-	protected $_results = array();
+	public $_lastStatement = null;
 	
 	
 	public function buildJoinStatement($data) {
@@ -93,6 +93,7 @@ class DboSource extends DataSource{
 	public function prepare($sql, $params = array()) {
 		$this->_params = $params;
 		$this->_handle = $this->_connection->prepare($sql);
+		$this->_lastStatement = $sql;
 	}
 	
 	public function execute($params = array()) {
@@ -212,7 +213,6 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
-			var_dump($sql);
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
@@ -323,28 +323,31 @@ class DboSource extends DataSource{
 	
 	public function fetchAssociatedData(Model $model, $recursive = -1) {
 		foreach ($model->_associations as $association => $value) {
-			foreach ($value as $associatedModel => $relationship)
-			if($association === 'hasOne') {
-				$targetAlias = $model->{$associatedModel}->_name;
-				$defaults = array(
-					'type' => 'LEFT',
-					'foreign_key' => strtolower($targetAlias) . '_id',
-				);
-				$settings = array_merge($defaults, $relationship);
-				
-				$data = array(
-					'type' => $settings['type'],
-					'table' => $this->fieldQuote($model->{$associatedModel}->_table),
-					'alias' => $this->fieldQuote($targetAlias),
-					'conditions' => $this->parseConditions(array(
-						$model->_name . '.' . $settings['foreign_key'] => $targetAlias . '.' . $model->{$associatedModel}->_primaryKey
-					), false, false)
-				);
-				$this->_joins .= $this->buildJoinStatement($data);
-			
-			}
+			foreach ($value as $key => $val) {
+				foreach ($val as $associatedModel => $relationship) {
+					if($association === 'hasOne') {
+						$targetAlias = $model->{$associatedModel}->_name;
+						$defaults = array(
+							'type' => 'LEFT',
+							'foreign_key' => strtolower($targetAlias) . '_id',
+						);
+						$settings = array_merge($defaults, $relationship);
+						
+						$data = array(
+							'type' => strtoupper($settings['type']),
+							'table' => $this->fieldQuote($model->{$associatedModel}->_table),
+							'alias' => $this->fieldQuote($targetAlias),
+							'conditions' => $this->parseConditions(array(
+								$model->_name . '.' . $settings['foreign_key'] => $targetAlias . '.' . $model->{$associatedModel}->_primaryKey
+							), false, false)
+						);
+						$this->_joins .= ' ' . $this->buildJoinStatement($data);
+					}
+				}	
+			}	
 		}
 	}
+	
 	
 	
 	
