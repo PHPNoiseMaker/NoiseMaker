@@ -18,12 +18,7 @@ class Model {
 	
 	public $_dbConfig = 'default';
 	
-	private $_associations = array(
-		'belongsTo' => array(),
-		'hasMany' => array(),
-		'hasOne' => array(),
-		'hasAndBelongsToMany' => array()
-	);
+	private $_associations = null;
 	public function __construct() {
 		if ($this->_name === null || !isset($this->_name)) {
 			$this->_name = get_class($this);
@@ -31,13 +26,35 @@ class Model {
 		if ($this->_table === null || !isset($this->_table)) {
 			$this->_table = Inflect::pluralize(strtolower($this->_name));
 		}
+		if ($this->_associations === null) {
+			$this->buildAssociationData();
+		}
 	}
+	
+	public function buildAssociationData() {
+		$associations = array('belongsTo', 'hasMany', 'hasOne', 'hasAndBelongsToMany');
+		foreach ($associations as $association) {
+			if (is_array($this->{$association})) {
+				foreach ($this->{$association} as $key => $value) {
+					if (is_string($key) && is_array($value)) {
+						$this->_associations[$association] = array($key => $value);
+					} elseif(is_numeric($key) && is_string($value)) {
+						$this->_associations[$association] = array($value => array());
+					}
+				}
+			} else {
+				$this->_associations[$association] = array($this->{$association} => array());
+			}
+		}		
+	}
+	
 	public function __isset($name) {
-		
-		foreach($this->_associations as $key => $relationship) {
-			if (array_search($name, $this->{$key}) !== false) {
-				$this->{$name} = ObjectRegistry::init($name, $relationship);
-				break;
+		foreach($this->_associations as $key => $association) {
+			foreach ($association as $key => $relationship) {
+				if ($name === $key) {
+					$this->{$name} = ObjectRegistry::init($key);
+					break;
+				}
 			}
 		}
 		if (isset($this->{$name}) && $this->{$name} instanceOf Model) {

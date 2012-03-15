@@ -171,7 +171,7 @@ class DboSource extends DataSource{
 				if (is_array($queryData['fields'])) {
 					$this->_fields = '';
 					foreach($queryData['fields'] as $field) {
-						if ($this->fieldBelongsToModel($field, $model->_name)) {
+						if (!empty($field)) {
 							$this->_fields .= $this->fieldQuote($field) . ',';
 						}
 					}
@@ -197,7 +197,6 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
-			var_dump($sql);
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
