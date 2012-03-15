@@ -54,7 +54,7 @@ class ObjectRegistry {
 	 * @return void
 	 */
 	public static function getInstance() {
-		if(self::$instance === null) {
+		if (self::$instance === null) {
 			self::$instance = new self();
 		}
 		return self::$instance;
@@ -68,7 +68,7 @@ class ObjectRegistry {
 	 * @return void
 	 */
 	protected function get($key) {
-		if(array_key_exists($key, self::$_objects)) {
+		if (array_key_exists($key, self::$_objects)) {
 			return self::$_objects[$key];
 		}
 		return null;
@@ -83,7 +83,7 @@ class ObjectRegistry {
 	 * @return void
 	 */
 	protected function set($key, $value) {
-		if(!array_key_exists($key, self::$_objects)) {
+		if (!array_key_exists($key, self::$_objects)) {
 			self::$_objects[$key] = $value;
 		}
 		return self::$_objects[$key];
@@ -125,14 +125,14 @@ class ObjectRegistry {
 	public static function init($class, $relationship = null) {
 		if (!array_key_exists($class, self::$_objects)) {
 			App::uses($class, 'Model');
-			if(class_exists($class)) {
+			if (class_exists($class)) {
 				$modelRef = new ReflectionClass($class);
 				
-				if($modelRef->isAbstract() || $modelRef->isInterface()) {
+				if ($modelRef->isAbstract() || $modelRef->isInterface()) {
 					return false;
 				}
 				$model = self::storeObject($class, $modelRef->newInstance());
-				if($model instanceOf Model) {
+				if ($model instanceOf Model) {
 					return $model;
 				}
 			}

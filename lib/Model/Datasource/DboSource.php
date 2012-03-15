@@ -67,7 +67,7 @@ class DboSource extends DataSource{
 				$type = '_params';
 				break;
 		}
-		if($this->{$type} !== null) {
+		if ($this->{$type} !== null) {
 			$count = count(explode(',', $this->{$type}));
 			$return = '?';
 			for($i = 1; $i < $count; $i++) {
@@ -80,7 +80,7 @@ class DboSource extends DataSource{
 	
 	public function __construct($config, $connect = true) {
 		parent::__construct($config);
-		if($connect) {
+		if ($connect) {
 			$this->connect();
 		}
 	}
@@ -133,15 +133,15 @@ class DboSource extends DataSource{
 	
 	public function read(Model &$model, $queryData = array()) {
 		$this->releaseResources();
-		if(is_array($queryData)) {
+		if (is_array($queryData)) {
 			$this->_table = $model->_table;
 			$this->_alias = $this->quote . $model->_name . $this->quote;
 			
-			if(isset($queryData['limit'])) {
-				if(is_int($queryData['limit']))
+			if (isset($queryData['limit'])) {
+				if (is_int($queryData['limit']))
 					$this->_limit = 'LIMIT 0,' . $queryData['limit'];
 				elseif (is_string($queryData['limit'])) {
-					if(strpos($queryData['limit'], ',') !== false) {
+					if (strpos($queryData['limit'], ',') !== false) {
 						list($start, $end) = explode(',', $queryData['limit']);
 						$this->_limit = "LIMIT {$start}, {$end}";
 					} else {
@@ -150,9 +150,9 @@ class DboSource extends DataSource{
 				}
 			}
 			
-			if(isset($queryData['order'])) {
-				if(is_array($queryData['order'])) {
-					if($this->_order === null) {
+			if (isset($queryData['order'])) {
+				if (is_array($queryData['order'])) {
+					if ($this->_order === null) {
 						$this->_order = 'ORDER BY ' . $queryData['order'][0];
 					}
 					for($i = 1; $i < count($queryData['order']); $i++) {
@@ -163,34 +163,33 @@ class DboSource extends DataSource{
 				}
 			}
 			
-			if(isset($queryData['fields'])) {
+			if (isset($queryData['fields'])) {
 				
-				if(is_array($queryData['fields'])) {
+				if (is_array($queryData['fields'])) {
 					$this->_fields = '';
 					foreach($queryData['fields'] as $field) {
-						if($this->fieldBelongsToModel($field, $model->_name)) {
+						if ($this->fieldBelongsToModel($field, $model->_name)) {
 							$this->_fields .= $this->fieldQuote($field) . ',';
 						}
 					}
 
-				} elseif(!empty($queryData['fields'])) {
+				} elseif (!empty($queryData['fields'])) {
 					$this->_fields = $this->fieldQuote($queryData['fields']);
 				}
-				if(substr($this->_fields, strlen($this->_fields) - 1) == ',') {
+				if (substr($this->_fields, strlen($this->_fields) - 1) == ',') {
 					$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
 				}
 			}  else {
 				$this->_fields = '*';
 			}
 			
-			if(isset($queryData['conditions'])) {
+			if (isset($queryData['conditions'])) {
 				$this->_conditions = $this->parseConditions($queryData['conditions']);
 			}
 			
 			
 			
 			$sql = $this->buildStatement('select');
-			//var_dump($sql);
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
@@ -200,52 +199,51 @@ class DboSource extends DataSource{
 	}
 	
 	
-	public function parseConditions($conditions, $where = true, $quoteValues = true) {
-		$command = '';
-		
-		if($where) {
-			$command = ' WHERE ';
+	public function parseConditions($conditions, $where = true) {		
+		if ($where) {
+			$where = ' WHERE ';
 		}
 		
-		if(is_array($conditions) && !empty($conditions)) {
-			$out = $this->parseConditionArray($conditions, $quoteValues);
-			return $command . implode(' AND ', $out);
+		if (is_array($conditions) && !empty($conditions)) {
+			$out = $this->parseConditionArray($conditions);
+			return $where . implode(' AND ', $out);
 			
-		} elseif(empty($command)) {
-			return $command . '1 = 1';
+		} elseif (empty($where)) {
+			return $where . '1 = 1';
 		}
-		return  $command . $this->fieldQuote($conditions);
+		return  $where . $this->fieldQuote($conditions);
 	}
 	
-	public function parseConditionArray($conditions, $quoteValues = true) {
+	public function parseConditionArray($conditions) {
 		$out = array();
-		$data = null;
-		$bool = array('and', 'or', 'not', 'and not', 'or not', 'xor', '||', '&&');
-
+		$commands = array('AND', 'XOR', 'NOT', 'OR', '||', '&&');
+	
 		foreach ($conditions as $key => $value) {
-			$join = ' AND ';
+			$join = ' ' . $commands[0] . ' ';
 			$not = null;
-
-
+	
 			if (is_numeric($key) && empty($value)) {
 				continue;
 			} elseif (is_numeric($key) && is_string($value)) {
 				$out[] = $not . $this->fieldQuote($value);
-			} elseif ((is_numeric($key) && is_array($value)) || in_array(strtolower(trim($key)), $bool)) {
-				if (in_array(strtolower(trim($key)), $bool)) {
+			} elseif (
+				(is_numeric($key) && is_array($value)) 
+				|| in_array(strtoupper(trim($key)), $commands)
+			) {
+				if (in_array(strtoupper(trim($key)), $commands)) {					
 					$join = ' ' . strtoupper($key) . ' ';
 				} else {
 					$key = $join;
 				}
-				$value = $this->parseConditionArray($value, $quoteValues);
-
-				if (strpos($join, 'NOT') !== false) {
-					if (strtoupper(trim($key)) === 'NOT') {
-						$key = ' AND ' . trim($key);
+				$value = $this->parseConditionArray($value);
+	
+				if (strpos($join, $commands[2]) !== false) {
+					if (strtoupper(trim($key)) === $commands[2]) {
+						$key = ' ' . $commands[0] . ' ' . strtoupper(trim($key));
 					}
-					$not = ' NOT ';
+					$not = ' ' . $commands[2] . ' ';
 				}
-
+			
 				if (empty($value[1])) {
 					if ($not) {
 						$out[] = $not . '( ' . $value[0] . ' )';
@@ -253,36 +251,32 @@ class DboSource extends DataSource{
 						$out[] = $value[0] ;
 					}
 				} else {
-					$out[] = '(' . $not . '(' . implode(') ' . strtoupper($key) . ' (', $value) . ' ))';
+					$implode = ') ' . strtoupper($key) . ' (';
+					$out[] = '(' . $not . '(' . implode($implode, $value) . ' ))';
 				}
 			} else {
-				
-				$data = $this->_parseKey(trim($key), $value);
-				if ($data != null) {
-					$out[] = $data;
-					$data = null;
-				}
+				$out[] = $this->_parseKey(trim($key), $value);	
 			}
 			 
 		}
 		return $out;
 	}
-
+	
 	public function _parseKey($key, $value) {
 		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
-			if(strpos(strtoupper($key), $operator) !== false) {
+			if (strpos(strtoupper($key), $operator) !== false) {
 				$key = trim(substr($key, 0, strlen($key) - strlen($operator)));
 				$key = $this->fieldQuote($key);
 				
 				
-				if($operator == '!=') {
-					if(empty($value) || $value === null || $value == 'null') {
+				if ($operator == '!=') {
+					if (empty($value) || $value === null || $value == 'null') {
 						return $key . ' IS NOT NULL';
 					}
 				}
-				if($operator == '=') {
-					if(empty($value) || $value === null || $value == 'null') {
+				if ($operator == '=') {
+					if (empty($value) || $value === null || $value == 'null') {
 						return $key . ' IS NULL';
 					}
 				}
@@ -291,18 +285,16 @@ class DboSource extends DataSource{
 			}
 		}
 		$this->_params[] = $value;
+		
 		return $this->fieldQuote($key) . " = ?";
 		
-	}
-	public function value($value, $column = null) {
-		return $this->_handle->quote($value);
 	}
 	
 	
 	public function fieldBelongsToModel($field, $model) {
-		if(strpos($field, '.') !== false) {
+		if (strpos($field, '.') !== false) {
 			list($extractedModel, $field) = explode('.', $field);
-			if($model === $extractedModel) {
+			if ($model === $extractedModel) {
 				return true;
 			}
 		}
@@ -310,7 +302,7 @@ class DboSource extends DataSource{
 	}
 	
 	public function fieldQuote($field) {
-		if(strpos($field, '.') !== false) {
+		if (strpos($field, '.') !== false) {
 			list($model, $field) = explode('.', $field);
 			return $this->quote 
 				   . trim($model) 

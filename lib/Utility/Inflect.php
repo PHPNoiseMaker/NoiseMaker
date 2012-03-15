@@ -154,7 +154,7 @@ class Inflect
         return $string;
     }
 
-    public static function pluralize_if($count, $string)
+    public static function pluralize_if ($count, $string)
     {
         if ($count == 1)
             return "1 $string";

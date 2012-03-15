@@ -25,28 +25,28 @@ class Model {
 		'hasAndBelongsToMany' => array()
 	);
 	public function __construct() {
-		if($this->_name === null || !isset($this->_name)) {
+		if ($this->_name === null || !isset($this->_name)) {
 			$this->_name = get_class($this);
 		}
-		if($this->_table === null || !isset($this->_table)) {
+		if ($this->_table === null || !isset($this->_table)) {
 			$this->_table = Inflect::pluralize(strtolower($this->_name));
 		}
 	}
 	public function __isset($name) {
 		
 		foreach($this->_associations as $key => $relationship) {
-			if(array_search($name, $this->{$key}) !== false) {
+			if (array_search($name, $this->{$key}) !== false) {
 				$this->{$name} = ObjectRegistry::init($name, $relationship);
 				break;
 			}
 		}
-		if(isset($this->{$name}) && $this->{$name} instanceOf Model) {
+		if (isset($this->{$name}) && $this->{$name} instanceOf Model) {
 			return true;
 		}
 		return false;
 	}
 	public function __get($name) {
-		if(isset($this->{$name})) {
+		if (isset($this->{$name})) {
 			return $this->{$name};
 		}
 		
@@ -60,7 +60,7 @@ class Model {
 		
 		$this->{$class} = ObjectRegistry::init($class);
 		
-		if($this->{$class} instanceof Model) {
+		if ($this->{$class} instanceof Model) {
 			return true;
 		}
 		return false;

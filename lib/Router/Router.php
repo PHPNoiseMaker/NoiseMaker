@@ -116,8 +116,8 @@ class Router {
 	 * @return void
 	 */
 	public static function addRule($uri, $target = array(), $args = array()) {
-		if(is_array($args)) {
-			if(empty($args)) {
+		if (is_array($args)) {
+			if (empty($args)) {
 				$args['pass'] = array();
 			}
 		}
@@ -192,7 +192,7 @@ class Router {
 				unset($array[$key]);
 			}
 		}
-		if(count($array) < 1) {
+		if (count($array) < 1) {
 			$array = array();
 		}
 		return $array; 
@@ -208,9 +208,9 @@ class Router {
 	private static function parseNamedParams($params = array()) {
 		$newParams = array();
 		foreach($params as $key => $val) {
-			if(strpos($val, ':') !== false) {
+			if (strpos($val, ':') !== false) {
 				list($name, $value) = explode(':', $val);
-				if(!empty($name) && !empty($value))
+				if (!empty($name) && !empty($value))
 					self::$namedParams[$name] = $value;
 			} else {
 				$newParams[] = $val;
@@ -233,7 +233,7 @@ class Router {
 		
 		$parsedRule = self::arrayClean(explode('/', $rule));
 		$parsedRuleCount = count($parsedRule);
-		if(
+		if (
 			$parsedRuleCount == $commandCount
 			|| (
 				isset($parsedRule[$parsedRuleCount])
@@ -246,12 +246,12 @@ class Router {
 			$i = 0;
 			foreach ($parsedRule as $parsedKey => $parsedValue) {
 				
-				if(isset(self::$command[$i])) {
+				if (isset(self::$command[$i])) {
 					
-					if(strpos($parsedValue, ':') === 0) {
+					if (strpos($parsedValue, ':') === 0) {
 						$varName = substr($parsedValue, 1);
 						$position = array_search($varName, self::$rules[$rule]['pass']);
-						if($varName == 'controller') {
+						if ($varName == 'controller') {
 							self::$controller = self::$command[$i];
 						} elseif ($varName == 'action') {
 							self::$action = self::$command[$i];
@@ -265,22 +265,22 @@ class Router {
 					
 						
 					
-					} elseif(strcmp($parsedValue, self::$command[$i]) === 0) {
+					} elseif (strcmp($parsedValue, self::$command[$i]) === 0) {
 						
-						if(self::$controller === null)
+						if (self::$controller === null)
 							self::$controller = self::$rules[$rule]['target']['controller'];
-						if(self::$action === null)
+						if (self::$action === null)
 							self::$action = self::$rules[$rule]['target']['action'];
 						
 						foreach(self::$rules[$rule]['target'] as $ruleTargetKey => $ruleTargetVal) {
-							if(
+							if (
 								$ruleTargetKey !== 'action'
 								&& $ruleTargetKey !== 'controller'
 							)
 							self::$params[] = $ruleTargetVal;
 						}
 						
-					} elseif(
+					} elseif (
 						isset($parsedRule[$parsedRuleCount])
 						&& $parsedRule[$parsedRuleCount] != '*'
 					) {
@@ -290,18 +290,18 @@ class Router {
 				$i++;
 			}
 			
-			if(
+			if (
 				isset($parsedRule[$parsedRuleCount])
 				&& $parsedRule[$parsedRuleCount] == '*'
 			) {
 				for($a = $i - 1; $a <= $commandCount; $a++) {
-					if(isset(self::$command[$a]) && !empty(self::$command[$a]))
+					if (isset(self::$command[$a]) && !empty(self::$command[$a]))
 						self::$params[] = self::$command[$a];
 				}
 			}
 			
-			if(!$i) {
-				if(
+			if (!$i) {
+				if (
 					isset(self::$rules[$rule]['target']['controller']) 
 					&& isset(self::$rules[$rule]['target']['action'])
 				) {
@@ -329,13 +329,13 @@ class Router {
 		
 		$commandCount = count(self::$command);
 			
-		if(strpos(self::$command[$commandCount - 1], '?') !== false) {
+		if (strpos(self::$command[$commandCount - 1], '?') !== false) {
 			list($command) = explode('?', self::$command[$commandCount - 1]);
 			self::$command[$commandCount - 1] = $command;
 		}
 		foreach(self::$rules as $rule => $target) {
 			$matched = self::matchRule($rule);
-			if($matched)
+			if ($matched)
 				break;
 		}
 	}

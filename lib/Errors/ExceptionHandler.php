@@ -17,7 +17,7 @@ class ExceptionHandler {
 		$controller = new ErrorsController(new Request(), new Response());
 		
 		$debugLevel = Config::getConfig('debug');
-		if($debugLevel > 0) {
+		if ($debugLevel > 0) {
 			$message = $e->getMessage();
 			$code = $e->getCode();
 		} else {
@@ -51,7 +51,7 @@ class ExceptionHandler {
 		$controller = new ErrorsController(new Request(), new Response());
 		
 		$debugLevel = Config::getConfig('debug');
-		if($debugLevel > 0) {
+		if ($debugLevel > 0) {
 			$params = array(
 				'error' => array(
 					'message' => $errorMsg,

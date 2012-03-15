@@ -57,13 +57,13 @@ class View {
 		 * @return void
 		 */
 		public function __construct($controller = null, $view = null, $viewVars = null) {
-			if($controller !== null) {
+			if ($controller !== null) {
 				$this->controller = $controller;
 			}
-			if($view !== null) {
+			if ($view !== null) {
 				$this->view = $view;
 			}
-			if($view !== null) {
+			if ($view !== null) {
 				$this->viewVars = $viewVars;
 			}
 		}
@@ -80,7 +80,7 @@ class View {
 		public function renderPage() {
 			try {
 				$return = $this->renderLayout($this->loadView($this->viewVars));
-				if($return !== false) {
+				if ($return !== false) {
 					return $return;
 				}
 			} catch (Exception $e) {
@@ -108,7 +108,7 @@ class View {
 		 * @return void
 		 */
 		public function setView($view = null) {
-			if($view !== null) {
+			if ($view !== null) {
 				$this->view = $view;
 			}
 		}
@@ -121,7 +121,7 @@ class View {
 		 * @return void
 		 */
 		public function setController($controller = null) {
-			if($controller !== null) {
+			if ($controller !== null) {
 				$this->controller = $controller;
 				
 			}
@@ -136,9 +136,9 @@ class View {
 		 * @return void
 		 */
 		public static function viewExists($controller, $view) {
-			if(file_exists(ROOT . DS  . APP_DIR . DS . 'View/' . $controller . '/' . $view . '.ctp')) {
+			if (file_exists(ROOT . DS  . APP_DIR . DS . 'View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
-			} elseif(file_exists(ROOT . DS . 'lib/View/' . $controller . '/' . $view . '.ctp')) {
+			} elseif (file_exists(ROOT . DS . 'lib/View/' . $controller . '/' . $view . '.ctp')) {
 				return true;
 			}
 			return false;
@@ -153,11 +153,11 @@ class View {
 		 */
 		protected function renderLayout($content = null) {
 			$view = $this->_evaluate(ROOT . DS  . APP_DIR . DS . 'View/Layout/' . $this->layout . '.ctp', array('content' => $content));
-			if($view) {
+			if ($view) {
 				return $view;
 			} else {
 				$view = $this->_evaluate(ROOT . DS  . 'lib/View/Layout/' . $this->layout . '.ctp', array('content' => $content));
-				if($view !== false) {
+				if ($view !== false) {
 					return $view;
 				}
 			}
@@ -172,11 +172,11 @@ class View {
 		 */
 		protected function loadView() {
 			$view = $this->_evaluate(ROOT . DS . APP_DIR . DS . 'View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
-			if($view) {
+			if ($view) {
 				return $view;
 			} else {
 				$view = $this->_evaluate(ROOT . DS . 'lib/View/' . $this->controller . '/' . $this->view . '.ctp', $this->viewVars);
-				if($view !== false) {
+				if ($view !== false) {
 					return $view;
 					
 				}
@@ -193,7 +193,7 @@ class View {
 		 * @return void
 		 */
 		protected function _evaluate($___viewFn, $___dataForView = null) {
-			if(file_exists($___viewFn)) {
+			if (file_exists($___viewFn)) {
 				extract($___dataForView, EXTR_SKIP);
 				ob_start();
 		

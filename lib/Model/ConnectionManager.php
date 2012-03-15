@@ -45,7 +45,7 @@ class ConnectionManager {
 	
 	}
 	private static function getConnectionInfo($name) {
-		if(isset(self::$_config->{$name}['datasource'])) {
+		if (isset(self::$_config->{$name}['datasource'])) {
 			$classname = self::$_config->{$name}['datasource'];
 			if (strpos($classname, '/') !== false) {
 				$package = dirname($classname);
@@ -60,14 +60,14 @@ class ConnectionManager {
 		if (!array_key_exists($name, self::$_dataSources)) {
 			$conInfo = self::getConnectionInfo($name);
 			App::uses($conInfo['classname'], 'Model' . DS . 'Datasource' . DS . $conInfo['package']);
-			if(class_exists($conInfo['classname'])) {
+			if (class_exists($conInfo['classname'])) {
 				return self::add($name, new $conInfo['classname'](self::$_config->{$name}));
 			}
 		}
 		return self::$_dataSources[$name];
 	}
 	
-	public static function getDatasource($key) {
+	public static function getDataSource($key) {
 		return self::getInstance()->getDatasrc($key);
 	}
 	

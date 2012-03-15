@@ -27,7 +27,7 @@ class PagesController extends AppController {
 	public function display() {
 		$args = func_get_args();
 
-		if(
+		if (
 			isset($args[0])
 			&& !empty($args[0])
 		) {
@@ -35,7 +35,7 @@ class PagesController extends AppController {
 		} else {
 			$page = 'index';
 		}
-		if(View::viewExists('Pages', $page)) {
+		if (View::viewExists('Pages', $page)) {
 			$this->view = $page;
 			
 		} else {

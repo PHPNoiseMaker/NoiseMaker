@@ -120,7 +120,7 @@ class Request {
 	 * @return void
 	 */
 	private function _parseGET() {
-		if(isset($_GET) && is_array($_GET)) {
+		if (isset($_GET) && is_array($_GET)) {
 			$this->command = array_shift($_GET);
 			foreach($_GET as $key => $val) {
 				$this->queryString[$key] = $val;
@@ -136,12 +136,12 @@ class Request {
 	 * @return void
 	 */
 	private function _parsePOST() {
-		if(isset($_POST) && is_array($_POST)) {
+		if (isset($_POST) && is_array($_POST)) {
 			foreach($_POST as $key => $val) {
 				$this->data[$key] = $val;
 			}
 		}
-		if(isset($this->data['data'])) {
+		if (isset($this->data['data'])) {
 			$data = $this->data['data'];
 			unset($this->data['data']);
 			$this->data = array_merge($this->data, $data);
@@ -191,8 +191,8 @@ class Request {
 		$serverName = env('SERVER_NAME');
 		$requestURI = env('REQUEST_URI');
 		
-		if(env('HTTPS') !== false) {
-			if(env('HTTPS') == 'on') {
+		if (env('HTTPS') !== false) {
+			if (env('HTTPS') == 'on') {
 				$s = 's';
 			} else {
 				$s = '';
@@ -207,7 +207,7 @@ class Request {
 		$protocol = $strleft(strtolower(env('SERVER_PROTOCOL')), '/') . $s;
 		
 		
-		if($port == '80' || $port == '443') {
+		if ($port == '80' || $port == '443') {
 			$port = '';
 		}
 		return $protocol . '://' . $serverName . $port . $requestURI;

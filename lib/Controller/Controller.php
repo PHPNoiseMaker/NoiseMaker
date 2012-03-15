@@ -118,7 +118,7 @@ class Controller {
 	 * @return void
 	 */
 	public function __construct(Request $request, Response $response) {
-		if($this->name === null) {
+		if ($this->name === null) {
 			$class = get_class($this);
 			$this->name = substr($class, 0, strpos($class, 'Controller'));
 			unset($class);
@@ -182,13 +182,13 @@ class Controller {
 	 * @return void
 	 */
 	private function _constructModels() {
-		if($this->uses !== false) {
-			if(is_array($this->uses)) {
-				if(sizeof($this->uses) === 0) {
+		if ($this->uses !== false) {
+			if (is_array($this->uses)) {
+				if (sizeof($this->uses) === 0) {
 					$this->uses[] = $this->getModelName();
 				}
 				foreach($this->uses as $model) {
-					if(!$this->_loadModel($this->getModelName($model))) {
+					if (!$this->_loadModel($this->getModelName($model))) {
 						trigger_error('Could not load the model!');
 					}
 				}
@@ -211,11 +211,11 @@ class Controller {
 		$this->{$class} = ObjectRegistry::init($class);
 		
 		
-		if(($key = array_search($class, $this->_setters)) !== false) {
+		if (($key = array_search($class, $this->_setters)) !== false) {
 			unset($this->_setters[$key]);
 		}
 		
-		if($this->{$class} instanceof Model) {
+		if ($this->{$class} instanceof Model) {
 			return true;
 		}
 		return false;
@@ -238,7 +238,7 @@ class Controller {
 	 */
 	
 	private function initView($controller = null, $view = null, $viewVars = null) {
-		if($this->View === null) {
+		if ($this->View === null) {
 			$this->View = new View($controller, $view, $viewVars);
 		}
 	}
@@ -281,7 +281,7 @@ class Controller {
 	 * @return void
 	 */
 	final public function redirect($location) {
-		if(!is_array($location)) {
+		if (!is_array($location)) {
 			$this->response->setHeader(array('Location' => $location));
 			$this->response->_code = 301;		
 			$this->response->buildAsset();
@@ -299,16 +299,16 @@ class Controller {
 	 * @return void
 	 */
 	final public function getModelName($controller = null) {
-		if(is_object($controller)) {
+		if (is_object($controller)) {
 			$controllerName = $controller->name;
 		}
-		if(is_string($controller)) {
+		if (is_string($controller)) {
 		    $controllerName = $controller;
 		}
-		if($controller === null) {
+		if ($controller === null) {
 			$controllerName = $this->name;
 		}
-		if( ($pos = strpos($controllerName, 'Controller')) && $pos !== false) {
+		if ( ($pos = strpos($controllerName, 'Controller')) && $pos !== false) {
 			return ucfirst(Inflect::singularize(substr($controllerName, 0, $pos)));
 		} else {
 			return ucfirst(Inflect::singularize($controllerName));

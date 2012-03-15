@@ -67,13 +67,13 @@ class Dispatcher {
 		App::uses($class, 'Controller');
 		$controllerRef = new ReflectionClass($class);
 		
-		if($controllerRef->isAbstract() || $controllerRef->isInterface()) {
+		if ($controllerRef->isAbstract() || $controllerRef->isInterface()) {
 			return false;
 		}
 		
 		$this->controller = $controllerRef->newInstance($this->request, $this->response);
 		
-		if($this->controller instanceof Controller) {
+		if ($this->controller instanceof Controller) {
 			return true;
 		}
 		return false;
@@ -89,30 +89,30 @@ class Dispatcher {
 		
 		$class = $this->request->controller . 'Controller';
 
-		if(empty($this->request->action)) {
+		if (empty($this->request->action)) {
 			$this->request->action = 'index';
 		}
 	
 
-		if( !$this->_loadController($class) ) {
+		if ( !$this->_loadController($class) ) {
 			throw new ControllerNotFoundException();
 		}
 		
 		
-		if(method_exists($this->controller, $this->request->action)) {
+		if (method_exists($this->controller, $this->request->action)) {
 			
 			$ref = new ReflectionClass(get_class($this->controller));
 			$method = $ref->getMethod($this->request->action);
 
-			if($method->isPrivate()) {
+			if ($method->isPrivate()) {
 				$error = 'Trying to access a private method!';
 			}
-			if($method->isProtected()) {
+			if ($method->isProtected()) {
 				$error = 'Trying to access a protected method!';
 			}
 			unset($ref, $method);
 			
-			if(isset($error)) {
+			if (isset($error)) {
 				throw new MethodNotAllowedException($error);
 			}
 			

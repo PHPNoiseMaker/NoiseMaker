@@ -56,7 +56,7 @@ class Config {
 	 * @return void
 	 */
 	public static function getInstance() {
-		if(self::$instance === null) {
+		if (self::$instance === null) {
 			self::$instance = new self();
 		}
 		return self::$instance;
@@ -70,7 +70,7 @@ class Config {
 	 * @return void
 	 */
 	protected function get($key) {
-		if(array_key_exists($key, self::$_configs)) {
+		if (array_key_exists($key, self::$_configs)) {
 			return self::$_configs[$key];
 		}
 		return null;

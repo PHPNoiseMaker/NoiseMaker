@@ -50,7 +50,7 @@ class App {
 	 * @return void
 	 */
 	public static function autoLoad($class) {
-		if(!isset(self::$_map[$class])) {
+		if (!isset(self::$_map[$class])) {
 			return false;
 		}
 		return self::import($class, self::$_map[$class]);
@@ -80,27 +80,27 @@ class App {
 	 * @return void
 	 */
 	public static function import($class, $path = null, $check_only = false) {
-		if(strpos('/', $path) !== false) {
+		if (strpos('/', $path) !== false) {
 			$path = implode(DS, explode('/', $path));
 		}
-		if(file_exists($file = ROOT . DS . APP_DIR . DS . $path . DS . $class . '.php')) {
+		if (file_exists($file = ROOT . DS . APP_DIR . DS . $path . DS . $class . '.php')) {
 			$file = substr($file, strlen(ROOT . DS));
 			
-			if(!$check_only) {
+			if (!$check_only) {
 				include_once APP_DIR . DS . $path . DS . $class . '.php';
 				self::$_openFiles[] = $file;
 			}
 
-		} elseif(file_exists($file = ROOT . DS . 'lib' . DS . $path . DS . $class . '.php')) {
+		} elseif (file_exists($file = ROOT . DS . 'lib' . DS . $path . DS . $class . '.php')) {
 			$file = substr($file, strlen(ROOT . DS));
-			if(!$check_only) {
+			if (!$check_only) {
 				include_once 'lib' . DS . $path . DS . $class . '.php';
 				
 				self::$_openFiles[] = $file;
 			}
 			
 		} else {
-			if(!$check_only) {
+			if (!$check_only) {
 				switch($path) {
 					case 'Controller':
 						throw new ControllerNotFoundException();

@@ -142,9 +142,9 @@ class Response {
 	 */
 	public function buildAsset($body = null) {
 		$this->_sendCode($this->_code);
-		if(is_array($this->_headers)) {
+		if (is_array($this->_headers)) {
 			foreach($this->_headers as $key => $value) {
-				if(is_int($key)) {
+				if (is_int($key)) {
 					header($value);
 				} else {
 					header($key . ': ' . $value);
@@ -165,7 +165,7 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
-		if(Config::getConfig('debug') > 0) {
+		if (Config::getConfig('debug') > 0) {
 			var_dump((memory_get_peak_usage(true)) / 1024 / 1024);
 			//var_dump($_SERVER);
 			//var_dump($_ENV);	
@@ -236,8 +236,8 @@ class Response {
 	 * @return void
 	 */
 	private function _sendCode($code = null) {
-		if($code !== null) {
-			if(array_key_exists($code, $this->_messages)) {
+		if ($code !== null) {
+			if (array_key_exists($code, $this->_messages)) {
 				$this->setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[$code]);
 			} else {
 				$this->setHeader('HTTP/1.0 ' . $code . ' ' . $this->_messages[404]);
@@ -258,7 +258,7 @@ class Response {
 	 * @return void
 	 */
 	public function setHeader($header) {
-		if(!is_array($header)) {
+		if (!is_array($header)) {
 			$this->_headers[] = $header;
 		} else {
 			foreach($header as $key => $val) {
