@@ -159,10 +159,10 @@ class DboSource extends DataSource{
 			if (isset($queryData['order'])) {
 				if (is_array($queryData['order'])) {
 					if ($this->_order === null) {
-						$this->_order = 'ORDER BY ' . $queryData['order'][0];
+						$this->_order = 'ORDER BY ' . $this->order($queryData['order'][0]);
 					}
 					for($i = 1; $i < count($queryData['order']); $i++) {
-						$this->_order .= ', ' . $queryData['order'][$i];
+						$this->_order .= ', ' . $this->order($queryData['order'][$i]);
 					}
 				} else {
 					$this->_order = $queryData['order'];
@@ -195,7 +195,7 @@ class DboSource extends DataSource{
 			// Joins
 			
 			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
-				$this->fetchAssociatedData($model, $queryData['recursive']);
+				$this->fetchJoins($model, $queryData['recursive']);
 			}
 			
 			
@@ -213,6 +213,8 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
+			var_dump($sql);
+			
 			$this->prepare($sql, $this->_params);
 			
 			return $this->fetchResults();
@@ -221,6 +223,15 @@ class DboSource extends DataSource{
 		trigger_error('Query data must be an array...');
 	}
 	
+	public function order($order) {
+		if (is_array($order)) {
+			foreach ($order as $key => $val) {
+				return $this->fieldQuote($key) . ' ' . strtoupper($val);
+			}
+		} else {
+			return $order;
+		}
+	}
 	
 	public function parseConditions($conditions, $where = true, $params = true) {		
 		if ($where) {
@@ -237,7 +248,7 @@ class DboSource extends DataSource{
 		return  $where . $this->fieldQuote($conditions, $params);
 	}
 	
-	public function parseConditionArray($conditions, $params = false) {
+	public function parseConditionArray($conditions, $params = false, $join = false) {
 		$out = array();
 		$commands = array('AND', 'XOR', 'NOT', 'OR', '||', '&&');
 	
@@ -248,7 +259,10 @@ class DboSource extends DataSource{
 			if (is_numeric($key) && empty($value)) {
 				continue;
 			} elseif (is_numeric($key) && is_string($value)) {
-				$out[] = $not . $this->fieldQuote($value);
+				if(!$join)
+					$out[] = $not . $this->fieldQuote($value);
+				else
+					$out[] = $not . $value;
 			} elseif (
 				(is_numeric($key) && is_array($value)) 
 				|| in_array(strtoupper(trim($key)), $commands)
@@ -285,13 +299,12 @@ class DboSource extends DataSource{
 		return $out;
 	}
 	
-	public function _parseKey($key, $value, $params = false) {
+	public function _parseKey($key, $value, $params = false, $join = false) {
 		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
 			if (strpos(strtoupper($key), $operator) !== false) {
 				$key = trim(substr($key, 0, strlen($key) - strlen($operator)));
 				$key = $this->fieldQuote($key);
-				
 				
 				if ($operator == '!=') {
 					if (empty($value) || $value === null || $value == 'null') {
@@ -311,21 +324,26 @@ class DboSource extends DataSource{
 				}
 			}
 		}
-		if ($params) {
+		if ($params && !$join) {
 			$this->_params[] = $value;
 			return $this->fieldQuote($key) . " = ?";
-		} else {
+		} elseif (!$params && !$join) {
 			return $this->fieldQuote($key) . " = " . $value;
+		} elseif ($params && $join) {
+			$this->_params[] = $value;
+			return array($this->fieldQuote($key) => '?');
+		} else {
+			return array($key => $value);
 		}
 		
 	}
 	
 	
-	public function fetchAssociatedData(Model $model, $recursive = -1) {
+	public function fetchJoins(Model $model, $recursive = -1) {
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
-					if($association === 'hasOne') {
+					if ($association === 'hasOne' || $association === 'belongsTo') {
 						$targetAlias = $model->{$associatedModel}->_name;
 						$defaults = array(
 							'type' => 'LEFT',
@@ -338,13 +356,23 @@ class DboSource extends DataSource{
 							. '.' 
 							. $model->{$associatedModel}->_primaryKey
 						);
+						$conditions = array(array($joinKey => $joinValue));
+						if (array_key_exists('scope', $settings)) {
+							if(is_array($settings['scope'])) {
+								foreach($settings['scope'] as $key => $value) {
+									$conditions[] = $this->_parseKey($key, $value, true, true);
+								}
+								var_dump($conditions);
+								
+								
+							}
+						}
+						
 						$data = array(
 							'type' => strtoupper($settings['type']),
 							'table' => $this->fieldQuote($model->{$associatedModel}->_table),
 							'alias' => $this->fieldQuote($targetAlias),
-							'conditions' => $this->parseConditions(array(
-								$joinKey => $joinValue,
-							), false, false)
+							'conditions' => $this->parseConditions($conditions, false, false)
 						);
 						$this->_joins .= ' ' . $this->buildJoinStatement($data);
 					}

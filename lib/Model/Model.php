@@ -84,7 +84,43 @@ class Model {
 			trigger_error('Query data must be an array…');
 		}
 		$db = ConnectionManager::getDataSource('default');
-		return $db->read($this, $query);
+		switch($type) {
+			case 'all':
+				return $db->read($this, $query);
+			case 'first':
+				$query['limit'] = 1;
+				$result = $db->read($this, $query);
+				return $result[0];
+			case 'last':
+				$query['limit'] = 1;
+				if (isset($query['order'])) {
+					if (is_array($query['order'])) {
+						foreach ($query['order'] as $key => $val) {
+							if(is_numeric($key) && is_array($val)) {
+								foreach ($val as $field => $order) {
+									if($order == 'ASC') {
+										$query['order'][$key][$field] = 'DESC';
+									} else {
+										$query['order'][$key][$field] = 'ASC';
+									}
+								}
+							} else {
+								if($val == 'ASC') {
+									$query['order'][$field] = 'DESC';
+								} else {
+									$query['order'][$field] = 'ASC';
+								}
+							}
+						}
+					}
+				} else {
+					$query['order'] = array(array($this->_name . '.' . $this->_primaryKey => 'DESC'));
+				}
+				var_dump($query['order']);
+				$result = $db->read($this, $query);
+				return $result[0];
+		}
+		
 	}
 	
 	public function getLastStatement() {
