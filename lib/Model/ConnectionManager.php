@@ -113,7 +113,6 @@ class ConnectionManager {
 	}
 	
 	public static function endRecord() {
-		var_dump('test');
 		self::getInstance()->record_end();
 		return true;
 	}
