@@ -152,49 +152,16 @@ class DboSource extends DataSource{
 			}
 			
 			if (isset($queryData['order'])) {
-				if (is_array($queryData['order'])) {
-					if ($this->_order === null) {
-						$this->_order = 'ORDER BY ' . $this->order($queryData['order'][0]);
-					}
-					for($i = 1; $i < count($queryData['order']); $i++) {
-						$this->_order .= ', ' . $this->order($queryData['order'][$i]);
-					}
-				} else {
-					$this->_order = $queryData['order'];
-				}
+				$this->order($queryData['order']);
 			}
 			
 			if (isset($queryData['fields'])) {
-				if (is_array($queryData['fields'])) {
-					$this->_fields = '';
-					foreach($queryData['fields'] as $field) {
-						if (!empty($field)) {
-							if($this->fieldBelongsToModel($field, $model)) {
-								$this->_fields .= $this->fieldQuote($field) . ',';
-								
-							} else {
-								$this->_associationFields[] = $field;
-							}
-							
-						}
-					}
-					if(empty($this->_fields)) {
-						$this->_fields = '*';
-					}
-
-				} elseif (!empty($queryData['fields'])) {
-					$this->_fields = $this->fieldQuote($queryData['fields']);
-				} else {
-					$this->_fields = '*';
-				}
-				if (substr($this->_fields, strlen($this->_fields) - 1) == ',') {
-					$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
-				}
+				$this->fields($queryData['fields'], $model);
 			}  else {
 				$this->_fields = '*';
 			}
 			if($count) {
-				$this->_fields = 'COUNT(*)';
+				$this->_fields = 'COUNT(' . $this->fieldQuote($model->_name . '.' . $model->_primaryKey) . ')';
 			}
 			
 			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
@@ -205,7 +172,7 @@ class DboSource extends DataSource{
 			
 			// Joins
 			
-			if($model->recursive > -1) {
+			if($model->recursive > -1 && !$count) {
 				$this->fetchJoins($model, $model->recursive);
 			}
 			
@@ -226,13 +193,12 @@ class DboSource extends DataSource{
 			$sql = $this->buildStatement('select');
 			
 			
-			
 			$this->prepare($sql, $this->_params);
 			
 			$this->execute();
 			$results = $this->fetchResults($count, $associated);
 			
-			if($model->recursive > -1) {
+			if($model->recursive > -1 && !$count) {
 				
 				$results = $this->fetchAssociations($model, $results, $model->recursive);
 			}
@@ -243,6 +209,47 @@ class DboSource extends DataSource{
 		trigger_error('Query data must be an array...');
 	}
 	
+	public function order($order) {
+		if (is_array($order)) {
+			if ($this->_order === null) {
+				$this->_order = 'ORDER BY ' . $this->setOrder($order[0]);
+			}
+			for($i = 1; $i < count($order); $i++) {
+				$this->_order .= ', ' . $this->setOrder($order[$i]);
+			}
+		} else {
+			$this->_order = $order;
+		}
+	}
+	
+	public function fields($fields, Model $model) {
+		if (is_array($fields)) {
+			$this->_fields = '';
+			foreach($fields as $field) {
+				if (!empty($field)) {
+					if($this->fieldBelongsToModel($field, $model)) {
+						$this->_fields .= $this->fieldQuote($field) . ',';
+						
+					} else {
+						$this->_associationFields[] = $field;
+					}
+					
+				}
+			}
+			if(empty($this->_fields)) {
+				$this->_fields = '*';
+			}
+
+		} elseif (!empty($fields)) {
+			$this->_fields = $this->fieldQuote($fields);
+		} else {
+			$this->_fields = '*';
+		}
+		if (substr($this->_fields, strlen($this->_fields) - 1) == ',') {
+			$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
+		}
+		
+	}
 	public function limit($limit) {
 		if (is_int($limit))
 			return 'LIMIT 0,' . $limit;
@@ -257,7 +264,7 @@ class DboSource extends DataSource{
 	}
 	
 	
-	public function order($order) {
+	public function setOrder($order) {
 		if (is_array($order)) {
 			foreach ($order as $key => $val) {
 				return $this->fieldQuote($key) . ' ' . strtoupper($val);
