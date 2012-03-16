@@ -89,15 +89,18 @@ class Model {
 			trigger_error('Query data must be an array…');
 		}
 		$db = $this->getDataSource();
+		$results = array();
 		switch($type) {
 			case 'all':
-				return $db->read($this, $query, false, $associated);
+				$results = $db->read($this, $query, false, $associated);
+			break;
 			case 'count':
-				return $db->read($this, $query, true, $associated);
+				$results = $db->read($this, $query, true, $associated);
+			break;
 			case 'first':
 				$query['limit'] = 1;
-				$result = $db->read($this, $query, false, $associated);
-				return $result[0];
+				$results = $db->read($this, $query, false, $associated);
+			break;
 			case 'last':
 				$query['limit'] = 1;
 				if (isset($query['order'])) {
@@ -123,11 +126,16 @@ class Model {
 				} else {
 					$query['order'] = array(array($this->_name . '.' . $this->_primaryKey => 'DESC'));
 				}
-				var_dump($query['order']);
-				$result = $db->read($this, $query, false, $associated);
-				return $result[0];
+
+				$results = $db->read($this, $query, false, $associated);
+				break;
 		}
+		return $this->afterFind($results);
 		
+	}
+	
+	public function afterFind($results) {
+		return $results;
 	}
 	
 	public function getLastStatement() {
