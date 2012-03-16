@@ -8,6 +8,8 @@ class ConnectionManager {
 	
 	private static $_config = null;
 	
+	private static $_statementHistory = array();
+	
 	public function __construct() {
 			
 	}
@@ -69,6 +71,29 @@ class ConnectionManager {
 	
 	public static function getDataSource($key) {
 		return self::getInstance()->getDatasrc($key);
+	}
+	
+	private static function addHistory($sql) {
+		self::$_statementHistory[] = $sql;
+	}
+	
+	private static function getHistory($id = null) {
+		if($id === null) {
+			return self::$_statementHistory;
+		}
+		if(array_key_exists($id, self::$_statementHistory)) {
+			return self::$_statementHistory[$id];
+		}
+		return null;
+	}
+	
+	public static function record($sql, $params) {
+		self::getInstance()->addHistory(array($sql, $params));
+		return true;
+	}
+	
+	public static function history($id = null) {
+		return self::getInstance()->getHistory($id);
 	}
 	
 

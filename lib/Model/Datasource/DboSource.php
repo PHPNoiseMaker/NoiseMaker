@@ -23,6 +23,8 @@ class DboSource extends DataSource{
 	
 	protected $quote = '`';
 	
+	protected $_associationFields = array();
+	
 	public $_lastStatement = null;
 	
 	
@@ -94,6 +96,7 @@ class DboSource extends DataSource{
 		$this->_params = $params;
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
+		ConnectionManager::record($sql, $params);
 	}
 	
 	public function execute($params = array()) {
@@ -170,17 +173,27 @@ class DboSource extends DataSource{
 			}
 			
 			if (isset($queryData['fields'])) {
-				
 				if (is_array($queryData['fields'])) {
 					$this->_fields = '';
 					foreach($queryData['fields'] as $field) {
 						if (!empty($field)) {
-							$this->_fields .= $this->fieldQuote($field) . ',';
+							if($this->fieldBelongsToModel($field, $model)) {
+								$this->_fields .= $this->fieldQuote($field) . ',';
+								
+							} else {
+								$this->_associationFields[] = $field;
+							}
+							
 						}
+					}
+					if(empty($this->_fields)) {
+						$this->_fields = '*';
 					}
 
 				} elseif (!empty($queryData['fields'])) {
 					$this->_fields = $this->fieldQuote($queryData['fields']);
+				} else {
+					$this->_fields = '*';
 				}
 				if (substr($this->_fields, strlen($this->_fields) - 1) == ',') {
 					$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
@@ -217,9 +230,18 @@ class DboSource extends DataSource{
 			
 			$sql = $this->buildStatement('select');
 			
+			
+			
 			$this->prepare($sql, $this->_params);
 			
-			return $this->fetchResults($count);
+			$results = $this->fetchResults($count);
+			
+			
+			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
+				$results = $this->fetchAssociations($model, $results, $queryData['recursive']);
+			}
+			
+			return $results;
 			
 		}
 		trigger_error('Query data must be an array...');
@@ -250,7 +272,7 @@ class DboSource extends DataSource{
 		return  $where . $this->fieldQuote($conditions, $params);
 	}
 	
-	public function parseConditionArray($conditions, $params = false, $join = false) {
+	public function parseConditionArray($conditions, $params = false) {
 		$out = array();
 		$commands = array('AND', 'XOR', 'NOT', 'OR', '||', '&&');
 	
@@ -301,7 +323,7 @@ class DboSource extends DataSource{
 		return $out;
 	}
 	
-	public function _parseKey($key, $value, $params = false, $join = false) {
+	public function _parseKey($key, $value, $params = false) {
 		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
 			if (strpos(strtoupper($key), $operator) !== false) {
@@ -326,22 +348,17 @@ class DboSource extends DataSource{
 				}
 			}
 		}
-		if ($params && !$join) {
+		if ($params) {
 			$this->_params[] = $value;
 			return $this->fieldQuote($key) . " = ?";
-		} elseif (!$params && !$join) {
+		} else{
 			return $this->fieldQuote($key) . " = " . $value;
-		} elseif ($params && $join) {
-			$this->_params[] = $value;
-			return array($this->fieldQuote($key) => '?');
-		} else {
-			return array($key => $value);
-		}
+		} 
 		
 	}
 	
 	
-	public function fetchJoins(Model $model, $recursive = -1) {
+	public function fetchJoins(Model $model, $recursive) {
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
@@ -361,11 +378,9 @@ class DboSource extends DataSource{
 						$conditions = array(array($joinKey => $joinValue));
 						if (array_key_exists('scope', $settings)) {
 							if(is_array($settings['scope'])) {
-								foreach($settings['scope'] as $key => $value) {
-									$conditions[] = $this->_parseKey($key, $value, true, true);
-								}
 								
-								
+								$conditions[] = $this->parseConditions($settings['scope'], false);
+
 							}
 						}
 						
@@ -376,6 +391,7 @@ class DboSource extends DataSource{
 							'conditions' => $this->parseConditions($conditions, false, false)
 						);
 						$this->_joins .= ' ' . $this->buildJoinStatement($data);
+						
 					}
 				}	
 			}	
@@ -383,13 +399,61 @@ class DboSource extends DataSource{
 	}
 	
 	
+	public function fetchAssociations(Model $model, $results, $recursive) {
+		foreach ($model->_associations as $association => $value) {
+			foreach ($value as $key => $val) {
+				foreach ($val as $associatedModel => $relationship) {
+					if($association === 'hasMany') {
+						foreach ($results as $key => $result) {
+							$targetAlias = $model->{$associatedModel}->_name;
+							$defaults = array(
+								'foreign_key' => 'id',
+							);
+							$settings = array_merge($defaults, $relationship);
+							$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
+							$joinValue = $result[$model->_name][$model->_primaryKey];
+							$conditions = array(array($joinKey => $joinValue));
+							
+							
+							$data = array(
+								'conditions' => $conditions,
+								'recursive' => -1,
+								'fields' => $this->_associationFields
+							);
+							$results[$key][$model->{$associatedModel}->_name] = $model->{$associatedModel}->find('all', $data);
+							
+						}
+					} elseif ($relationship === 'hasAndBelongsToMany') {
+					
+					}
+				}
+			}
+		}
+		return $results;
+	}
 	
 	
-	public function fieldBelongsToModel($field, $model) {
+	
+	
+	public function fieldBelongsToModel($field, Model $model) {
 		if (strpos($field, '.') !== false) {
 			list($extractedModel, $field) = explode('.', $field);
-			if ($model === $extractedModel) {
+			if ($model->_name === $extractedModel) {
 				return true;
+			}
+			foreach ($model->_associations as $type => $value) {
+				if (is_array($value)) {
+					foreach ($value as $key => $val) {
+						foreach ($val as $assosiatedModel => $relationship) {
+							if($type === 'hasOne' || $type === 'belongsTo') {
+								if($extractedModel === $assosiatedModel) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+				
 			}
 		}
 		return false;

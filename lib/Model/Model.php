@@ -21,6 +21,9 @@ class Model {
 	public $_primaryKey = 'id';
 	
 	private $_associations = null;
+
+	
+	
 	public function __construct() {
 		if ($this->_name === null || !isset($this->_name)) {
 			$this->_name = get_class($this);
@@ -83,7 +86,7 @@ class Model {
 		if (!is_array($query)) {
 			trigger_error('Query data must be an array…');
 		}
-		$db = ConnectionManager::getDataSource('default');
+		$db = $this->getDataSource();
 		switch($type) {
 			case 'all':
 				return $db->read($this, $query);
@@ -126,10 +129,13 @@ class Model {
 	}
 	
 	public function getLastStatement() {
-		$db = ConnectionManager::getDataSource('default');
+		$db = $this->getDataSource();
 		return $db->_lastStatement;
 	}
 	
+	public function getDataSource() {
+		return ConnectionManager::getDataSource($this->_dbConfig);
+	}
 	
 	private function _loadModel($class) {
 
