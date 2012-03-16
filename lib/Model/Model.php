@@ -21,6 +21,8 @@ class Model {
 	public $_primaryKey = 'id';
 	
 	private $_associations = null;
+	
+	public $recursive = -1;
 
 	
 	
@@ -82,7 +84,7 @@ class Model {
 		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
 	
-	public function find($type = 'all', $query) {
+	public function find($type = 'all', $query = array()) {
 		if (!is_array($query)) {
 			trigger_error('Query data must be an array…');
 		}

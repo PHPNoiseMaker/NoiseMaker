@@ -206,13 +206,16 @@ class DboSource extends DataSource{
 				$this->_fields = 'COUNT(*)';
 			}
 			
+			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
+				$model->recursive = $queryData['recursive'];
+			}
 			
 			//Joins MUST be done before conditions. Order matters.
 			
 			// Joins
 			
-			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
-				$this->fetchJoins($model, $queryData['recursive']);
+			if($model->recursive > -1) {
+				$this->fetchJoins($model, $model->recursive);
 			}
 			
 			
@@ -238,9 +241,9 @@ class DboSource extends DataSource{
 			$this->execute();
 			$results = $this->fetchResults($count);
 			
-			
-			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
-				$results = $this->fetchAssociations($model, $results, $queryData['recursive']);
+			if($model->recursive > -1) {
+				
+				$results = $this->fetchAssociations($model, $results, $model->recursive);
 			}
 			
 			return $results;
@@ -378,10 +381,10 @@ class DboSource extends DataSource{
 							. $model->{$associatedModel}->_primaryKey
 						);
 						$conditions = array(array($joinKey => $joinValue));
-						if (array_key_exists('scope', $settings)) {
-							if(is_array($settings['scope'])) {
+						if (array_key_exists('conditions', $settings)) {
+							if(is_array($settings['conditions'])) {
 								
-								$conditions[] = $this->parseConditions($settings['scope'], false);
+								$conditions[] = $this->parseConditions($settings['conditions'], false);
 
 							}
 						}
@@ -431,6 +434,7 @@ class DboSource extends DataSource{
 				}
 			}
 		}
+		
 		return $results;
 	}
 	
@@ -448,7 +452,7 @@ class DboSource extends DataSource{
 					foreach ($value as $key => $val) {
 						foreach ($val as $assosiatedModel => $relationship) {
 							if($type === 'hasOne' || $type === 'belongsTo') {
-								if($extractedModel === $assosiatedModel) {
+								if($extractedModel === $assosiatedModel && $model->recursive > -1) {
 									return true;
 								}
 							}
