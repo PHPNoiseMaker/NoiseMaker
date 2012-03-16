@@ -213,7 +213,7 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
-			var_dump($sql);
+		
 			
 			$this->prepare($sql, $this->_params);
 			
@@ -362,7 +362,6 @@ class DboSource extends DataSource{
 								foreach($settings['scope'] as $key => $value) {
 									$conditions[] = $this->_parseKey($key, $value, true, true);
 								}
-								var_dump($conditions);
 								
 								
 							}
