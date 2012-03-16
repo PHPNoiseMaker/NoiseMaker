@@ -141,7 +141,7 @@ class DboSource extends DataSource{
 		$this->_conditions = null;
 	}
 	
-	public function read(Model &$model, $queryData = array(), $count = false) {
+	public function read(Model &$model, $queryData = array(), $count = false, $associated = false) {
 		$this->releaseResources();
 		if (is_array($queryData)) {
 			$this->_table = $model->_table;
@@ -230,7 +230,7 @@ class DboSource extends DataSource{
 			$this->prepare($sql, $this->_params);
 			
 			$this->execute();
-			$results = $this->fetchResults($count);
+			$results = $this->fetchResults($count, $associated);
 			
 			if($model->recursive > -1) {
 				
@@ -413,7 +413,7 @@ class DboSource extends DataSource{
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
-					if($association === 'hasMany') {
+					if($association === 'hasMany' || $association === 'hasAndBelongsToMany') {
 						foreach ($results as $key => $result) {
 							$targetAlias = $model->{$associatedModel}->_name;
 							$defaults = array(
@@ -433,7 +433,7 @@ class DboSource extends DataSource{
 								'fields' => $this->_associationFields,
 								'limit' => $settings['limit']
 							);
-							$results[$key][$model->{$associatedModel}->_name] = $model->{$associatedModel}->find('all', $data);
+							$results[$key][$model->{$associatedModel}->_name] = $model->{$associatedModel}->find('all', $data, true);
 							
 						}
 					} elseif ($relationship === 'hasAndBelongsToMany') {
@@ -492,7 +492,7 @@ class DboSource extends DataSource{
 		return '?';
 	}
 	
-	public function fetchResults($count = false) {
+	public function fetchResults($count = false, $associated = false) {
 
 		$columns = array();
 		
@@ -506,8 +506,10 @@ class DboSource extends DataSource{
 		while($row = $this->_handle->fetch(PDO::FETCH_NUM)) {
 			$result[] = array();
 			foreach($row as $key => $val) {
-				if (!$count)
+				if (!$count && !$associated)
 					$result[count($result) - 1][$columns[$key]['table']][$columns[$key]['name']] = $val;
+				elseif (!$count && $associated)
+					$result[count($result) - 1][$columns[$key]['name']] = $val;
 			}
 			
 		}

@@ -84,19 +84,19 @@ class Model {
 		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
 	
-	public function find($type = 'all', $query = array()) {
+	public function find($type = 'all', $query = array(), $associated = false) {
 		if (!is_array($query)) {
 			trigger_error('Query data must be an array…');
 		}
 		$db = $this->getDataSource();
 		switch($type) {
 			case 'all':
-				return $db->read($this, $query);
+				return $db->read($this, $query, false, $associated);
 			case 'count':
-				return $db->read($this, $query, true);
+				return $db->read($this, $query, true, $associated);
 			case 'first':
 				$query['limit'] = 1;
-				$result = $db->read($this, $query);
+				$result = $db->read($this, $query, false, $associated);
 				return $result[0];
 			case 'last':
 				$query['limit'] = 1;
@@ -124,7 +124,7 @@ class Model {
 					$query['order'] = array(array($this->_name . '.' . $this->_primaryKey => 'DESC'));
 				}
 				var_dump($query['order']);
-				$result = $db->read($this, $query);
+				$result = $db->read($this, $query, false, $associated);
 				return $result[0];
 		}
 		
