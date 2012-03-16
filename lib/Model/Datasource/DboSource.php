@@ -50,8 +50,8 @@ class DboSource extends DataSource{
 			case 'update':
 				$query = "UPDATE {$this->_table} AS {$this->_alias}"
 					   . " {$this->_joins}"
-					   . " SET ({$this->_fields})"
-					   . " VALUES ({$this->_values})";
+					   . " SET {$this->_fields}"
+					   . " {$this->_conditions}";
 				return $query;
 			
 			case 'insert':
@@ -91,8 +91,13 @@ class DboSource extends DataSource{
 		}
 	}
 	
-	public function prepare($sql, $params = array()) {
-		$this->_params = $params;
+	public function prepare($sql, $params = null) {
+		if($params !== null) {
+			$this->_params = $params;
+		} else {
+			$params = $this->_params;
+		}
+		
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
 		ConnectionManager::startRecord($sql, $params);
@@ -164,7 +169,11 @@ class DboSource extends DataSource{
 			return false;
 		}
 		$query = $this->buildStatement('insert');
-		var_dump($query, $this->_params);
+		
+		$this->prepare($query);
+		$this->execute();
+		$id = $this->getLastInsertId();
+		$model->id = $id;
 	}
 	
 	public function read(Model &$model, $queryData = array(), $count = false, $associated = false) {
@@ -219,7 +228,7 @@ class DboSource extends DataSource{
 			$sql = $this->buildStatement('select');
 			
 			
-			$this->prepare($sql, $this->_params);
+			$this->prepare($sql);
 			
 			$this->execute();
 			$results = $this->fetchResults($count, $associated);
@@ -235,6 +244,30 @@ class DboSource extends DataSource{
 		trigger_error('Query data must be an array...');
 	}
 	
+	public function update(Model &$model, $fields, $values, $conditions) {
+		$this->releaseResources();
+		if(is_array($fields) && is_array($values)) {
+			$fieldCount = count($fields);
+			$valueCount = count($values);
+			if($fieldCount === $valueCount) {
+				$this->_fields = implode(',', $this->updateFields($fields, $values));
+			} else {
+				return false;
+			}
+			$this->_table = $this->fieldQuote($model->_table);
+			$this->_alias = $this->fieldQuote($model->_name);
+			$this->_conditions = $this->parseConditions($conditions);
+		} else {
+			return false;
+		}
+		$query = $this->buildStatement('update');
+		//var_dump($query, $this->_params);
+		$this->prepare($query);
+		$this->execute();
+		$id = $this->getLastInsertId();
+		$model->id = $id;
+	}
+	
 	public function order($order) {
 		if (is_array($order)) {
 			if ($this->_order === null) {
@@ -245,6 +278,24 @@ class DboSource extends DataSource{
 			}
 		} else {
 			$this->_order = $order;
+		}
+	}
+	
+	public function updateFields($fields, $values) {
+		if (is_array($fields) && is_array($values)) {
+			$fieldCount = count($fields);
+			if($fieldCount === count($values)) {
+				$out = array();
+				for($i = 0; $i < $fieldCount; $i++) {
+					$out[] = $this->fieldQuote($fields[$i]) . ' = ' . $this->placeHold($values[$i]);
+				}
+				return $out;
+			} else {
+				return false;
+			}
+			
+		} else {
+			return false;
 		}
 	}
 	

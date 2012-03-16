@@ -23,6 +23,8 @@ class Model {
 	private $_associations = null;
 	
 	public $recursive = -1;
+	
+	public $id = null;
 
 	
 	
@@ -132,6 +134,10 @@ class Model {
 		}
 		return $this->afterFind($results);
 		
+	}
+	
+	public function create() {
+		$this->id = null;
 	}
 	
 	public function afterFind($results) {
