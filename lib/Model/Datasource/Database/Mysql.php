@@ -2,7 +2,7 @@
 App::uses('DboSource', 'Model/Datasource');
 class Mysql extends DboSource{ 
 	protected $_baseConfig = array(
-		'persistent' => true,
+		'persistent' => false,
 		'host' => 'localhost',
 		'port' => '3306',
 		'login' => 'root',

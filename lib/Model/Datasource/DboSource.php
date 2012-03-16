@@ -148,16 +148,7 @@ class DboSource extends DataSource{
 			$this->_alias = $this->quote . $model->_name . $this->quote;
 			
 			if (isset($queryData['limit'])) {
-				if (is_int($queryData['limit']))
-					$this->_limit = 'LIMIT 0,' . $queryData['limit'];
-				elseif (is_string($queryData['limit'])) {
-					if (strpos($queryData['limit'], ',') !== false) {
-						list($start, $end) = explode(',', $queryData['limit']);
-						$this->_limit = "LIMIT {$start}, {$end}";
-					} else {
-						$this->_limit = 'LIMIT 0, ' . (int) $queryData['limit'];
-					}
-				}
+				$this->_limit = $this->limit($queryData['limit']);
 			}
 			
 			if (isset($queryData['order'])) {
@@ -251,6 +242,20 @@ class DboSource extends DataSource{
 		}
 		trigger_error('Query data must be an array...');
 	}
+	
+	public function limit($limit) {
+		if (is_int($limit))
+			return 'LIMIT 0,' . $limit;
+		elseif (is_string($limit)) {
+			if (strpos($limit, ',') !== false) {
+				list($start, $end) = explode(',', $limit);
+				return  "LIMIT {$start}, {$end}";
+			} else {
+				return  'LIMIT 0, ' . (int) $limit;
+			}
+		}
+	}
+	
 	
 	public function order($order) {
 		if (is_array($order)) {
@@ -362,7 +367,7 @@ class DboSource extends DataSource{
 		
 	}
 	
-	
+	// Fetches hasOne and belongsTo Associations 
 	public function fetchJoins(Model $model, $recursive) {
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
@@ -403,7 +408,7 @@ class DboSource extends DataSource{
 		}
 	}
 	
-	
+	// Fetches hasMany and hasAndBelongsToMany associations
 	public function fetchAssociations(Model $model, $results, $recursive) {
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
@@ -413,8 +418,10 @@ class DboSource extends DataSource{
 							$targetAlias = $model->{$associatedModel}->_name;
 							$defaults = array(
 								'foreign_key' => 'id',
+								'limit' => 100
 							);
 							$settings = array_merge($defaults, $relationship);
+							
 							$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
 							$joinValue = $result[$model->_name][$model->_primaryKey];
 							$conditions = array(array($joinKey => $joinValue));
@@ -423,7 +430,8 @@ class DboSource extends DataSource{
 							$data = array(
 								'conditions' => $conditions,
 								'recursive' => -1,
-								'fields' => $this->_associationFields
+								'fields' => $this->_associationFields,
+								'limit' => $settings['limit']
 							);
 							$results[$key][$model->{$associatedModel}->_name] = $model->{$associatedModel}->find('all', $data);
 							
