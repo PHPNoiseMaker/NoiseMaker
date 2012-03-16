@@ -13,6 +13,8 @@ class DboSource extends DataSource{
 	
 	protected $_fields = null;
 	
+	protected $_values = null;
+	
 	protected $_table = null;
 	
 	protected $_alias = null;
@@ -46,19 +48,16 @@ class DboSource extends DataSource{
 				return $query;
 			
 			case 'update':
-				$placeHolders = $this->createPlaceHolders();
 				$query = "UPDATE {$this->_table} AS {$this->_alias}"
 					   . " {$this->_joins}"
 					   . " SET ({$this->_fields})"
-					   . " VALUES ({$placeHolders}";
+					   . " VALUES ({$this->_values})";
 				return $query;
 			
 			case 'insert':
-				$placeHolders = $this->createPlaceHolders();
-				return "INSERT INTO {$this->_table} ({$this->_fields}) VALUES ({$placeHolders}";
+				return "INSERT INTO {$this->_table} ({$this->_fields}) VALUES ({$this->_values})";
 			
 			case 'delete':
-				$placeHolders = $this->createPlaceHolders();
 				return "DELETE FROM {$this->_table} {$this->_joins} {$this->_conditions}";
 
 			
@@ -136,9 +135,36 @@ class DboSource extends DataSource{
 		$this->_limit = null;
 		$this->_joins = null;
 		$this->_fields = null;
+		$this->_values = null;
 		$this->_table = null;
 		$this->_alias = null;
 		$this->_conditions = null;
+		$this->_handle = null;
+	}
+	
+	public function create(Model &$model, $fields, $values) {
+		$this->releaseResources();
+		if(is_array($fields) && is_array($values)) {
+			$fieldCount = count($fields);
+			$valueCount = count($values);
+			if($fieldCount === $valueCount) {
+				foreach ($values as $key => $value) {
+					$values[$key] = $this->placeHold($value);
+				}
+				foreach ($fields as $key => $field) {
+					$fields[$key] = $this->fieldQuote($field);
+				}
+				$this->_fields = implode(',', $fields);
+				$this->_values = implode(',', $values);
+			} else {
+				return false;
+			}
+			$this->_table = $this->fieldQuote($model->_table);
+		} else {
+			return false;
+		}
+		$query = $this->buildStatement('insert');
+		var_dump($query, $this->_params);
 	}
 	
 	public function read(Model &$model, $queryData = array(), $count = false, $associated = false) {
@@ -497,6 +523,10 @@ class DboSource extends DataSource{
 	public function placeHold($value) {
 		$this->_params[] = $value;
 		return '?';
+	}
+	
+	public function getLastInsertId() {
+		return $this->_connection->lastInsertId();
 	}
 	
 	public function fetchResults($count = false, $associated = false) {
