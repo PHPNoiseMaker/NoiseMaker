@@ -10,6 +10,8 @@ class ConnectionManager {
 	
 	private static $_statementHistory = array();
 	
+	private static $_statementBuffer = null;
+	
 	public function __construct() {
 			
 	}
@@ -87,8 +89,32 @@ class ConnectionManager {
 		return null;
 	}
 	
-	public static function record($sql, $params) {
-		self::getInstance()->addHistory(array($sql, $params));
+	private static function record_start($sql, $params) {
+		self::$_statementBuffer = array($sql, $params, microtime(true));
+	}
+	private static function record_end() {
+		if(self::$_statementBuffer !== null) {
+			list($sql, $params, $start_time) = self::$_statementBuffer;
+			self::$_statementBuffer = null;
+			self::$_statementHistory[] = array(
+				'query' => $sql, 
+				'params' => $params, 
+				'duration' => (microtime(true) - $start_time) * 1000 * 1000 . ' ms'
+			);
+		} else {
+			
+			return null;
+		}
+	}
+	
+	public static function startRecord($sql, $params) {
+		self::getInstance()->record_start($sql, $params);
+		return true;
+	}
+	
+	public static function endRecord() {
+		var_dump('test');
+		self::getInstance()->record_end();
 		return true;
 	}
 	

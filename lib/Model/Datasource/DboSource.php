@@ -96,11 +96,12 @@ class DboSource extends DataSource{
 		$this->_params = $params;
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
-		ConnectionManager::record($sql, $params);
+		ConnectionManager::startRecord($sql, $params);
 	}
 	
-	public function execute($params = array()) {
-		$this->_handle->execute($params);
+	public function execute() {
+		$this->_handle->execute($this->_params);
+		ConnectionManager::endRecord();
 	}
 	
 	public function setFetch($type = 'assoc') {
@@ -234,6 +235,7 @@ class DboSource extends DataSource{
 			
 			$this->prepare($sql, $this->_params);
 			
+			$this->execute();
 			$results = $this->fetchResults($count);
 			
 			
@@ -481,7 +483,7 @@ class DboSource extends DataSource{
 	public function fetchResults($count = false) {
 
 		$columns = array();
-		$this->_handle->execute($this->_params);
+		
 		for($i = 0; $i < $this->_handle->columnCount(); $i++) {
 			$meta = $this->_handle->getColumnMeta($i);
 			$columns[$i] = $meta;
