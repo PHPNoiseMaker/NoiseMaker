@@ -137,7 +137,7 @@ class DboSource extends DataSource{
 		$this->_conditions = null;
 	}
 	
-	public function read(Model &$model, $queryData = array()) {
+	public function read(Model &$model, $queryData = array(), $count = false) {
 		$this->releaseResources();
 		if (is_array($queryData)) {
 			$this->_table = $model->_table;
@@ -188,6 +188,9 @@ class DboSource extends DataSource{
 			}  else {
 				$this->_fields = '*';
 			}
+			if($count) {
+				$this->_fields = 'COUNT(*)';
+			}
 			
 			
 			//Joins MUST be done before conditions. Order matters.
@@ -213,11 +216,10 @@ class DboSource extends DataSource{
 			
 			
 			$sql = $this->buildStatement('select');
-		
 			
 			$this->prepare($sql, $this->_params);
 			
-			return $this->fetchResults();
+			return $this->fetchResults($count);
 			
 		}
 		trigger_error('Query data must be an array...');
@@ -412,7 +414,7 @@ class DboSource extends DataSource{
 		return '?';
 	}
 	
-	public function fetchResults() {
+	public function fetchResults($count = false) {
 
 		$columns = array();
 		$this->_handle->execute($this->_params);
@@ -426,9 +428,13 @@ class DboSource extends DataSource{
 		while($row = $this->_handle->fetch(PDO::FETCH_NUM)) {
 			$result[] = array();
 			foreach($row as $key => $val) {
-				$result[count($result) - 1][$columns[$key]['table']][$columns[$key]['name']] = $val;
+				if (!$count)
+					$result[count($result) - 1][$columns[$key]['table']][$columns[$key]['name']] = $val;
 			}
 			
+		}
+		if($count) {
+			return (int) $val;
 		}
 		$this->_handle->closeCursor();
 		return $result;

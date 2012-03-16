@@ -87,6 +87,8 @@ class Model {
 		switch($type) {
 			case 'all':
 				return $db->read($this, $query);
+			case 'count':
+				return $db->read($this, $query, true);
 			case 'first':
 				$query['limit'] = 1;
 				$result = $db->read($this, $query);
