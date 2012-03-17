@@ -41,12 +41,12 @@ class Mysql extends DboSource{
 	}
 	
 	public function buildGroupBy($fields) {
-		if(is_array($fields)) {
+		if (is_array($fields)) {
 			foreach($fields as $field) {
 				$this->buildGroupBy($field);
 			}
 		} else {
-			if($this->_groupBy === null) {
+			if ($this->_groupBy === null) {
 				$this->_groupBy = 'GROUP BY ' . $this->fieldQuote($fields);
 			} else {
 				$this->_groupBy .= ', ' . $this->fieldQuote($fields);

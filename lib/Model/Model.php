@@ -202,12 +202,12 @@ class Model {
 		foreach ($associations as $association) {
 			if (is_array($this->{$association})) {
 				foreach ($this->{$association} as $key => $value) {
-					if(!array_key_exists($association, $this->_associations)) {
+					if (!array_key_exists($association, $this->_associations)) {
 						$this->_associations[$association] = array();
 					}
 					if (is_string($key) && is_array($value)) {
 						array_push($this->_associations[$association], array($key => $value));
-					} elseif(is_numeric($key) && is_string($value)) {
+					} elseif (is_numeric($key) && is_string($value)) {
 						array_push($this->_associations[$association], array($value => array()));
 					}
 				}
@@ -250,16 +250,16 @@ class Model {
 				if (isset($query['order'])) {
 					if (is_array($query['order'])) {
 						foreach ($query['order'] as $key => $val) {
-							if(is_numeric($key) && is_array($val)) {
+							if (is_numeric($key) && is_array($val)) {
 								foreach ($val as $field => $order) {
-									if($order == 'ASC') {
+									if ($order == 'ASC') {
 										$query['order'][$key][$field] = 'DESC';
 									} else {
 										$query['order'][$key][$field] = 'ASC';
 									}
 								}
 							} else {
-								if($val == 'ASC') {
+								if ($val == 'ASC') {
 									$query['order'][$field] = 'DESC';
 								} else {
 									$query['order'][$field] = 'ASC';
@@ -286,15 +286,26 @@ class Model {
 	 * @param mixed $data
 	 * @return void
 	 */
-	public function save($data) {
+	public function save($data, $whitelist = null) {
+		$data = $this->beforeSave($data);
 		if (is_array($data)) {
 			$db = $this->getDataSource();
-			foreach($data as $key => $val) {
-				if($db->fieldBelongsToModel($key, $this)) {
-					if(strpos($key, '.') !== false) {
+			foreach ($data as $key => $val) {
+				if ($db->fieldBelongsToModel($key, $this)) {
+					
+					if (
+						$whitelist !== null 
+						&& is_array($whitelist) 
+						&& !in_array($key, $whitelist)
+					) {
+						unset($data[$key]);
+						continue;
+					}
+					
+					if (strpos($key, '.') !== false) {
 						list(,$key) = explode('.', $key);
 					}
-					if($key === $this->_primaryKey) {
+					if ($key === $this->_primaryKey) {
 						$this->id = $val;
 					}
 					
@@ -308,7 +319,7 @@ class Model {
 				$fields = array();
 				$values = array();
 				foreach($data as $key => $val) {
-					if(strpos($key, '.') !== false) {
+					if (strpos($key, '.') !== false) {
 						list(,$key) = explode('.', $key);
 					}
 					$fields[] = $key;
@@ -317,7 +328,7 @@ class Model {
 				return $db->create($this, $fields, $values);
 			
 			} else {
-				if($this->exists()) {
+				if ($this->exists()) {
 					$fields = array_keys($data);
 					$values = array_values($data);
 					$fieldKey = $this->_name . '.' . $this->_primaryKey;
@@ -337,8 +348,8 @@ class Model {
 	
 	
 	public function delete($id = null) {
-		if($id !== null) {
-			if($this->exists($id)) {
+		if ($id !== null) {
+			if ($this->exists($id)) {
 				$conditions = array(
 					$this->_primaryKey => $this->id
 				);
@@ -368,7 +379,7 @@ class Model {
 	 * @return void
 	 */
 	public function exists($id = null) {
-		if($id === null) {
+		if ($id === null) {
 			$id = $this->id;
 		}
 		$count = $this->find('count', array(
@@ -376,7 +387,7 @@ class Model {
 				$this->_name . '.' . $this->_primaryKey => $id
 			)
 		));
-		if($count) {
+		if ($count) {
 			return true;
 		}
 		return false;
@@ -404,16 +415,6 @@ class Model {
 		return $data;
 	}
 	
-	/**
-	 * afterSave function.
-	 * 
-	 * @access public
-	 * @param mixed $data
-	 * @return void
-	 */
-	public function afterSave($data) {
-		return $data;
-	}
 	
 	/**
 	 * getLastStatement function.

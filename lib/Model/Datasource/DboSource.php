@@ -92,10 +92,10 @@ class DboSource extends DataSource{
 	}
 	
 	public function prepare($sql, $params = null) {
-		if($this->_connection === null) {
+		if ($this->_connection === null) {
 			$this->connect();
 		}
-		if($params !== null) {
+		if ($params !== null) {
 			$this->_params = $params;
 		} else {
 			$params = $this->_params;
@@ -162,10 +162,10 @@ class DboSource extends DataSource{
 	 */
 	public function create(Model &$model, $fields, $values) {
 		$this->releaseResources();
-		if(is_array($fields) && is_array($values)) {
+		if (is_array($fields) && is_array($values)) {
 			$fieldCount = count($fields);
 			$valueCount = count($values);
-			if($fieldCount === $valueCount) {
+			if ($fieldCount === $valueCount) {
 				foreach ($values as $key => $value) {
 					$values[$key] = $this->placeHold($value);
 				}
@@ -218,11 +218,11 @@ class DboSource extends DataSource{
 			}  else {
 				$this->_fields = '*';
 			}
-			if($count) {
+			if ($count) {
 				$this->_fields = 'COUNT(' . $this->fieldQuote($model->_name . '.' . $model->_primaryKey) . ')';
 			}
 			
-			if(isset($queryData['recursive']) && $queryData['recursive'] > -1) {
+			if (isset($queryData['recursive']) && $queryData['recursive'] > -1) {
 				$model->recursive = $queryData['recursive'];
 			}
 			
@@ -230,7 +230,7 @@ class DboSource extends DataSource{
 			
 			// Joins
 			
-			if($model->recursive > -1 && !$count) {
+			if ($model->recursive > -1 && !$count) {
 				$this->fetchJoins($model, $model->recursive);
 			}
 			
@@ -256,11 +256,11 @@ class DboSource extends DataSource{
 			$this->execute();
 			$results = $this->fetchResults($count, $associated);
 			
-			if($model->recursive > -1 && !$count) {
+			if ($model->recursive > -1 && !$count) {
 				
 				$results = $this->fetchAssociations($model, $results, $model->recursive);
 			}
-			if(!empty($results))
+			if (!empty($results))
 				return $results;
 			return false;
 			
@@ -280,10 +280,10 @@ class DboSource extends DataSource{
 	 */
 	public function update(Model &$model, $fields, $values, $conditions) {
 		$this->releaseResources();
-		if(is_array($fields) && is_array($values)) {
+		if (is_array($fields) && is_array($values)) {
 			$fieldCount = count($fields);
 			$valueCount = count($values);
-			if($fieldCount === $valueCount) {
+			if ($fieldCount === $valueCount) {
 				$this->_fields = implode(',', $this->updateFields($fields, $values));
 			} else {
 				return false;
@@ -311,7 +311,7 @@ class DboSource extends DataSource{
 	 */
 	public function delete(Model &$model, $conditions) {
 		$this->releaseResources();
-		if(is_array($conditions)) {
+		if (is_array($conditions)) {
 			$this->_conditions = $this->parseConditions($conditions);
 			$this->_table = $model->_table;
 			
@@ -354,7 +354,7 @@ class DboSource extends DataSource{
 	public function updateFields($fields, $values) {
 		if (is_array($fields) && is_array($values)) {
 			$fieldCount = count($fields);
-			if($fieldCount === count($values)) {
+			if ($fieldCount === count($values)) {
 				$out = array();
 				for($i = 0; $i < $fieldCount; $i++) {
 					$out[] = $this->fieldQuote($fields[$i]) . ' = ' . $this->placeHold($values[$i]);
@@ -382,7 +382,7 @@ class DboSource extends DataSource{
 			$this->_fields = '';
 			foreach($fields as $field) {
 				if (!empty($field)) {
-					if($this->fieldBelongsToModel($field, $model)) {
+					if ($this->fieldBelongsToModel($field, $model)) {
 						$this->_fields .= $this->fieldQuote($field) . ',';
 						
 					} else {
@@ -391,7 +391,7 @@ class DboSource extends DataSource{
 					
 				}
 			}
-			if(empty($this->_fields)) {
+			if (empty($this->_fields)) {
 				$this->_fields = '*';
 			}
 
@@ -486,7 +486,7 @@ class DboSource extends DataSource{
 			if (is_numeric($key) && empty($value)) {
 				continue;
 			} elseif (is_numeric($key) && is_string($value)) {
-				if(!$join)
+				if (!$join)
 					$out[] = $not . $this->fieldQuote($value);
 				else
 					$out[] = $not . $value;
@@ -597,7 +597,7 @@ class DboSource extends DataSource{
 						);
 						$conditions = array(array($joinKey => $joinValue));
 						if (array_key_exists('conditions', $settings)) {
-							if(is_array($settings['conditions'])) {
+							if (is_array($settings['conditions'])) {
 								
 								$conditions[] = $this->parseConditions($settings['conditions'], false);
 
@@ -632,7 +632,7 @@ class DboSource extends DataSource{
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
-					if($association === 'hasMany' || $association === 'hasAndBelongsToMany') {
+					if ($association === 'hasMany' || $association === 'hasAndBelongsToMany') {
 						foreach ($results as $key => $result) {
 							$targetAlias = $model->{$associatedModel}->_name;
 							$defaults = array(
@@ -686,8 +686,8 @@ class DboSource extends DataSource{
 				if (is_array($value)) {
 					foreach ($value as $key => $val) {
 						foreach ($val as $assosiatedModel => $relationship) {
-							if($type === 'hasOne' || $type === 'belongsTo') {
-								if($extractedModel === $assosiatedModel && $model->recursive > -1) {
+							if ($type === 'hasOne' || $type === 'belongsTo') {
+								if ($extractedModel === $assosiatedModel && $model->recursive > -1) {
 									return true;
 								}
 							}
@@ -782,7 +782,7 @@ class DboSource extends DataSource{
 			}
 			
 		}
-		if($count) {
+		if ($count) {
 			return (int) $val;
 		}
 		$this->_handle->closeCursor();
