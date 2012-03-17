@@ -92,6 +92,9 @@ class DboSource extends DataSource{
 	}
 	
 	public function prepare($sql, $params = null) {
+		if($this->_connection === null) {
+			$this->connect();
+		}
 		if($params !== null) {
 			$this->_params = $params;
 		} else {
@@ -105,7 +108,7 @@ class DboSource extends DataSource{
 	
 	public function execute() {
 		$this->_handle->execute($this->_params);
-		ConnectionManager::endRecord();
+		ConnectionManager::endRecord($this->getAffected());
 	}
 	
 	public function setFetch($type = 'assoc') {
@@ -145,8 +148,18 @@ class DboSource extends DataSource{
 		$this->_alias = null;
 		$this->_conditions = null;
 		$this->_handle = null;
+		//$this->_connection = null;
 	}
 	
+	/**
+	 * create function.
+	 * 
+	 * @access public
+	 * @param Model &$model
+	 * @param mixed $fields
+	 * @param mixed $values
+	 * @return void
+	 */
 	public function create(Model &$model, $fields, $values) {
 		$this->releaseResources();
 		if(is_array($fields) && is_array($values)) {
@@ -176,6 +189,16 @@ class DboSource extends DataSource{
 		$model->id = $id;
 	}
 	
+	/**
+	 * read function.
+	 * 
+	 * @access public
+	 * @param Model &$model
+	 * @param array $queryData (default: array())
+	 * @param bool $count (default: false)
+	 * @param bool $associated (default: false)
+	 * @return void
+	 */
 	public function read(Model &$model, $queryData = array(), $count = false, $associated = false) {
 		$this->releaseResources();
 		if (is_array($queryData)) {
@@ -244,6 +267,16 @@ class DboSource extends DataSource{
 		trigger_error('Query data must be an array...');
 	}
 	
+	/**
+	 * update function.
+	 * 
+	 * @access public
+	 * @param Model &$model
+	 * @param mixed $fields
+	 * @param mixed $values
+	 * @param mixed $conditions
+	 * @return void
+	 */
 	public function update(Model &$model, $fields, $values, $conditions) {
 		$this->releaseResources();
 		if(is_array($fields) && is_array($values)) {
@@ -268,6 +301,34 @@ class DboSource extends DataSource{
 		$model->id = $id;
 	}
 	
+	/**
+	 * delete function.
+	 * 
+	 * @access public
+	 * @param Model &$model
+	 * @param mixed $conditions
+	 * @return void
+	 */
+	public function delete(Model &$model, $conditions) {
+		$this->releaseResources();
+		if(is_array($conditions)) {
+			$this->_conditions = $this->parseConditions($conditions);
+			$this->_table = $model->_table;
+			
+			$query = $this->buildStatement('delete');
+			$this->prepare($query);
+			$this->execute();
+		}
+		
+	}
+	
+	/**
+	 * order function.
+	 * 
+	 * @access public
+	 * @param mixed $order
+	 * @return void
+	 */
 	public function order($order) {
 		if (is_array($order)) {
 			if ($this->_order === null) {
@@ -281,6 +342,14 @@ class DboSource extends DataSource{
 		}
 	}
 	
+	/**
+	 * updateFields function.
+	 * 
+	 * @access public
+	 * @param mixed $fields
+	 * @param mixed $values
+	 * @return void
+	 */
 	public function updateFields($fields, $values) {
 		if (is_array($fields) && is_array($values)) {
 			$fieldCount = count($fields);
@@ -299,6 +368,14 @@ class DboSource extends DataSource{
 		}
 	}
 	
+	/**
+	 * fields function.
+	 * 
+	 * @access public
+	 * @param mixed $fields
+	 * @param Model $model
+	 * @return void
+	 */
 	public function fields($fields, Model $model) {
 		if (is_array($fields)) {
 			$this->_fields = '';
@@ -327,6 +404,13 @@ class DboSource extends DataSource{
 		}
 		
 	}
+	/**
+	 * limit function.
+	 * 
+	 * @access public
+	 * @param mixed $limit
+	 * @return void
+	 */
 	public function limit($limit) {
 		if (is_int($limit))
 			return 'LIMIT 0,' . $limit;
@@ -341,6 +425,13 @@ class DboSource extends DataSource{
 	}
 	
 	
+	/**
+	 * setOrder function.
+	 * 
+	 * @access public
+	 * @param mixed $order
+	 * @return void
+	 */
 	public function setOrder($order) {
 		if (is_array($order)) {
 			foreach ($order as $key => $val) {
@@ -351,6 +442,15 @@ class DboSource extends DataSource{
 		}
 	}
 	
+	/**
+	 * parseConditions function.
+	 * 
+	 * @access public
+	 * @param mixed $conditions
+	 * @param bool $where (default: true)
+	 * @param bool $params (default: true)
+	 * @return void
+	 */
 	public function parseConditions($conditions, $where = true, $params = true) {		
 		if ($where) {
 			$where = ' WHERE ';
@@ -366,6 +466,14 @@ class DboSource extends DataSource{
 		return  $where . $this->fieldQuote($conditions, $params);
 	}
 	
+	/**
+	 * parseConditionArray function.
+	 * 
+	 * @access public
+	 * @param mixed $conditions
+	 * @param bool $params (default: false)
+	 * @return void
+	 */
 	public function parseConditionArray($conditions, $params = false) {
 		$out = array();
 		$commands = array('AND', 'XOR', 'NOT', 'OR', '||', '&&');
@@ -417,6 +525,15 @@ class DboSource extends DataSource{
 		return $out;
 	}
 	
+	/**
+	 * _parseKey function.
+	 * 
+	 * @access public
+	 * @param mixed $key
+	 * @param mixed $value
+	 * @param bool $params (default: false)
+	 * @return void
+	 */
 	public function _parseKey($key, $value, $params = false) {
 		$operators = array('!=', '>=', '<=', '<', '>', '=', 'LIKE');
 		foreach ($operators as $operator) {
@@ -451,7 +568,15 @@ class DboSource extends DataSource{
 		
 	}
 	
-	// Fetches hasOne and belongsTo Associations 
+
+	/**
+	 * Fetches hasOne and belongsTo Associations .
+	 * 
+	 * @access public
+	 * @param Model $model
+	 * @param mixed $recursive
+	 * @return void
+	 */
 	public function fetchJoins(Model $model, $recursive) {
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
@@ -492,7 +617,16 @@ class DboSource extends DataSource{
 		}
 	}
 	
-	// Fetches hasMany and hasAndBelongsToMany associations
+
+	/**
+	 * Fetches hasMany and hasAndBelongsToMany associations
+	 * 
+	 * @access public
+	 * @param Model $model
+	 * @param mixed $results
+	 * @param mixed $recursive
+	 * @return void
+	 */
 	public function fetchAssociations(Model $model, $results, $recursive) {
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
@@ -533,6 +667,14 @@ class DboSource extends DataSource{
 	
 	
 	
+	/**
+	 * fieldBelongsToModel function.
+	 * 
+	 * @access public
+	 * @param mixed $field
+	 * @param Model $model
+	 * @return void
+	 */
 	public function fieldBelongsToModel($field, Model $model) {
 		if (strpos($field, '.') !== false) {
 			list($extractedModel, $field) = explode('.', $field);
@@ -557,6 +699,13 @@ class DboSource extends DataSource{
 		return false;
 	}
 	
+	/**
+	 * fieldQuote function.
+	 * 
+	 * @access public
+	 * @param mixed $field
+	 * @return void
+	 */
 	public function fieldQuote($field) {
 		if (strpos($field, '.') !== false) {
 			list($model, $field) = explode('.', $field);
@@ -571,15 +720,46 @@ class DboSource extends DataSource{
 		}
 	}
 	
+	/**
+	 * placeHold function.
+	 * 
+	 * @access public
+	 * @param mixed $value
+	 * @return void
+	 */
 	public function placeHold($value) {
 		$this->_params[] = $value;
 		return '?';
 	}
 	
+	/**
+	 * getLastInsertId function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function getLastInsertId() {
 		return $this->_connection->lastInsertId();
 	}
 	
+	/**
+	 * getAffected function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function getAffected() {
+		return $this->_handle->rowCount();
+	}
+	
+	/**
+	 * fetchResults function.
+	 * 
+	 * @access public
+	 * @param bool $count (default: false)
+	 * @param bool $associated (default: false)
+	 * @return void
+	 */
 	public function fetchResults($count = false, $associated = false) {
 
 		$columns = array();

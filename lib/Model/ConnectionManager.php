@@ -92,14 +92,15 @@ class ConnectionManager {
 	private static function record_start($sql, $params) {
 		self::$_statementBuffer = array($sql, $params, microtime(true));
 	}
-	private static function record_end() {
+	private static function record_end($affected) {
 		if(self::$_statementBuffer !== null) {
 			list($sql, $params, $start_time) = self::$_statementBuffer;
 			self::$_statementBuffer = null;
 			self::$_statementHistory[] = array(
 				'query' => $sql, 
 				'params' => $params, 
-				'duration' => (microtime(true) - $start_time) * 1000 * 1000 . ' ms'
+				'duration' => (microtime(true) - $start_time),
+				'affected' => $affected
 			);
 		} else {
 			
@@ -112,8 +113,8 @@ class ConnectionManager {
 		return true;
 	}
 	
-	public static function endRecord() {
-		self::getInstance()->record_end();
+	public static function endRecord($affected) {
+		self::getInstance()->record_end($affected);
 		return true;
 	}
 	
