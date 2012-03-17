@@ -316,6 +316,21 @@ class Model {
 				}
 				return $db->create($this, $fields, $values);
 			
+			} else {
+				if($this->exists()) {
+					$fields = array_keys($data);
+					$values = array_values($data);
+					$fieldKey = $this->_name . '.' . $this->_primaryKey;
+					$conditions = array(
+						$fieldKey => $this->id
+					);
+					return $db->update($this, $fields, $values, $conditions);
+					
+				} else {
+					$this->id = null;
+					$this->save($data);
+				}
+			
 			}
 			
 			
