@@ -288,57 +288,59 @@ class Model {
 	 */
 	public function save($data, $whitelist = null) {
 		$data = $this->beforeSave($data);
+		$out = array();
 		if (is_array($data)) {
 			$db = $this->getDataSource();
-			foreach ($data as $key => $val) {
-				if ($db->fieldBelongsToModel($key, $this)) {
-					
-					if (
-						$whitelist !== null 
-						&& is_array($whitelist) 
-						&& !in_array($key, $whitelist)
-					) {
-						unset($data[$key]);
-						continue;
+			
+			foreach ($data as $key => $field) {
+				if ($key === $this->_name) {
+					foreach ($field as $fieldName => $val) {
+						if (
+							$whitelist !== null 
+							&& is_array($whitelist) 
+							&& !in_array($key . '.' . $fieldName, $whitelist)
+						) {
+							continue;
+						}
+						
+						if (strpos($fieldName, '.') !== false) {
+							list(,$fieldName) = explode('.', $fieldName);
+						}
+						if ($fieldName === $this->_primaryKey) {
+							$this->id = $val;
+						}
+						$out[$key . '.' . $fieldName] = $val;
 					}
-					
-					if (strpos($key, '.') !== false) {
-						list(,$key) = explode('.', $key);
-					}
-					if ($key === $this->_primaryKey) {
-						$this->id = $val;
-					}
-					
 				} else {
-					unset($data[$key]);
+					continue;
 				}
-				
 			}
-			
-			if ($this->id === null) {
-				$fields = array();
-				$values = array();
-				foreach($data as $key => $val) {
-					if (strpos($key, '.') !== false) {
-						list(,$key) = explode('.', $key);
+			if(!empty($out)) {
+				if ($this->id === null) {
+					$fields = array();
+					$values = array();
+					foreach($out as $key => $val) {
+						if (strpos($key, '.') !== false) {
+							list(,$key) = explode('.', $key);
+						}
+						$fields[] = $key;
+						$values[] = $val;
 					}
-					$fields[] = $key;
-					$values[] = $val;
+					return $db->create($this, $fields, $values);
+				
+				} else {
+					if ($this->exists()) {
+						$fields = array_keys($out);
+						$values = array_values($out);
+						$fieldKey = $this->_name . '.' . $this->_primaryKey;
+						$conditions = array(
+							$fieldKey => $this->id
+						);
+						return $db->update($this, $fields, $values, $conditions);
+						
+					} 
+				
 				}
-				return $db->create($this, $fields, $values);
-			
-			} else {
-				if ($this->exists()) {
-					$fields = array_keys($data);
-					$values = array_values($data);
-					$fieldKey = $this->_name . '.' . $this->_primaryKey;
-					$conditions = array(
-						$fieldKey => $this->id
-					);
-					return $db->update($this, $fields, $values, $conditions);
-					
-				} 
-			
 			}
 			
 			
