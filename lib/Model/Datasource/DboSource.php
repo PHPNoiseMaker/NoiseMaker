@@ -260,8 +260,9 @@ class DboSource extends DataSource{
 				
 				$results = $this->fetchAssociations($model, $results, $model->recursive);
 			}
-			
-			return $results;
+			if(!empty($results))
+				return $results;
+			return false;
 			
 		}
 		trigger_error('Query data must be an array...');
@@ -297,8 +298,7 @@ class DboSource extends DataSource{
 		//var_dump($query, $this->_params);
 		$this->prepare($query);
 		$this->execute();
-		$id = $this->getLastInsertId();
-		$model->id = $id;
+		return $this->getAffected();
 	}
 	
 	/**
@@ -318,8 +318,9 @@ class DboSource extends DataSource{
 			$query = $this->buildStatement('delete');
 			$this->prepare($query);
 			$this->execute();
+			return $this->getAffected();
 		}
-		
+		return false;
 	}
 	
 	/**
