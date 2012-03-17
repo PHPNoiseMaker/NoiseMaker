@@ -326,14 +326,24 @@ class Model {
 					);
 					return $db->update($this, $fields, $values, $conditions);
 					
-				} else {
-					$this->id = null;
-					$this->save($data);
-				}
+				} 
 			
 			}
 			
 			
+		}
+		return false;
+	}
+	
+	
+	public function delete($id = null) {
+		if($id !== null) {
+			if($this->exists($id)) {
+				$conditions = array(
+					$this->_primaryKey => $this->id
+				);
+				return $this->getDataSource()->delete($this, $conditions);
+			}
 		}
 		return false;
 	}
