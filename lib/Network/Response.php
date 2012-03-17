@@ -166,13 +166,14 @@ class Response {
 	public function send() {
 		echo $this->_body;
 		if (Config::getConfig('debug') > 1) {
-			var_dump((memory_get_peak_usage(true)) / 1024 / 1024);
-			//var_dump($_SERVER);
-			//var_dump($_ENV);	
-			//var_dump(Config::getConfigs());
 			App::uses('ObjectRegistry', 'Utility');
-			var_dump(ObjectRegistry::getObjects());
-			var_dump(App::getOpenFiles());
+			App::uses('ConnectionManager', 'Model');
+			var_dump(array(
+				'Peak Memory Usage' => (memory_get_peak_usage(true) / 1024 / 1024 ) . ' MB',
+				'SQL' => ConnectionManager::history(), 
+				'Loaded Models' => ObjectRegistry::getObjects(), 
+				'Open Files' => App::getOpenFiles())
+			);
 		}
 		exit;
 	}
