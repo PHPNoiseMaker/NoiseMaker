@@ -271,8 +271,8 @@ class Controller {
 	}
 	
 	/**
-	 * redirect function.
-	 * Wrapper for redirection
+	 * Redirect to another URL, stop script execution.
+	 * 
 	 * 
 	 * It will accept either a url, or a path array to do a route lookup for the right URL
 	 * 

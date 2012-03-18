@@ -676,7 +676,7 @@ class DboSource extends DataSource{
 	 * @param Model $model
 	 * @return void
 	 */
-	public function fieldBelongsToModel($field, Model $model) {
+	public function fieldBelongsToModel($field, Model $model, $saveAssociated = false) {
 		if (strpos($field, '.') !== false) {
 			list($extractedModel, $field) = explode('.', $field);
 			if ($model->_name === $extractedModel) {
@@ -687,14 +687,13 @@ class DboSource extends DataSource{
 					foreach ($value as $key => $val) {
 						foreach ($val as $assosiatedModel => $relationship) {
 							if ($type === 'hasOne' || $type === 'belongsTo') {
-								if ($extractedModel === $assosiatedModel && $model->recursive > -1) {
+								if ($extractedModel === $assosiatedModel && $saveAssociated) {
 									return true;
 								}
 							}
 						}
 					}
 				}
-				
 			}
 		}
 		return false;
