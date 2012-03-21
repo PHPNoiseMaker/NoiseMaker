@@ -192,15 +192,16 @@ class View {
 		 * @param mixed $___dataForView (default: null)
 		 * @return void
 		 */
-		protected function _evaluate($___viewFn, $___dataForView = null) {
-			if (file_exists($___viewFn)) {
-				extract($___dataForView, EXTR_SKIP);
+		protected function _evaluate($___viewFileName, $___viewData = null) {
+			if (file_exists($___viewFileName)) {
+				extract($___viewData, EXTR_SKIP);
 				ob_start();
 		
-				include_once $___viewFn;
+				include_once $___viewFileName;
 		
 				return ob_get_clean();
 			}
+			
 			return false;
 			
 		}

@@ -1,6 +1,6 @@
 <?php
-App::uses('DboSource', 'Model/Datasource');
-class Mysql extends DboSource{ 
+App::uses('PdoSource', 'Model/Datasource');
+class Mysql extends PdoSource{ 
 	protected $_baseConfig = array(
 		'persistent' => false,
 		'host' => 'localhost',

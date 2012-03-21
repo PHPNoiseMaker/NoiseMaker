@@ -1,6 +1,6 @@
 <?php
 App::uses('DataSource', 'Model/Datasource');
-class DboSource extends DataSource{ 
+class PdoSource extends DataSource{ 
 	protected $_handle = null;
 	
 	protected $_params = array();
