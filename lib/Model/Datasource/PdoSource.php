@@ -655,8 +655,6 @@ class PdoSource extends DataSource{
 							$results[$key][$model->{$associatedModel}->_name] = $model->{$associatedModel}->find('all', $data, true);
 							
 						}
-					} elseif ($relationship === 'hasAndBelongsToMany') {
-					
 					}
 				}
 			}
