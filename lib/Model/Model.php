@@ -468,10 +468,9 @@ class Model {
 				'conditions' => array(
 					$this->_name . '.' . $this->_primaryKey => $this->id
 				),
-				'recursive' => -1
+				'recursive' => $this->recursive
 			));
 			if ($this->data) {
-				var_dump($this->data);
 				return $this->data;
 			}
 		}
