@@ -331,17 +331,10 @@ class Model {
 						$values[] = $val;
 					}
 					$db->create($this, $fields, $values);
-					foreach($association_data as $model => $data) {
-						$fields = array();
-						$values = array();
-						foreach($data as $key => $val) {
-							$fields[] = $key;
-							$values[] = $val;
-						}
-						$fields[] = strtolower($this->_name) . '_' . $this->_primaryKey;
-						$values[] = $this->id;
-						$db->create($this->{$model}, $fields, $values);
-						
+					foreach($association_data as $model => $associated_data) {
+						$primaryKey = strtolower($this->_name) . '_' . $this->_primaryKey;
+						$associated_data[$primaryKey] = $this->id;
+						$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
 						
 					}
 					return true;

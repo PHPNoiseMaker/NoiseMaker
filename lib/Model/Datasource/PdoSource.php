@@ -591,7 +591,17 @@ class PdoSource extends DataSource{
 							'foreign_key' => strtolower($targetAlias) . '_id',
 						);
 						$settings = array_merge($defaults, $relationship);
-						if($association === 'belongsTo') {
+						
+						foreach ($this->_associationFields as $association_field) {
+							if (strpos($association_field, '.') !== false) {
+								list($aModel, $aFieldKey) = explode('.', $association_field);
+								if($aModel === $associatedModel) {
+									$this->_fields .= ', ' . $this->fieldQuote($association_field);
+								}
+							}
+						}
+						
+						if ($association === 'belongsTo') {
 							$joinKey = $model->_name . '.' . $settings['foreign_key'];
 							$joinValue = $this->fieldQuote(
 								$targetAlias 
