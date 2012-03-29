@@ -310,17 +310,17 @@ class Model {
 						if ($fieldName === $this->_primaryKey) {
 							$this->id = $val;
 						}
-						if($key === $this->_name)
+						if ($key === $this->_name)
 							$out[$key . '.' . $fieldName] = $val;
 						else
-							if($saveAll)
+							if ($saveAll)
 								$association_data[$key][$fieldName] = $val;
 					}
 				} else {
 					continue;
 				}
 			}
-			if(!empty($out)) {
+			if (!empty($out)) {
 				if ($this->id === null) {
 					$fields = array();
 					$values = array();
@@ -342,8 +342,8 @@ class Model {
 						$fieldKey = $this->_name . '.' . $this->_primaryKey;
 						
 						foreach($fields as $key => $value) {
-							if($value === $fieldKey) {
-								if($values[$key] === $this->id) {
+							if ($value === $fieldKey) {
+								if ($values[$key] === $this->id) {
 									unset($fields[$key], $values[$key]);
 								}
 							}
@@ -357,8 +357,8 @@ class Model {
 					} 
 				
 				}
-				if($this->id !== null) {
-					if(count($association_data) > 0)
+				if ($this->id !== null) {
+					if (count($association_data) > 0)
 						$this->saveAssociatedData($association_data);
 					return true;
 				}
@@ -372,7 +372,7 @@ class Model {
 	public function saveAssociatedData($association_data) {
 		foreach($association_data as $model => $associated_data) {
 			$associationType = $this->getAssociationType($model);
-			if(
+			if (
 				$associationType == 'hasOne'
 				|| $associationType == 'hasMany'
 			) {
@@ -380,7 +380,7 @@ class Model {
 				$associated_data[$primaryKey] = $this->id;
 			}
 			$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
-			if(
+			if (
 				$associationType == 'belongsTo'
 				|| $associationType == 'hasAndBelongsToMany'
 			) {
@@ -399,7 +399,8 @@ class Model {
 	
 			foreach($models as $key => $val) {
 				$theModel = array_keys($val);
-				if($model === $theModel[0]) {
+				$theModel = array_shift($theModel);
+				if ($model === $theModel) {
 					return $type;
 				}
 			}

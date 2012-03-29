@@ -103,13 +103,13 @@ class PdoSource extends DataSource{
 		
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
-		if(Config::getConfig('debug') > 1)
+		if (Config::getConfig('debug') > 1)
 			ConnectionManager::startRecord($sql, $params);
 	}
 	
 	public function execute() {
 		$this->_handle->execute($this->_params);
-		if(Config::getConfig('debug') > 1)
+		if (Config::getConfig('debug') > 1)
 			ConnectionManager::endRecord($this->getAffected());
 	}
 	
@@ -595,7 +595,7 @@ class PdoSource extends DataSource{
 						foreach ($this->_associationFields as $association_field) {
 							if (strpos($association_field, '.') !== false) {
 								list($aModel, $aFieldKey) = explode('.', $association_field);
-								if($aModel === $associatedModel) {
+								if ($aModel === $associatedModel) {
 									$this->_fields .= ', ' . $this->fieldQuote($association_field);
 								}
 							}

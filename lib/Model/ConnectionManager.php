@@ -80,10 +80,10 @@ class ConnectionManager {
 	}
 	
 	private static function getHistory($id = null) {
-		if($id === null) {
+		if ($id === null) {
 			return self::$_statementHistory;
 		}
-		if(array_key_exists($id, self::$_statementHistory)) {
+		if (array_key_exists($id, self::$_statementHistory)) {
 			return self::$_statementHistory[$id];
 		}
 		return null;
@@ -93,7 +93,7 @@ class ConnectionManager {
 		self::$_statementBuffer = array($sql, $params, microtime(true));
 	}
 	private static function record_end($affected) {
-		if(self::$_statementBuffer !== null) {
+		if (self::$_statementBuffer !== null) {
 			list($sql, $params, $start_time) = self::$_statementBuffer;
 			self::$_statementBuffer = null;
 			self::$_statementHistory[] = array(
