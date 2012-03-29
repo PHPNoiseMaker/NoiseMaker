@@ -331,13 +331,7 @@ class Model {
 						$values[] = $val;
 					}
 					$db->create($this, $fields, $values);
-					foreach($association_data as $model => $associated_data) {
-						$primaryKey = strtolower($this->_name) . '_' . $this->_primaryKey;
-						$associated_data[$primaryKey] = $this->id;
-						$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
-						
-					}
-					return true;
+					
 				
 				} else {
 					if ($this->exists()) {
@@ -347,10 +341,15 @@ class Model {
 						$conditions = array(
 							$fieldKey => $this->id
 						);
-						return $db->update($this, $fields, $values, $conditions);
+						$db->update($this, $fields, $values, $conditions);
 						
 					} 
 				
+				}
+				if($this->id !== null) {
+					if(count($association_data) > 0)
+						$this->saveAssociatedData($association_data);
+					return true;
 				}
 			}
 			
@@ -359,6 +358,43 @@ class Model {
 		return false;
 	}
 	
+	public function saveAssociatedData($association_data) {
+		foreach($association_data as $model => $associated_data) {
+			$associationType = $this->getAssociationType($model);
+			if(
+				$associationType == 'hasOne'
+				|| $associationType == 'hasMany'
+			) {
+				$primaryKey = strtolower($this->_name) . '_' . $this->_primaryKey;
+				$associated_data[$primaryKey] = $this->id;
+			}
+			$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+			if(
+				$associationType == 'belongsTo'
+				|| $associationType == 'hasAndBelongsToMany'
+			) {
+				$foreignKey = strtolower($this->{$model}->_name) . '_' . $this->{$model}->_primaryKey;
+				$data[$foreignKey] = $this->{$model}->id;
+				$data[$this->_primaryKey] = $this->id;
+				$this->save(array($this->_name => $data), null, false);
+			}
+			
+			
+		}
+	}
+	
+	public function getAssociationType($model) {
+		foreach($this->_associations as $type => $models) {
+	
+			foreach($models as $key => $val) {
+				$theModel = array_keys($val);
+				if($model === $theModel[0]) {
+					return $type;
+				}
+			}
+		}
+		return false;
+	}
 	
 	public function delete($id = null) {
 		if ($id !== null) {
