@@ -313,7 +313,8 @@ class Model {
 						if($key === $this->_name)
 							$out[$key . '.' . $fieldName] = $val;
 						else
-							$association_data[$key][$fieldName] = $val;
+							if($saveAll)
+								$association_data[$key][$fieldName] = $val;
 					}
 				} else {
 					continue;
