@@ -384,6 +384,9 @@ class PdoSource extends DataSource{
 			$this->_fields = '';
 			foreach($fields as $field) {
 				if (!empty($field)) {
+					if (strpos($field, '.') === false) {
+						$field = $model->_name . '.' . $field;
+					}
 					if ($this->fieldBelongsToModel($field, $model)) {
 						$this->_fields .= $this->fieldQuote($field) . ',';
 						
