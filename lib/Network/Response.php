@@ -165,7 +165,7 @@ class Response {
 	 */
 	public function send() {
 		echo $this->_body;
-		if (Config::getConfig('debug') > 1) {
+		if (Config::getConfig('debug') > 0) {
 			App::uses('ObjectRegistry', 'Utility');
 			App::uses('ConnectionManager', 'Model');
 			var_dump(array(

@@ -286,14 +286,15 @@ class Model {
 	 * @param mixed $data
 	 * @return void
 	 */
-	public function save($data, $whitelist = null) {
+	public function save($data, $whitelist = null, $saveAll = false) {
 		$data = $this->beforeSave($data);
+		$association_data = array();
 		$out = array();
 		if (is_array($data)) {
 			$db = $this->getDataSource();
 			
 			foreach ($data as $key => $field) {
-				if ($key === $this->_name) {
+				if ($key === $this->_name || $saveAll) {
 					foreach ($field as $fieldName => $val) {
 						if (
 							$whitelist !== null 
@@ -309,7 +310,10 @@ class Model {
 						if ($fieldName === $this->_primaryKey) {
 							$this->id = $val;
 						}
-						$out[$key . '.' . $fieldName] = $val;
+						if($key === $this->_name)
+							$out[$key . '.' . $fieldName] = $val;
+						else
+							$association_data[$key][$fieldName] = $val;
 					}
 				} else {
 					continue;
@@ -326,7 +330,21 @@ class Model {
 						$fields[] = $key;
 						$values[] = $val;
 					}
-					return $db->create($this, $fields, $values);
+					$db->create($this, $fields, $values);
+					foreach($association_data as $model => $data) {
+						$fields = array();
+						$values = array();
+						foreach($data as $key => $val) {
+							$fields[] = $key;
+							$values[] = $val;
+						}
+						$fields[] = strtolower($this->_name) . '_' . $this->_primaryKey;
+						$values[] = $this->id;
+						$db->create($this->{$model}, $fields, $values);
+						
+						
+					}
+					return true;
 				
 				} else {
 					if ($this->exists()) {

@@ -103,12 +103,14 @@ class PdoSource extends DataSource{
 		
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
-		ConnectionManager::startRecord($sql, $params);
+		if(Config::getConfig('debug') > 1)
+			ConnectionManager::startRecord($sql, $params);
 	}
 	
 	public function execute() {
 		$this->_handle->execute($this->_params);
-		ConnectionManager::endRecord($this->getAffected());
+		if(Config::getConfig('debug') > 1)
+			ConnectionManager::endRecord($this->getAffected());
 	}
 	
 	public function setFetch($type = 'assoc') {
@@ -589,12 +591,22 @@ class PdoSource extends DataSource{
 							'foreign_key' => strtolower($targetAlias) . '_id',
 						);
 						$settings = array_merge($defaults, $relationship);
-						$joinKey = $model->_name . '.' . $settings['foreign_key'];
-						$joinValue = $this->fieldQuote(
-							$targetAlias 
-							. '.' 
-							. $model->{$associatedModel}->_primaryKey
-						);
+						if($association === 'belongsTo') {
+							$joinKey = $model->_name . '.' . $settings['foreign_key'];
+							$joinValue = $this->fieldQuote(
+								$targetAlias 
+								. '.' 
+								. $model->{$associatedModel}->_primaryKey
+							);
+						} else {
+							$joinKey = $model->_name . '.' . $model->_primaryKey;
+							$joinValue = $this->fieldQuote(
+								$targetAlias 
+								. '.' 
+								. strtolower($model->_name) . '_' . $model->_primaryKey
+							);
+
+						}
 						$conditions = array(array($joinKey => $joinValue));
 						if (array_key_exists('conditions', $settings)) {
 							if (is_array($settings['conditions'])) {
