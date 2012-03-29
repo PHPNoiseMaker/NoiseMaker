@@ -228,6 +228,7 @@ class Router {
 	 */
 	private static function matchRule($rule) {
 		$paramBuffer = array();
+		
 		self::$command = self::arrayClean(self::$command);
 		$commandCount = sizeof(self::$command);
 		
@@ -250,6 +251,7 @@ class Router {
 					
 					if (strpos($parsedValue, ':') === 0) {
 						$varName = substr($parsedValue, 1);
+						
 						$position = array_search($varName, self::$rules[$rule]['pass']);
 						if ($varName == 'controller') {
 							self::$controller = self::$command[$i];
@@ -266,11 +268,10 @@ class Router {
 						
 					
 					} elseif (strcmp($parsedValue, self::$command[$i]) === 0) {
-						
-						if (self::$controller === null)
-							self::$controller = self::$rules[$rule]['target']['controller'];
-						if (self::$action === null)
-							self::$action = self::$rules[$rule]['target']['action'];
+
+					
+						self::$controller = self::$rules[$rule]['target']['controller'];
+						self::$action = self::$rules[$rule]['target']['action'];
 						
 						foreach(self::$rules[$rule]['target'] as $ruleTargetKey => $ruleTargetVal) {
 							if (
@@ -289,7 +290,6 @@ class Router {
 				}
 				$i++;
 			}
-			
 			if (
 				isset($parsedRule[$parsedRuleCount])
 				&& $parsedRule[$parsedRuleCount] == '*'
@@ -311,7 +311,6 @@ class Router {
 			}
 			
 		}
-		
 		return (self::$controller !== null) ? true : false;
 	}
 	
@@ -333,10 +332,12 @@ class Router {
 			list($command) = explode('?', self::$command[$commandCount - 1]);
 			self::$command[$commandCount - 1] = $command;
 		}
-		foreach(self::$rules as $rule => $target) {
-			$matched = self::matchRule($rule);
-			if ($matched)
+		foreach (self::$rules as $rule => $target) {
+			if (self::matchRule($rule))
 				break;
+		}
+		if (self::$controller === null) {
+			throw new NotFoundException();
 		}
 	}
 }

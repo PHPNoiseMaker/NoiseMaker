@@ -244,6 +244,7 @@ class Model {
 			case 'first':
 				$query['limit'] = 1;
 				$results = $db->read($this, $query, false, $associated);
+				$results = $results[0];
 			break;
 			case 'last':
 				$query['limit'] = 1;
@@ -272,6 +273,7 @@ class Model {
 				}
 
 				$results = $db->read($this, $query, false, $associated);
+				$results = $results[0];
 				break;
 		}
 		return $this->afterFind($results);
@@ -430,6 +432,7 @@ class Model {
 	 */
 	public function create() {
 		$this->id = null;
+		$this->data = null;
 	}
 	
 	/**
@@ -451,6 +454,28 @@ class Model {
 		if ($count) {
 			return true;
 		}
+		return false;
+	}
+	
+	public function read($fields = null) {
+		$this->data = null;
+		if ($this->id !== null) {
+			if ($fields === null) {
+				$fields = array();
+			}
+			$this->data = $this->find('first', array(
+				'fields' => $fields,
+				'conditions' => array(
+					$this->_name . '.' . $this->_primaryKey => $this->id
+				),
+				'recursive' => -1
+			));
+			if ($this->data) {
+				var_dump($this->data);
+				return $this->data;
+			}
+		}
+		
 		return false;
 	}
 	

@@ -1,21 +1,81 @@
 <?php
 
+/**
+ * ConnectionManager class.
+ */
 class ConnectionManager {
 	
+	/**
+	 * _instance
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var mixed
+	 * @access private
+	 * @static
+	 */
 	private static $_instance = null;
 	
+	/**
+	 * _dataSources
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access private
+	 * @static
+	 */
 	private static $_dataSources = array();
 	
+	/**
+	 * _config
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var mixed
+	 * @access private
+	 * @static
+	 */
 	private static $_config = null;
 	
+	/**
+	 * _statementHistory
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access private
+	 * @static
+	 */
 	private static $_statementHistory = array();
 	
+	/**
+	 * _statementBuffer
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var mixed
+	 * @access private
+	 * @static
+	 */
 	private static $_statementBuffer = null;
 	
+	/**
+	 * __construct function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function __construct() {
-			
+		
 	}
 	
+	/**
+	 * __clone function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function __clone() {
 	}
 	
