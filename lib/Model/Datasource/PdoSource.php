@@ -665,9 +665,16 @@ class PdoSource extends DataSource{
 							
 							$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
 							$joinValue = $result[$model->_name][$model->_primaryKey];
+							
+							if ($association === 'hasMany') {
+								$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
+								$joinValue = $result[$model->_name][$model->_primaryKey];
+							} else {
+								$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
+								$joinValue = $result[$model->_name][$model->_primaryKey];
+	
+							}
 							$conditions = array(array($joinKey => $joinValue));
-							
-							
 							$data = array(
 								'conditions' => $conditions,
 								'recursive' => -1,
