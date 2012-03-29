@@ -337,7 +337,17 @@ class Model {
 					if ($this->exists()) {
 						$fields = array_keys($out);
 						$values = array_values($out);
+						
 						$fieldKey = $this->_name . '.' . $this->_primaryKey;
+						
+						foreach($fields as $key => $value) {
+							if($value === $fieldKey) {
+								if($values[$key] === $this->id) {
+									unset($fields[$key], $values[$key]);
+								}
+							}
+						}
+						
 						$conditions = array(
 							$fieldKey => $this->id
 						);
