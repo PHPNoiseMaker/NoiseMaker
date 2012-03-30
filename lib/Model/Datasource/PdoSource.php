@@ -657,39 +657,41 @@ class PdoSource extends DataSource{
 		foreach ($model->_associations as $association => $value) {
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
-					if ($association === 'hasMany' || $association === 'hasAndBelongsToMany') {
-						$associatedPrimaryKey = $model->{$associatedModel}->_primaryKey;
-						$associatedName = $model->{$associatedModel}->_name;
-						foreach ($results as $key => $result) {
-							$targetAlias = $associatedName;
-							$defaults = array(
-								'foreign_key' => 'id',
-								'limit' => null
-							);
-							$settings = array_merge($defaults, $relationship);
-							
-							$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
-							$joinValue = $result[$model->_name][$model->_primaryKey];
-							
-							if ($association === 'hasMany') {
+					switch ($association) {
+						case 'hasMany':
+							$associatedPrimaryKey = $model->{$associatedModel}->_primaryKey;
+							$associatedName = $model->{$associatedModel}->_name;
+							foreach ($results as $key => $result) {
+								$targetAlias = $associatedName;
+								$defaults = array(
+									'foreign_key' => 'id',
+									'limit' => null
+								);
+								$settings = array_merge($defaults, $relationship);
+								
 								$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
 								$joinValue = $result[$model->_name][$model->_primaryKey];
-							} else {
-								$joinKey = $associatedName . '.' . $associatedPrimaryKey;
-								$hABTMkey = strtolower($associatedName) . '_' . $associatedPrimaryKey;
-								$joinValue = $result[$model->_name][$hABTMkey];
-	
+								
+								if ($association === 'hasMany') {
+									$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
+									$joinValue = $result[$model->_name][$model->_primaryKey];
+								} else {
+									$joinKey = $associatedName . '.' . $associatedPrimaryKey;
+									$hABTMkey = strtolower($associatedName) . '_' . $associatedPrimaryKey;
+									$joinValue = $result[$model->_name][$hABTMkey];
+		
+								}
+								$conditions = array(array($joinKey => $joinValue));
+								$data = array(
+									'conditions' => $conditions,
+									'recursive' => -1,
+									'fields' => $this->_associationFields,
+									'limit' => $settings['limit']
+								);
+								$results[$key][$associatedName] = $model->{$associatedModel}->find('all', $data, true);
+								
 							}
-							$conditions = array(array($joinKey => $joinValue));
-							$data = array(
-								'conditions' => $conditions,
-								'recursive' => -1,
-								'fields' => $this->_associationFields,
-								'limit' => $settings['limit']
-							);
-							$results[$key][$associatedName] = $model->{$associatedModel}->find('all', $data, true);
-							
-						}
+						break;
 					}
 				}
 			}
