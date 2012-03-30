@@ -398,6 +398,16 @@ class Model {
 					
 					$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
 				break;
+				case 'belongsTo':
+
+					$localKey = strtolower($this->{$model}->_name) . '_' . $this->{$model}->_primaryKey;
+					
+					$result = $this->read($localKey);
+					if ($result) {
+						$associated_data[$this->{$model}->_primaryKey] = $result[$this->_name][$localKey];
+					}
+					$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+				break;
 			}
 			
 			if (
