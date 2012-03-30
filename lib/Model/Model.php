@@ -198,23 +198,29 @@ class Model {
 	 */
 	public function buildAssociationData() {
 		$associations = array('belongsTo', 'hasMany', 'hasOne', 'hasAndBelongsToMany');
+		$defaults = array();
+		
 		$this->_associations = array();
 		foreach ($associations as $association) {
+			if($association == 'hasMany' || $association == 'hasOne') {
+				$defaults = array_merge($defaults, array('dependant' => false));
+			}
 			if (is_array($this->{$association})) {
 				foreach ($this->{$association} as $key => $value) {
 					if (!array_key_exists($association, $this->_associations)) {
 						$this->_associations[$association] = array();
 					}
 					if (is_string($key) && is_array($value)) {
+						$value = array_merge($defaults, $value);
 						array_push($this->_associations[$association], array($key => $value));
 					} elseif (is_numeric($key) && is_string($value)) {
-						array_push($this->_associations[$association], array($value => array()));
+						array_push($this->_associations[$association], array($value => $defaults));
 					}
 				}
 			} else {
-				array_push($this->_associations[$association], array($this->{$association} => array()));
+				array_push($this->_associations[$association], array($this->{$association} => $defaults));
 			}
-		}		
+		}	
 	}
 	
 	
@@ -461,13 +467,14 @@ class Model {
 		return false;
 	}
 	
-	public function delete($id = null) {
+	public function delete($id = null, $cascade = false) {
 		if ($id !== null) {
-			if ($this->exists($id)) {
+			$this->id = $id;
+			if ($this->exists()) {
 				$conditions = array(
 					$this->_primaryKey => $this->id
 				);
-				return $this->getDataSource()->delete($this, $conditions);
+				$this->getDataSource()->delete($this, $conditions);
 			}
 		}
 		return false;
