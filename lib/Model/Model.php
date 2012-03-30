@@ -486,23 +486,23 @@ class Model {
 									$model = array_shift($model);
 									$relationship = array_values($val);
 									$relationship = array_shift($relationship);
-									
-									$results = $this->{$model}->find('all', array(
-										'recursive' => -1,
-										'fields' => array(
-											$model . '.' . $this->{$model}->_primaryKey
-										),
-										'conditions' => array(
-											$model . '.' . strtolower($this->_name) . '_' . $this->_primaryKey => $this->id
-										)
-									));
-									
-									if(is_array($results)) {
-										foreach($results as $result) {
-											$this->{$model}->delete($result[$model][$this->{$model}->_primaryKey], false);
+									if ($relationship['dependant'] !== false) {
+										$results = $this->{$model}->find('all', array(
+											'recursive' => -1,
+											'fields' => array(
+												$model . '.' . $this->{$model}->_primaryKey
+											),
+											'conditions' => array(
+												$model . '.' . strtolower($this->_name) . '_' . $this->_primaryKey => $this->id
+											)
+										));
+										
+										if(is_array($results)) {
+											foreach($results as $result) {
+												$this->{$model}->delete($result[$model][$this->{$model}->_primaryKey], false);
+											}
 										}
 									}
-									
 								}
 							}
 						}
