@@ -444,7 +444,7 @@ class Model {
 			
 			if (
 				$associationType == 'belongsTo'
-				|| $associationType == 'hasAndBelongsToMany'
+				//|| $associationType == 'hasAndBelongsToMany'
 			) {
 				$foreignKey = strtolower($modelName) . '_' . $modelPrimaryKey;
 				$data[$foreignKey] = $this->{$model}->id;
