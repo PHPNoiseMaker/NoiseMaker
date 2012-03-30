@@ -662,7 +662,7 @@ class PdoSource extends DataSource{
 							$targetAlias = $model->{$associatedModel}->_name;
 							$defaults = array(
 								'foreign_key' => 'id',
-								'limit' => 100
+								'limit' => null
 							);
 							$settings = array_merge($defaults, $relationship);
 							
