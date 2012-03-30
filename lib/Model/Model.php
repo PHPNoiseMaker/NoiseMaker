@@ -486,7 +486,7 @@ class Model {
 									$model = array_shift($model);
 									$relationship = array_values($val);
 									$relationship = array_shift($relationship);
-									if ($relationship['dependant'] !== false) {
+									if ($relationship['dependant'] === true) {
 										$results = $this->{$model}->find('all', array(
 											'recursive' => -1,
 											'fields' => array(
