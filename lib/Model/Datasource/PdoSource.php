@@ -658,23 +658,25 @@ class PdoSource extends DataSource{
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
 					if ($association === 'hasMany' || $association === 'hasAndBelongsToMany') {
+						$associatedPrimaryKey = $model->{$associatedModel}->_primaryKey;
+						$associatedName = $model->{$associatedModel}->_name;
 						foreach ($results as $key => $result) {
-							$targetAlias = $model->{$associatedModel}->_name;
+							$targetAlias = $associatedName;
 							$defaults = array(
 								'foreign_key' => 'id',
 								'limit' => null
 							);
 							$settings = array_merge($defaults, $relationship);
 							
-							$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
+							$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
 							$joinValue = $result[$model->_name][$model->_primaryKey];
 							
 							if ($association === 'hasMany') {
-								$joinKey = $model->{$associatedModel}->_name . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
+								$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
 								$joinValue = $result[$model->_name][$model->_primaryKey];
 							} else {
-								$joinKey = $model->{$associatedModel}->_name . '.' . $model->{$associatedModel}->_primaryKey;
-								$hABTMkey = strtolower($model->{$associatedModel}->_name) . '_' . $model->{$associatedModel}->_primaryKey;
+								$joinKey = $associatedName . '.' . $associatedPrimaryKey;
+								$hABTMkey = strtolower($associatedName) . '_' . $associatedPrimaryKey;
 								$joinValue = $result[$model->_name][$hABTMkey];
 	
 							}
@@ -685,7 +687,7 @@ class PdoSource extends DataSource{
 								'fields' => $this->_associationFields,
 								'limit' => $settings['limit']
 							);
-							$results[$key][$model->{$associatedModel}->_name] = $model->{$associatedModel}->find('all', $data, true);
+							$results[$key][$associatedName] = $model->{$associatedModel}->find('all', $data, true);
 							
 						}
 					}

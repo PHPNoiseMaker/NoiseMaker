@@ -384,6 +384,8 @@ class Model {
 	public function saveAssociatedData($association_data) {
 		foreach($association_data as $model => $associated_data) {
 			$associationType = $this->getAssociationType($model);
+			$modelPrimaryKey = $this->{$model}->_primaryKey;
+			$modelName = $this->{$model}->_name;
 			switch($associationType) {
 				case 'hasOne':
 					$foreignKey = strtolower($this->_name) . '_' . $this->_primaryKey;
@@ -392,28 +394,28 @@ class Model {
 					$result = $this->{$model}->find('first', array(
 						'recursive' => -1,
 						'fields' => array(
-							$this->{$model}->_name . '.' . $this->{$model}->_primaryKey
+							$modelName . '.' . $modelPrimaryKey
 						),
 						'conditions' => array(
-							$this->{$model}->_name . '.' . $foreignKey => $this->id
+							$modelName . '.' . $foreignKey => $this->id
 						)
 					));
 					
 					if ($result) {
-						$associated_data[$this->{$model}->_primaryKey] = $result[$this->{$model}->_name][$this->{$model}->_primaryKey];
+						$associated_data[$modelPrimaryKey] = $result[$modelName][$modelPrimaryKey];
 					}
 					
-					$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+					$this->{$model}->save(array($modelName => $associated_data), null, false);
 				break;
 				case 'belongsTo':
 
-					$localKey = strtolower($this->{$model}->_name) . '_' . $this->{$model}->_primaryKey;
+					$localKey = strtolower($modelName) . '_' . $modelPrimaryKey;
 					
 					$result = $this->read($localKey);
 					if ($result) {
-						$associated_data[$this->{$model}->_primaryKey] = $result[$this->_name][$localKey];
+						$associated_data[$modelPrimaryKey] = $result[$this->_name][$localKey];
 					}
-					$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+					$this->{$model}->save(array($modelName => $associated_data), null, false);
 				break;
 				case 'hasMany':
 					$foreignKey = strtolower($this->_name) . '_' . $this->_primaryKey;
@@ -422,19 +424,19 @@ class Model {
 					$results = $this->{$model}->find('all', array(
 						'recursive' => -1,
 						'fields' => array(
-							$this->{$model}->_name . '.' . $this->{$model}->_primaryKey
+							$modelName . '.' . $modelPrimaryKey
 						),
 						'conditions' => array(
-							$this->{$model}->_name . '.' . $foreignKey => $this->id
+							$modelName . '.' . $foreignKey => $this->id
 						)
 					));
 					if(is_array($results)) {
 						foreach ($results as $result) {
-							$associated_data[$this->{$model}->_primaryKey] = $result[$this->{$model}->_name][$this->{$model}->_primaryKey];
-							$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+							$associated_data[$modelPrimaryKey] = $result[$modelName][$modelPrimaryKey];
+							$this->{$model}->save(array($modelName => $associated_data), null, false);
 						}
 					} elseif ($results === false) {
-						$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+						$this->{$model}->save(array($modelName => $associated_data), null, false);
 					}
 					
 				break;
@@ -444,7 +446,7 @@ class Model {
 				$associationType == 'belongsTo'
 				|| $associationType == 'hasAndBelongsToMany'
 			) {
-				$foreignKey = strtolower($this->{$model}->_name) . '_' . $this->{$model}->_primaryKey;
+				$foreignKey = strtolower($modelName) . '_' . $modelPrimaryKey;
 				$data[$foreignKey] = $this->{$model}->id;
 				$data[$this->_primaryKey] = $this->id;
 				$this->save(array($this->_name => $data), null, false);
