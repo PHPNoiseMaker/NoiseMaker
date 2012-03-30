@@ -549,8 +549,11 @@ class Model {
 		return false;
 	}
 	
-	public function read($fields = null) {
+	public function read($fields = null, $id = null) {
 		$this->data = null;
+		if ($id !== null) {
+			$this->id = $id;
+		}
 		if ($this->id !== null) {
 			if ($fields === null) {
 				$fields = array();
