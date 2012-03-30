@@ -144,6 +144,7 @@ class Model {
 		}
 		if ($this->_associations === null) {
 			$this->buildAssociationData();
+			var_dump($this->_associations);
 		}
 	}
 	
@@ -474,7 +475,39 @@ class Model {
 				$conditions = array(
 					$this->_primaryKey => $this->id
 				);
-				$this->getDataSource()->delete($this, $conditions);
+				if ($this->getDataSource()->delete($this, $conditions)) {
+					if ($cascade) {
+						foreach ($this->_associations as $type => $values) {
+							if($type === 'hasMany' || $type === 'hasOne') {
+							
+								foreach ($values as $key => $val) {
+									$model = array_keys($val);
+									$model = array_shift($model);
+									$relationship = array_values($val);
+									$relationship = array_shift($relationship);
+									
+									$results = $this->{$model}->find('all', array(
+										'recursive' => -1,
+										'fields' => array(
+											$model . '.' . $this->{$model}->_primaryKey
+										),
+										'conditions' => array(
+											$model . '.' . strtolower($this->_name) . '_' . $this->_primaryKey => $this->id
+										)
+									));
+									
+									if(is_array($results)) {
+										foreach($results as $result) {
+											$this->{$model}->delete($result[$model][$this->{$model}->_primaryKey], false);
+										}
+									}
+									
+								}
+							}
+						}
+					}
+					return true;
+				}
 			}
 		}
 		return false;
