@@ -408,6 +408,29 @@ class Model {
 					}
 					$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
 				break;
+				case 'hasMany':
+					$foreignKey = strtolower($this->_name) . '_' . $this->_primaryKey;
+					$associated_data[$foreignKey] = $this->id;
+					
+					$results = $this->{$model}->find('all', array(
+						'recursive' => -1,
+						'fields' => array(
+							$this->{$model}->_name . '.' . $this->{$model}->_primaryKey
+						),
+						'conditions' => array(
+							$this->{$model}->_name . '.' . $foreignKey => $this->id
+						)
+					));
+					if(is_array($results)) {
+						foreach ($results as $result) {
+							$associated_data[$this->{$model}->_primaryKey] = $result[$this->{$model}->_name][$this->{$model}->_primaryKey];
+							$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+						}
+					} elseif ($results === false) {
+						$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+					}
+					
+				break;
 			}
 			
 			if (
