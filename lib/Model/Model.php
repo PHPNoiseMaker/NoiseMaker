@@ -376,12 +376,27 @@ class Model {
 			$associationType = $this->getAssociationType($model);
 			if (
 				$associationType == 'hasOne'
-				|| $associationType == 'hasMany'
 			) {
-				$primaryKey = strtolower($this->_name) . '_' . $this->_primaryKey;
-				$associated_data[$primaryKey] = $this->id;
+				$foreignKey = strtolower($this->_name) . '_' . $this->_primaryKey;
+				$associated_data[$foreignKey] = $this->id;
+				
+				$result = $this->{$model}->find('first', array(
+					'recursive' => -1,
+					'fields' => array(
+						$this->{$model}->_name . '.' . $this->{$model}->_primaryKey
+					),
+					'conditions' => array(
+						$this->{$model}->_name . '.' . $foreignKey => $this->id
+					)
+				));
+				
+				if ($result) {
+					$associated_data[$this->{$model}->_primaryKey] = $result[$this->{$model}->_name][$this->{$model}->_primaryKey];
+				}
+				
+				$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
 			}
-			$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+			
 			if (
 				$associationType == 'belongsTo'
 				|| $associationType == 'hasAndBelongsToMany'
