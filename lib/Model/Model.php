@@ -127,7 +127,7 @@ class Model {
 	 */
 	public $data = null;
 
-	
+
 	
 	/**
 	 * __construct function.
