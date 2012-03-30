@@ -298,6 +298,9 @@ class Model {
 			foreach ($data as $key => $field) {
 				if ($key === $this->_name || $saveAll) {
 					foreach ($field as $fieldName => $val) {
+						if (empty($val) || $val == '') {
+							$val = null;
+						}
 						if (
 							$whitelist !== null 
 							&& is_array($whitelist) 
@@ -374,27 +377,27 @@ class Model {
 	public function saveAssociatedData($association_data) {
 		foreach($association_data as $model => $associated_data) {
 			$associationType = $this->getAssociationType($model);
-			if (
-				$associationType == 'hasOne'
-			) {
-				$foreignKey = strtolower($this->_name) . '_' . $this->_primaryKey;
-				$associated_data[$foreignKey] = $this->id;
-				
-				$result = $this->{$model}->find('first', array(
-					'recursive' => -1,
-					'fields' => array(
-						$this->{$model}->_name . '.' . $this->{$model}->_primaryKey
-					),
-					'conditions' => array(
-						$this->{$model}->_name . '.' . $foreignKey => $this->id
-					)
-				));
-				
-				if ($result) {
-					$associated_data[$this->{$model}->_primaryKey] = $result[$this->{$model}->_name][$this->{$model}->_primaryKey];
-				}
-				
-				$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+			switch($associationType) {
+				case 'hasOne':
+					$foreignKey = strtolower($this->_name) . '_' . $this->_primaryKey;
+					$associated_data[$foreignKey] = $this->id;
+					
+					$result = $this->{$model}->find('first', array(
+						'recursive' => -1,
+						'fields' => array(
+							$this->{$model}->_name . '.' . $this->{$model}->_primaryKey
+						),
+						'conditions' => array(
+							$this->{$model}->_name . '.' . $foreignKey => $this->id
+						)
+					));
+					
+					if ($result) {
+						$associated_data[$this->{$model}->_primaryKey] = $result[$this->{$model}->_name][$this->{$model}->_primaryKey];
+					}
+					
+					$this->{$model}->save(array($this->{$model}->_name => $associated_data), null, false);
+				break;
 			}
 			
 			if (
