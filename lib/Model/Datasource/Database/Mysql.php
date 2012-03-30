@@ -57,18 +57,18 @@ class Mysql extends PdoSource{
 	
 	
 	public function describe(Model &$model) {
-		$DBH = $this->_connection->prepare('DESCRIBE `' . $model->_table .'`');
-		$DBH->execute();
-		$DBH->setFetchMode(PDO::FETCH_ASSOC);
+		$this->prepare('DESCRIBE `' . $model->_table .'`');
+		$this->execute();
 		$class = get_class($model);
-		$schema = array(
-			$class => array()
-		);
-		while($row = $DBH->fetch()) {
-			$field = array_shift($row);
+
+		$results = $this->fetchResults();
+		$schema = array();
+		foreach ($results as $row) {
+			$row = array_shift($row);
+			$field = $row['Field'];
+			unset($row['Field']);
 			$schema[$class][$field] = $row;
 		}
-		$DBH->closeCursor();
 		return $schema;
 	}
 }

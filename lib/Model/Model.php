@@ -280,12 +280,43 @@ class Model {
 
 				$results = $db->read($this, $query, false, $associated);
 				$results = $results[0];
-				break;
+			break;
+			case 'list':
+				if (isset($query['fields']) && is_array($query['fields'])) {
+					if(count($query['fields']) > 2) {
+						for ($i = 2; $i < count($query['fields']); $i++) {
+							unset($query['fields'][$i]);
+						}
+					}
+				}
+				if (isset($query['fields']) && is_string($query['fields']) && !empty($query['fields'])) {
+					$query['fields'] = array(
+						$this->_name . '.' . $this->_primaryKey,
+						$query['fields']
+					);
+				}
+				if(!isset($query['fields']) || empty($query['fields']) || $query['fields'] = '') {
+					$schema = $this->schema();
+					$columns = array_shift($schema);
+					if(count($columns) < 2) {
+						trigger_error('There must be at least two columns in order to create a list…');
+					}
+					$columns = array_keys($columns);
+					foreach ($columns as $key => $name) {
+						$columns[$key] = $this->_name . '.' . $name;
+					}
+					$query['fields'] = $columns;
+				}
+				var_dump($query['fields']);
+			break;	
 		}
 		return $this->afterFind($results);
 		
 	}
 	
+	public function schema() {
+		return $this->getDataSource()->describe($this);
+	}
 	
 	/**
 	 * save function.
