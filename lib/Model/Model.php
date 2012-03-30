@@ -144,7 +144,6 @@ class Model {
 		}
 		if ($this->_associations === null) {
 			$this->buildAssociationData();
-			var_dump($this->_associations);
 		}
 	}
 	
