@@ -288,14 +288,12 @@ class Model {
 							unset($query['fields'][$i]);
 						}
 					}
-				}
-				if (isset($query['fields']) && is_string($query['fields']) && !empty($query['fields'])) {
+				} elseif (isset($query['fields']) && is_string($query['fields']) && !empty($query['fields'])) {
 					$query['fields'] = array(
 						$this->_name . '.' . $this->_primaryKey,
 						$query['fields']
 					);
-				}
-				if(!isset($query['fields']) || empty($query['fields']) || $query['fields'] = '') {
+				} elseif (!isset($query['fields']) || empty($query['fields']) || $query['fields'] = '' ) {
 					$schema = $this->schema();
 					$columns = array_shift($schema);
 					if(count($columns) < 2) {
@@ -307,6 +305,13 @@ class Model {
 					}
 					$query['fields'] = $columns;
 				}
+				
+				foreach ($query['fields'] as $key => $value) {
+					if (strpos($value, '.') === false) {
+						$query['fields'][$key] = $this->_name . '.' . $value;
+					}
+				}
+				
 				$results = $db->read($this, $query, false, $associated);
 				$out = array();
 				list(,$first) = explode('.', $query['fields'][0]);
