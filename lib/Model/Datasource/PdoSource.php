@@ -679,7 +679,8 @@ class PdoSource extends DataSource{
 				foreach ($val as $associatedModel => $relationship) {
 					switch ($association) {
 						case 'hasMany':
-							$associatedPrimaryKey = $relationship['foreign_key'];
+							
+							
 							$associatedName = $model->{$associatedModel}->_name;
 							foreach ($results as $key => $result) {
 								$targetAlias = $associatedName;
@@ -695,6 +696,9 @@ class PdoSource extends DataSource{
 								
 								$settings = array_merge($defaults, $relationship);
 								
+								$associatedPrimaryKey = $settings['foreign_key'];
+								
+								
 								
 								$joinKey = $settings['joinKey'];
 								
@@ -707,6 +711,7 @@ class PdoSource extends DataSource{
 									'fields' => $this->_associationFields,
 									'limit' => $settings['limit']
 								);
+								
 								$results[$key][$associatedName] = $model->{$associatedModel}->find('all', $data, true);
 								
 							}
@@ -740,6 +745,9 @@ class PdoSource extends DataSource{
 							$foreignKey = strtolower($model->{$associatedModel}->_name) . '_' . $model->{$associatedModel}->_primaryKey;
 							
 							$associationFields = $this->_associationFields;
+							
+							
+								
 							$hABTM->bindModel(array(
 								'hasMany' => array(
 									$model->{$associatedModel}->_name => array(
@@ -753,14 +761,16 @@ class PdoSource extends DataSource{
 		
 							
 							foreach ($results as $key => $result) {
+							
 								if(isset($result[$model->_name][$model->_primaryKey])) {
+									
 									$id = $result[$model->_name][$model->_primaryKey];
 									
 									$joinResults = $hABTM->find('all', array(
 										'conditions' => array(
 											$joinName . '.' . $localKey => $id
 										),
-										'fields' => $associationFields,
+										'fields' => $this->_associationFields,
 										'recursive' => $recursive,
 									));
 									
