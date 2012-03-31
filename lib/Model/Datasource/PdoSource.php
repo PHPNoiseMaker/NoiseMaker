@@ -741,12 +741,6 @@ class PdoSource extends DataSource{
 							
 							$associationFields = $this->_associationFields;
 							$hABTM->bindModel(array(
-								/*'belongsTo' => array(
-									$model->_name => array(
-										'foreign_key' => $localKey,
-										
-									),
-								),*/
 								'hasMany' => array(
 									$model->{$associatedModel}->_name => array(
 										'foreign_key' => $foreignKey,
@@ -771,7 +765,6 @@ class PdoSource extends DataSource{
 									));
 									
 									
-									//var_dump($joinResults);
 									
 									foreach ($joinResults as $resultKey => $joinResult) {
 										
@@ -785,41 +778,10 @@ class PdoSource extends DataSource{
 												$results[$key][$jKey][] =  $jVal;
 												
 											}
-											
-										}
-										
-										
-									
-									}
-									
-									
-									
-									
-									
-									
-									/*
-foreach ($joinResults as $resKey => $resValue) {
-										if (isset($resValue[$joinName][$foreignKey])) {
-											$id = $resValue[$joinName][$foreignKey];
-											$associatedName = $model->{$associatedModel}->_name;
-											$associatedPrimary = $model->{$associatedModel}->_primaryKey;
-											$result = $model->{$associatedModel}->find('first', array(
-												'conditions' => array(
-													$associatedName . '.' . $associatedPrimary => $id
-												),
-												'recursive' => -1,
-											));
-											$results[$key][$associatedName][] = array_shift($result);
 										}
 									}
-*/
 								}
-							
 							}
-							
-							
-							
-							
 						break;
 					}
 				}
