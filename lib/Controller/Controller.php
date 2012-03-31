@@ -24,6 +24,26 @@ class Controller {
 	 */
 	public $uses = array();
 	
+	/**
+	 * helpers
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access public
+	 */
+	public $helpers = array();
+	
+	/**
+	 * components
+	 * 
+	 * (default value: array())
+	 * 
+	 * @var array
+	 * @access public
+	 */
+	public $components = array();
+	
 	
 	/**
 	 * View (Class)
@@ -107,7 +127,17 @@ class Controller {
   	 * @var array
   	 * @access private
   	 */
-  	private $_setters = array();  
+  	private $_setters = array(); 
+  	
+  	/**
+  	 * _parent
+  	 * 
+  	 * (default value: 'AppController')
+  	 * 
+  	 * @var string
+  	 * @access protected
+  	 */
+  	protected $_parent = 'AppController';
 
 	
 	/**
@@ -127,6 +157,7 @@ class Controller {
 		$this->response = $response;
 		$this->params['named'] = $this->request->namedParams;
 		$this->data = $this->request->data;
+		$this->_mergeVars();
 		$this->_constructModels();
 	}
 	/**
@@ -172,6 +203,43 @@ class Controller {
 		  throw new InternalErrorException('Property "' . $property . '" is read-only.');
 		} else {
 		  //throw new InternalErrorException('Property "' . $property . '" is not accessible.');
+		}
+	}
+	
+	private function _mergeVars() {
+		if (is_subclass_of($this, $this->_parent)) {
+			$parentVars = get_class_vars($this->_parent);
+			foreach ($parentVars as $var => $value) {
+				if (isset($this->{$var})) {
+					if (
+						$var == 'components'
+						|| $var == 'uses'
+						|| $var == 'helpers'
+					) {
+						if ($this->{$var} !== false) {
+							if (is_array($this->{$var}) && is_array($value)) {
+								$difference = array_diff($value, $this->{$var});
+								$this->{$var} = array_merge($difference, $this->{$var});
+							} elseif (is_array($this->{$var}) && is_string($value)) {
+								if (!in_array($value, $this->{$var})) {
+									array_unshift($this->{$var}, $value);
+								}
+							} elseif (is_string($this->{$var}) && is_array($value)) {
+								if (!in_array($this->{$var}, $value)) {
+									$difference = array_diff($value, array($this->{$var}));
+									$this->{$var} = array_merge(array($this->{$var}), $difference);
+								}
+							} else {
+								$this->{$var} = array($this->{$var});
+								$value = array($value);
+								$difference = array_diff($value, $this->{$var});
+								$this->{$var} = array_merget($this->{$var}, $value);
+							}
+						}
+					}
+				}
+				
+			}
 		}
 	}
 	

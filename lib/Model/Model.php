@@ -430,6 +430,9 @@ class Model {
 	public function saveAssociatedData($association_data) {
 		foreach($association_data as $model => $associated_data) {
 			$associationType = $this->getAssociationType($model);
+			if (!$associationType)
+				continue;
+				
 			$modelPrimaryKey = $this->{$model}->_primaryKey;
 			$modelName = $this->{$model}->_name;
 			switch($associationType) {
@@ -488,10 +491,7 @@ class Model {
 				break;
 			}
 			
-			if (
-				$associationType == 'belongsTo'
-				//|| $associationType == 'hasAndBelongsToMany'
-			) {
+			if ($associationType == 'belongsTo') {
 				$foreignKey = strtolower($modelName) . '_' . $modelPrimaryKey;
 				$data[$foreignKey] = $this->{$model}->id;
 				$data[$this->_primaryKey] = $this->id;

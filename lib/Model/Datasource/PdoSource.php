@@ -671,16 +671,7 @@ class PdoSource extends DataSource{
 								
 								$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
 								$joinValue = $result[$model->_name][$model->_primaryKey];
-								
-								if ($association === 'hasMany') {
-									$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
-									$joinValue = $result[$model->_name][$model->_primaryKey];
-								} else {
-									$joinKey = $associatedName . '.' . $associatedPrimaryKey;
-									$hABTMkey = strtolower($associatedName) . '_' . $associatedPrimaryKey;
-									$joinValue = $result[$model->_name][$hABTMkey];
-		
-								}
+																
 								$conditions = array(array($joinKey => $joinValue));
 								$data = array(
 									'conditions' => $conditions,
