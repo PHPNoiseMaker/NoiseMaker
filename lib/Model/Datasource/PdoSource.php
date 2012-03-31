@@ -105,7 +105,6 @@ class PdoSource extends DataSource{
 		
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
-		//var_dump($sql, $params);
 		if (Config::getConfig('debug') > 1)
 			ConnectionManager::startRecord($sql, $params);
 	}
@@ -227,6 +226,7 @@ class PdoSource extends DataSource{
 				$this->_fields = 'COUNT(' . $this->fieldQuote($model->_name . '.' . $model->_primaryKey) . ')';
 			}
 			
+			
 			if (isset($queryData['recursive']) && $queryData['recursive'] > -1) {
 				$model->recursive = $queryData['recursive'];
 			}
@@ -258,6 +258,7 @@ class PdoSource extends DataSource{
 			$sql = $this->buildStatement('select');
 			
 			
+			
 			$this->prepare($sql);
 			
 			$this->execute();
@@ -265,7 +266,7 @@ class PdoSource extends DataSource{
 			
 			if ($model->recursive > -1 && !$count) {
 				
-				$results = $this->fetchAssociations($model, $results, $model->recursive);
+				$results = $this->fetchAssociations($model, $results, $model->recursive - 1);
 			}
 			if (!empty($results))
 				return $results;
@@ -302,7 +303,6 @@ class PdoSource extends DataSource{
 			return false;
 		}
 		$query = $this->buildStatement('update');
-		//var_dump($query, $this->_params);
 		$this->prepare($query);
 		$this->execute();
 		return $this->getAffected();
@@ -393,27 +393,32 @@ class PdoSource extends DataSource{
 						$field = $model->_name . '.' . $field;
 					}
 					if ($this->fieldBelongsToModel($field, $model)) {
-						$this->_fields .= $this->fieldQuote($field) . ',';
+						
+							$this->_fields .= $this->fieldQuote($field) . ',';
 						
 					} else {
-						$this->_associationFields[] = $field;
+						if(!in_array($field, $this->_associationFields))
+							$this->_associationFields[] = $field;
 					}
 					
 				}
-			}
-			if (empty($this->_fields)) {
+			} 
+			if (empty($this->_fields) && empty($this->_associationFields)) {
 				$this->_fields = '*';
 			}
 
 		} elseif (!empty($fields)) {
-			$this->_fields = $this->fieldQuote($fields);
+			if($fields !== '*')
+				$this->_fields = $this->fieldQuote($fields);
+			else
+				$this->_fields = $fields;
 		} else {
 			$this->_fields = '*';
 		}
 		if (substr($this->_fields, strlen($this->_fields) - 1) == ',') {
 			$this->_fields = substr($this->_fields, 0, strlen($this->_fields) -1);
 		}
-		
+				
 	}
 	/**
 	 * limit function.
@@ -604,7 +609,11 @@ class PdoSource extends DataSource{
 							if (strpos($association_field, '.') !== false) {
 								list($aModel, $aFieldKey) = explode('.', $association_field);
 								if ($aModel === $associatedModel) {
-									$this->_fields .= ', ' . $this->fieldQuote($association_field);
+									if(empty($this->_fields))
+										$separator = '';
+									else
+										$separator = ', ';
+									$this->_fields .= $separator . $this->fieldQuote($association_field);
 								}
 							}
 						}
@@ -699,37 +708,45 @@ class PdoSource extends DataSource{
 							$foreignName = $model->{$associatedModel}->_name . $model->_name;
 							
 						
-							if ($this->tableExists($joinTable)) {
-								$hABTM = ObjectRegistry::storeObject($joinName, new Model(array('table' => $joinTable, 'name' => $joinName)));
-							} else {
+							if (!$this->tableExists($joinTable)) {
 								if($this->tableExists($this->flipName($joinTable))) {
 									$joinTable = $this->flipName($joinTable);
 									$joinName = $foreignName;
-									$hABTM = ObjectRegistry::storeObject($foreignName, new Model(array('table' => $joinTable, 'name' => $foreignName)));
 								} else {
 									trigger_error('Join table doesn\'t exist!');
 								}
 							}
 						
 							
-							
+							$hABTM = ObjectRegistry::storeObject($joinName, new Model(array('table' => $joinTable, 'name' => $joinName)));
 							
 							
 							$localKey = strtolower($model->_name) . '_' . $model->_primaryKey;
 							$foreignKey = strtolower($model->{$associatedModel}->_name) . '_' . $model->{$associatedModel}->_primaryKey;
 							
-							
+							$associationFields = $this->_associationFields;
 							
 							foreach ($results as $key => $result) {
 								if(isset($result[$model->_name][$model->_primaryKey])) {
 									$id = $result[$model->_name][$model->_primaryKey];
+									$hABTM->bindModel(array(
+										'belongsTo' => array(
+											$model->_name,
+											$model->{$associatedModel}->_name
+										)
+									));
 									$joinResults = $hABTM->find('all', array(
 										'conditions' => array(
 											$joinName . '.' . $localKey => $id
-										)
+										),
+										'fields' => $associationFields,
+										'recursive' => $recursive,
 									));
 									
-									foreach ($joinResults as $resKey => $resValue) {
+									var_dump($joinResults);
+									
+									/*
+foreach ($joinResults as $resKey => $resValue) {
 										if (isset($resValue[$joinName][$foreignKey])) {
 											$id = $resValue[$joinName][$foreignKey];
 											$associatedName = $model->{$associatedModel}->_name;
@@ -737,11 +754,13 @@ class PdoSource extends DataSource{
 											$result = $model->{$associatedModel}->find('first', array(
 												'conditions' => array(
 													$associatedName . '.' . $associatedPrimary => $id
-												)
+												),
+												'recursive' => -1,
 											));
 											$results[$key][$associatedName][] = array_shift($result);
 										}
 									}
+*/
 								}
 							
 							}
@@ -758,13 +777,7 @@ class PdoSource extends DataSource{
 		return $results;
 	}
 	
-	public function tableExists($table) {
-		$query = 'SHOW TABLES LIKE ?';
-		$this->prepare($query, array($table));
-		$this->execute();
-		$results = $this->fetchResults(true);
-		return $results;
-	}
+
 	
 	
 	/**

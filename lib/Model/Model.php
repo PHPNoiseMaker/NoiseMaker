@@ -200,7 +200,7 @@ class Model {
 		if (isset($this->{$name})) {
 			return $this->{$name};
 		}
-		
+		var_dump($name);
 		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
 	
@@ -278,8 +278,37 @@ class Model {
 				array_push($this->_associations[$association], array($this->{$association} => $defaults));
 			}
 		}	
+	//	var_dump($this->_associations);
 	}
 	
+	public function bindModel($data = array()) {
+		foreach ($data as $association => $val) {
+			if(is_string($association) && is_array($val)) {
+				foreach ($val as $key => $value) {
+					//var_dump($value);
+					//var_dump($this->_associations);
+					if(is_numeric($key) && is_string($value)) {
+						if (!array_key_exists($association, $this->_associations)) {
+							$this->_associations[$association] = array();
+						}
+						if (is_string($key) && is_array($value)) {
+							if(!$this->getAssociationType($key)) {
+								$value = array_merge($defaults, $value);
+								$this->_associations[$association][] = array($key => $value);
+								$this->{$association}[] = array($key => $value);
+							}
+						} elseif (is_numeric($key) && is_string($value)) {
+							if(!$this->getAssociationType($value)) {
+								$this->_associations[$association][] = array($value => array());
+								$this->{$association}[] = array($value => array());
+							}
+						}
+					}
+				}
+			}
+		}
+		//var_dump($this->_associations, $this->belongsTo);
+	}
 	
 	
 	/**
@@ -368,7 +397,7 @@ class Model {
 						$query['fields'][$key] = $this->_name . '.' . $value;
 					}
 				}
-				
+				$query['recursive'] = -1;
 				$results = $db->read($this, $query, false, $associated);
 				$out = array();
 				list(,$first) = explode('.', $query['fields'][0]);
