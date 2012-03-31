@@ -196,6 +196,22 @@ class Controller {
 				trigger_error('$this->uses must be an array!');
 			}
 		}
+		foreach (array('hasOne', 'hasMany', 'hasAndBelongsToMany', 'belongsTo') as $type) {
+			$model = $this->getModelName();
+			if (isset($this->{$model})){
+				if (isset($this->{$model}->{$type})) {
+					if (is_array($this->{$model}->{$type})) {
+						foreach ($this->{$model}->{$type} as $key => $association) {
+							if (is_numeric($key) && is_string($association)) {
+								$this->_loadModel($association);
+							} elseif (is_string($key) && is_array($association)) {
+								$this->_loadModel($key);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	 /**
      * _loadModel function.
