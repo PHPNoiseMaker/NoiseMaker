@@ -94,6 +94,7 @@ class PdoSource extends DataSource{
 	}
 	
 	public function prepare($sql, $params = null) {
+		//var_dump($sql);
 		if ($this->_connection === null) {
 			$this->connect();
 		}
@@ -598,13 +599,18 @@ class PdoSource extends DataSource{
 			foreach ($value as $key => $val) {
 				foreach ($val as $associatedModel => $relationship) {
 					if ($association === 'hasOne' || $association === 'belongsTo') {
-						$targetAlias = $model->{$associatedModel}->_name;
+						
 						$defaults = array(
 							'type' => 'LEFT',
-							'foreign_key' => strtolower($targetAlias) . '_id',
+							'class' => $model->_name,
+							'targetAlias' => $model->{$associatedModel}->_name,
 						);
+						$defaults = array_merge($defaults, array(
+							'foreign_key' => strtolower($defaults['targetAlias']) . '_id',
+						));
 						$settings = array_merge($defaults, $relationship);
 						
+						$targetAlias = $settings['targetAlias'];
 						foreach ($this->_associationFields as $association_field) {
 							if (strpos($association_field, '.') !== false) {
 								list($aModel, $aFieldKey) = explode('.', $association_field);
@@ -619,18 +625,18 @@ class PdoSource extends DataSource{
 						}
 						
 						if ($association === 'belongsTo') {
-							$joinKey = $model->_name . '.' . $settings['foreign_key'];
+							$joinKey = $settings['class'] . '.' . $settings['foreign_key'];
 							$joinValue = $this->fieldQuote(
 								$targetAlias 
 								. '.' 
 								. $model->{$associatedModel}->_primaryKey
 							);
 						} else {
-							$joinKey = $model->_name . '.' . $model->_primaryKey;
+							$joinKey = $settings['class'] . '.' . $model->_primaryKey;
 							$joinValue = $this->fieldQuote(
 								$targetAlias 
 								. '.' 
-								. strtolower($model->_name) . '_' . $model->_primaryKey
+								. strtolower($settings['class']) . '_' . $model->_primaryKey
 							);
 
 						}
@@ -673,18 +679,26 @@ class PdoSource extends DataSource{
 				foreach ($val as $associatedModel => $relationship) {
 					switch ($association) {
 						case 'hasMany':
-							$associatedPrimaryKey = $model->{$associatedModel}->_primaryKey;
+							$associatedPrimaryKey = $relationship['foreign_key'];
 							$associatedName = $model->{$associatedModel}->_name;
 							foreach ($results as $key => $result) {
 								$targetAlias = $associatedName;
 								$defaults = array(
-									'foreign_key' => 'id',
+									'class' => $model->_name,
+									'foreign_key' => $model->_primaryKey,
 									'limit' => null
 								);
+								$defaults = array_merge($defaults, array(
+									'joinKey' => $associatedName . '.' . strtolower($defaults['class']) . '_' . $defaults['foreign_key'],
+								));
+								
+								
 								$settings = array_merge($defaults, $relationship);
 								
-								$joinKey = $associatedName . '.' . strtolower($model->_name) . '_' . $model->_primaryKey;
-								$joinValue = $result[$model->_name][$model->_primaryKey];
+								
+								$joinKey = $settings['joinKey'];
+								
+								$joinValue = $result[$settings['class']][$settings['foreign_key']];
 																
 								$conditions = array(array($joinKey => $joinValue));
 								$data = array(
@@ -718,23 +732,36 @@ class PdoSource extends DataSource{
 							}
 						
 							
-							$hABTM = ObjectRegistry::storeObject($joinName, new Model(array('table' => $joinTable, 'name' => $joinName)));
+							$hABTM = ObjectRegistry::initHABTM($joinName, array('table' => $joinTable, 'name' => $joinName));
+							
 							
 							
 							$localKey = strtolower($model->_name) . '_' . $model->_primaryKey;
 							$foreignKey = strtolower($model->{$associatedModel}->_name) . '_' . $model->{$associatedModel}->_primaryKey;
 							
 							$associationFields = $this->_associationFields;
+							$hABTM->bindModel(array(
+								/*'belongsTo' => array(
+									$model->_name => array(
+										'foreign_key' => $localKey,
+										
+									),
+								),*/
+								'hasMany' => array(
+									$model->{$associatedModel}->_name => array(
+										'foreign_key' => $foreignKey,
+										'class' => $joinName,
+										'joinKey' => $model->_primaryKey
+									),
+								)
+							));
+							
+		
 							
 							foreach ($results as $key => $result) {
 								if(isset($result[$model->_name][$model->_primaryKey])) {
 									$id = $result[$model->_name][$model->_primaryKey];
-									$hABTM->bindModel(array(
-										'belongsTo' => array(
-											$model->_name,
-											$model->{$associatedModel}->_name
-										)
-									));
+									
 									$joinResults = $hABTM->find('all', array(
 										'conditions' => array(
 											$joinName . '.' . $localKey => $id
@@ -743,7 +770,32 @@ class PdoSource extends DataSource{
 										'recursive' => $recursive,
 									));
 									
-									var_dump($joinResults);
+									
+									//var_dump($joinResults);
+									
+									foreach ($joinResults as $resultKey => $joinResult) {
+										
+										foreach ($joinResult as $jKey => $jVal) {
+											
+											if($jKey != $joinName && $jKey != $model->_name) {
+												if(is_array($jVal)) {
+													$jVal = array_shift($jVal);
+												}
+														
+												$results[$key][$jKey][] =  $jVal;
+												
+											}
+											
+										}
+										
+										
+									
+									}
+									
+									
+									
+									
+									
 									
 									/*
 foreach ($joinResults as $resKey => $resValue) {

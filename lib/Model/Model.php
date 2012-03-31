@@ -263,14 +263,19 @@ class Model {
 				$defaults = array_merge($defaults, array('dependant' => false));
 			}
 			if (is_array($this->{$association})) {
+				
+				
 				foreach ($this->{$association} as $key => $value) {
 					if (!array_key_exists($association, $this->_associations)) {
 						$this->_associations[$association] = array();
 					}
+					
 					if (is_string($key) && is_array($value)) {
+						
 						$value = array_merge($defaults, $value);
 						array_push($this->_associations[$association], array($key => $value));
 					} elseif (is_numeric($key) && is_string($value)) {
+
 						array_push($this->_associations[$association], array($value => $defaults));
 					}
 				}
@@ -282,32 +287,36 @@ class Model {
 	}
 	
 	public function bindModel($data = array()) {
+		$defaults = array('dependant' => true);
 		foreach ($data as $association => $val) {
 			if(is_string($association) && is_array($val)) {
 				foreach ($val as $key => $value) {
-					//var_dump($value);
-					//var_dump($this->_associations);
-					if(is_numeric($key) && is_string($value)) {
-						if (!array_key_exists($association, $this->_associations)) {
-							$this->_associations[$association] = array();
+					
+					$defaults = array_merge($defaults, array(
+						'foreignKey' => ObjectRegistry::init($key)->_primaryKey
+					));
+					if (!array_key_exists($association, $this->_associations)) {
+						$this->_associations[$association] = array();
+					}
+					
+					if (is_string($key) && is_array($value)) {
+						if(!$this->getAssociationType($key)) {
+							$value = array_merge($defaults, $value);
+							$this->_associations[$association][] = array($key => $value);
+							$this->{$association}[] = array($key => $value);
 						}
-						if (is_string($key) && is_array($value)) {
-							if(!$this->getAssociationType($key)) {
-								$value = array_merge($defaults, $value);
-								$this->_associations[$association][] = array($key => $value);
-								$this->{$association}[] = array($key => $value);
-							}
-						} elseif (is_numeric($key) && is_string($value)) {
-							if(!$this->getAssociationType($value)) {
-								$this->_associations[$association][] = array($value => array());
-								$this->{$association}[] = array($value => array());
-							}
+					} elseif (is_numeric($key) && is_string($value)) {
+						if(!$this->getAssociationType($value)) {
+							$this->_associations[$association][] = array($value => $defaults);
+							$this->{$association}[] = array($value => $defaults);
 						}
 					}
+					
 				}
 			}
 		}
-		//var_dump($this->_associations, $this->belongsTo);
+		//var_dump($this->_associations);
+		
 	}
 	
 	
