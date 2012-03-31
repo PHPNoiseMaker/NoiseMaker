@@ -198,7 +198,11 @@ class View {
 				ob_start();
 		
 				include_once $___viewFileName;
-		
+				
+				$contents = ob_get_contents();
+				if($contents = '' || empty($contents)) {
+					return ' ';
+				}
 				return ob_get_clean();
 			}
 			
