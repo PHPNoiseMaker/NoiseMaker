@@ -72,4 +72,12 @@ class Mysql extends PdoSource{
 		}
 		return $schema;
 	}
+	
+	public function tableExists($table) {
+		$query = 'SHOW TABLES LIKE ?';
+		$this->prepare($query, array($table));
+		$this->execute();
+		$results = $this->fetchResults(true);
+		return $results;
+	}
 }
