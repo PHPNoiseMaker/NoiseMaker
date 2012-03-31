@@ -696,11 +696,23 @@ class PdoSource extends DataSource{
 							
 							
 							$joinName = $model->_name . $model->{$associatedModel}->_name;
+							$foreignName = $model->{$associatedModel}->_name . $model->_name;
 							
+						
+							if ($this->tableExists($joinTable)) {
+								$hABTM = ObjectRegistry::storeObject($joinName, new Model(array('table' => $joinTable, 'name' => $joinName)));
+							} else {
+								if($this->tableExists($this->flipName($joinTable))) {
+									$joinTable = $this->flipName($joinTable);
+									$joinName = $foreignName;
+									$hABTM = ObjectRegistry::storeObject($foreignName, new Model(array('table' => $joinTable, 'name' => $foreignName)));
+								} else {
+									trigger_error('Join table doesn\'t exist!');
+								}
+							}
 						
 							
 							
-							$hABTM = ObjectRegistry::storeObject($joinName, new Model(array('table' => $joinTable, 'name' => $joinName)));
 							
 							
 							$localKey = strtolower($model->_name) . '_' . $model->_primaryKey;
@@ -745,6 +757,15 @@ class PdoSource extends DataSource{
 		
 		return $results;
 	}
+	
+	public function tableExists($table) {
+		$query = 'SHOW TABLES LIKE ?';
+		$this->prepare($query, array($table));
+		$this->execute();
+		$results = $this->fetchResults(true);
+		return $results;
+	}
+	
 	
 	/**
 	 * flipName function.
@@ -802,16 +823,20 @@ class PdoSource extends DataSource{
 	 * @return void
 	 */
 	public function fieldQuote($field) {
-		if (strpos($field, '.') !== false) {
-			list($model, $field) = explode('.', $field);
-			return $this->quote 
-				   . trim($model) 
-				   . $this->quote 
-				   . '.' . $this->quote 
-				   . trim($field) 
-				   . $this->quote;
+		if(is_string($field)) {
+			if (strpos($field, '.') !== false) {
+				list($model, $field) = explode('.', $field);
+				return $this->quote 
+					   . trim($model) 
+					   . $this->quote 
+					   . '.' . $this->quote 
+					   . trim($field) 
+					   . $this->quote;
+			} else {
+				return $this->quote . trim($field) . $this->quote;
+			}
 		} else {
-			return $this->quote . trim($field) . $this->quote;
+			return false;
 		}
 	}
 	
@@ -866,6 +891,7 @@ class PdoSource extends DataSource{
 		}
 		
 		$result = array();
+		$thecount = 0;
 		while($row = $this->_handle->fetch(PDO::FETCH_NUM)) {
 			$result[] = array();
 			foreach($row as $key => $val) {
@@ -873,11 +899,13 @@ class PdoSource extends DataSource{
 					$result[count($result) - 1][$columns[$key]['table']][$columns[$key]['name']] = $val;
 				elseif (!$count && $associated)
 					$result[count($result) - 1][$columns[$key]['name']] = $val;
+				elseif ($count && !$associated)
+					$thecount++;
 			}
 			
 		}
 		if ($count) {
-			return (int) $val;
+			return (int) $thecount;
 		}
 		$this->_handle->closeCursor();
 		return $result;
