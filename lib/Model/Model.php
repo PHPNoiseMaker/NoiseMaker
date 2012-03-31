@@ -307,7 +307,18 @@ class Model {
 					}
 					$query['fields'] = $columns;
 				}
-				var_dump($query['fields']);
+				$results = $db->read($this, $query, false, $associated);
+				$out = array();
+				list(,$first) = explode('.', $query['fields'][0]);
+				list(,$second) = explode('.', $query['fields'][1]);
+				foreach ($results as $result) {
+					$firstField = $result[$this->_name][$first];
+					$secondField = $result[$this->_name][$second];
+					
+					$out[$firstField] = $secondField;
+				}
+				$results = $out;
+
 			break;	
 		}
 		return $this->afterFind($results);

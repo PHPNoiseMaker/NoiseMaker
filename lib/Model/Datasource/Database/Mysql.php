@@ -8,6 +8,7 @@ class Mysql extends PdoSource{
 		'login' => 'root',
 		'password' => '',
 		'database' => 'ender',
+		'encoding' => 'utf8'
 	);
 	
 	public function connect() {
@@ -56,7 +57,7 @@ class Mysql extends PdoSource{
 	}
 	
 	
-	public function describe(Model &$model) {
+	public function describe(Model $model) {
 		$this->prepare('DESCRIBE `' . $model->_table .'`');
 		$this->execute();
 		$class = get_class($model);
