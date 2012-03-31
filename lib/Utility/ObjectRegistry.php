@@ -115,6 +115,34 @@ class ObjectRegistry {
 	}
 	
 	/**
+	 * initHABTM function.
+	 * 
+	 * @access public
+	 * @static
+	 * @param mixed $class
+	 * @return void
+	 */
+	public static function initHABTM($class, $args = array()) {
+		if (!array_key_exists($class, self::$_objects)) {
+			App::uses('Model', 'Model');
+			if (class_exists($class)) {
+				$modelRef = new ReflectionClass($class);
+				
+				if ($modelRef->isAbstract() || $modelRef->isInterface()) {
+					return false;
+				}
+				$model = self::storeObject($class, $modelRef->newInstance($args));
+				if ($model instanceOf Model) {
+					return $model;
+				}
+			}
+			return false;
+		}
+		return self::$_objects[$class];
+	}
+	
+	
+	/**
 	 * init function.
 	 * 
 	 * @access public

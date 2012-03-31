@@ -206,6 +206,15 @@ class Controller {
 		}
 	}
 	
+	/**
+	 * Merges variables from Controller::$_parent (AppController unless otherwise specified)
+	 * Variables merged: $components, $uses, $helpers
+	 * If any of the variables is set to false it will not merge them. 
+	 * Probably best not to set components or helpers to false...
+	 * 
+	 * @access private
+	 * @return void
+	 */
 	private function _mergeVars() {
 		if (is_subclass_of($this, $this->_parent)) {
 			$parentVars = get_class_vars($this->_parent);

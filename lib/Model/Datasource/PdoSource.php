@@ -1,5 +1,7 @@
 <?php
 App::uses('DataSource', 'Model/Datasource');
+App::uses('ObjectRegistry', 'Utility');
+
 class PdoSource extends DataSource{ 
 	protected $_handle = null;
 	
@@ -103,6 +105,7 @@ class PdoSource extends DataSource{
 		
 		$this->_handle = $this->_connection->prepare($sql);
 		$this->_lastStatement = $sql;
+		//var_dump($sql, $params);
 		if (Config::getConfig('debug') > 1)
 			ConnectionManager::startRecord($sql, $params);
 	}
@@ -242,6 +245,8 @@ class PdoSource extends DataSource{
 			
 			if (isset($queryData['conditions'])) {
 				$this->_conditions = $this->parseConditions($queryData['conditions']);
+			} else {
+				$this->_conditions = 'WHERE 1 = 1';
 			}
 			
 			if (isset($queryData['group'])) {
@@ -683,6 +688,56 @@ class PdoSource extends DataSource{
 								
 							}
 						break;
+						
+						case 'hasAndBelongsToMany':
+							$joinTable = strtolower(Inflect::pluralize($model->_name));
+							$joinTable .= '_';
+							$joinTable .= strtolower(Inflect::pluralize($model->{$associatedModel}->_name));
+							
+							
+							$joinName = $model->_name . $model->{$associatedModel}->_name;
+							
+						
+							
+							
+							$hABTM = ObjectRegistry::storeObject($joinName, new Model(array('table' => $joinTable, 'name' => $joinName)));
+							
+							
+							$localKey = strtolower($model->_name) . '_' . $model->_primaryKey;
+							$foreignKey = strtolower($model->{$associatedModel}->_name) . '_' . $model->{$associatedModel}->_primaryKey;
+							
+							
+							
+							foreach ($results as $key => $result) {
+								if(isset($result[$model->_name][$model->_primaryKey])) {
+									$id = $result[$model->_name][$model->_primaryKey];
+									$joinResults = $hABTM->find('all', array(
+										'conditions' => array(
+											$joinName . '.' . $localKey => $id
+										)
+									));
+									
+									foreach ($joinResults as $resKey => $resValue) {
+										if (isset($resValue[$joinName][$foreignKey])) {
+											$id = $resValue[$joinName][$foreignKey];
+											$associatedName = $model->{$associatedModel}->_name;
+											$associatedPrimary = $model->{$associatedModel}->_primaryKey;
+											$result = $model->{$associatedModel}->find('first', array(
+												'conditions' => array(
+													$associatedName . '.' . $associatedPrimary => $id
+												)
+											));
+											$results[$key][$associatedName][] = array_shift($result);
+										}
+									}
+								}
+							
+							}
+							
+							
+							
+							
+						break;
 					}
 				}
 			}
@@ -691,7 +746,21 @@ class PdoSource extends DataSource{
 		return $results;
 	}
 	
-	
+	/**
+	 * flipName function.
+	 * 
+	 * @access public
+	 * @param mixed $name
+	 * @return void
+	 */
+	public function flipName($name) {
+		if (strpos($name, '_') !== false) {
+			$name = explode('_', $name);
+			$name = array_reverse($name);
+			$name = implode('_', $name);
+		}
+		return $name;
+	}
 	
 	
 	/**

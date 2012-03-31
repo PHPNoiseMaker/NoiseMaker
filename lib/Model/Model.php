@@ -126,6 +126,16 @@ class Model {
 	 * @access public
 	 */
 	public $data = null;
+	
+	/**
+	 * parent
+	 * 
+	 * (default value: 'AppModel')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $_parent = 'AppModel';
 
 
 	
@@ -135,16 +145,24 @@ class Model {
 	 * @access public
 	 * @return void
 	 */
-	public function __construct() {
+	public function __construct($options = array()) {
 		if ($this->_name === null || !isset($this->_name)) {
-			$this->_name = get_class($this);
+			if(!isset($options['name']))
+				$this->_name = get_class($this);
+			else
+				$this->_name = $options['name'];
 		}
 		if ($this->_table === null || !isset($this->_table)) {
-			$this->_table = Inflect::pluralize(strtolower($this->_name));
-		}
+			if(!isset($options['table']))
+				$this->_table = Inflect::pluralize(strtolower($this->_name));
+			else
+				$this->_table = $options['table'];
+			
+		} 
 		if ($this->_associations === null) {
 			$this->buildAssociationData();
 		}
+		$this->_mergeVars();
 	}
 	
 	/**
@@ -187,7 +205,46 @@ class Model {
 	}
 	
 	
-	
+	/**
+	 * _mergeVars function.
+	 * 
+	 * @access private
+	 * @return void
+	 */
+	private function _mergeVars() {
+		if (is_subclass_of($this, $this->_parent)) {
+			$parentVars = get_class_vars($this->_parent);
+			foreach ($parentVars as $var => $value) {
+				if (isset($this->{$var})) {
+					if (
+						$var == 'behaviors'
+					) {
+						if ($this->{$var} !== false) {
+							if (is_array($this->{$var}) && is_array($value)) {
+								$difference = array_diff($value, $this->{$var});
+								$this->{$var} = array_merge($difference, $this->{$var});
+							} elseif (is_array($this->{$var}) && is_string($value)) {
+								if (!in_array($value, $this->{$var})) {
+									array_unshift($this->{$var}, $value);
+								}
+							} elseif (is_string($this->{$var}) && is_array($value)) {
+								if (!in_array($this->{$var}, $value)) {
+									$difference = array_diff($value, array($this->{$var}));
+									$this->{$var} = array_merge(array($this->{$var}), $difference);
+								}
+							} else {
+								$this->{$var} = array($this->{$var});
+								$value = array($value);
+								$difference = array_diff($value, $this->{$var});
+								$this->{$var} = array_merge($this->{$var}, $value);
+							}
+						}
+					}
+				}
+				
+			}
+		}
+	}
 	
 	
 	/**
