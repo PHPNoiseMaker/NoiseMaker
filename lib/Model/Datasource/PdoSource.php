@@ -94,7 +94,7 @@ class PdoSource extends DataSource{
 	}
 	
 	public function prepare($sql, $params = null) {
-		var_dump(array('sql' => $sql, 'params' => $params));
+		//var_dump(array('sql' => $sql, 'params' => $params));
 		if ($this->_connection === null) {
 			$this->connect();
 		}
@@ -708,7 +708,7 @@ class PdoSource extends DataSource{
 									'limit' => $settings['limit']
 								);
 								
-								$results[$key][$associatedName] = $model->{$associatedModel}->find('all', $data, true);
+								$results[$key][$associatedName] = $model->{$associatedModel}->find('all', $data, false);
 								
 							}
 						break;
