@@ -781,7 +781,7 @@ class PdoSource extends DataSource{
 													$jVal = array_shift($jVal);
 												}
 														
-												$results[$key][$jKey][] =  $jVal;
+												$results[$key][$jKey][] =  array_shift($jVal);
 												
 											}
 										}
