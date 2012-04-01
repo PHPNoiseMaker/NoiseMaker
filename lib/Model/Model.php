@@ -303,12 +303,14 @@ class Model {
 						if(!$this->getAssociationType($key)) {
 							$value = array_merge($defaults, $value);
 							$this->_associations[$association][] = array($key => $value);
-							$this->{$association}[] = array($key => $value);
+							$this->_loadModel($key);
+							//$this->{$association}[] = array($key => $value);
 						}
 					} elseif (is_numeric($key) && is_string($value)) {
 						if(!$this->getAssociationType($value)) {
 							$this->_associations[$association][] = array($value => $defaults);
-							$this->{$association}[] = array($value => $defaults);
+							$this->_loadModel($value);
+							//$this->{$association}[] = array($value => $defaults);
 						}
 					}
 					
@@ -335,6 +337,7 @@ class Model {
 		}
 		$db = $this->getDataSource();
 		$results = array();
+		//var_dump($query);
 		switch($type) {
 			case 'all':
 				$results = $db->read($this, $query, false, $associated);
@@ -421,6 +424,7 @@ class Model {
 
 			break;	
 		}
+		$db->releaseResources();
 		return $this->afterFind($results);
 		
 	}

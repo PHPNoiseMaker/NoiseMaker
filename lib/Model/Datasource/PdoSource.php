@@ -94,7 +94,7 @@ class PdoSource extends DataSource{
 	}
 	
 	public function prepare($sql, $params = null) {
-		//var_dump($sql);
+		var_dump(array('sql' => $sql, 'params' => $params));
 		if ($this->_connection === null) {
 			$this->connect();
 		}
@@ -219,7 +219,7 @@ class PdoSource extends DataSource{
 			}
 			
 			if (isset($queryData['fields'])) {
-				$this->fields($queryData['fields'], $model);
+				$this->fields($queryData['fields'], $model, $associated);
 			}  else {
 				$this->_fields = '*';
 			}
@@ -385,21 +385,22 @@ class PdoSource extends DataSource{
 	 * @param Model $model
 	 * @return void
 	 */
-	public function fields($fields, Model $model) {
+	public function fields($fields, Model $model, $saveAssociated = false) {
 		if (is_array($fields)) {
 			$this->_fields = '';
-			foreach($fields as $field) {
+			foreach($fields as $key => $field) {
 				if (!empty($field)) {
 					if (strpos($field, '.') === false) {
 						$field = $model->_name . '.' . $field;
 					}
-					if ($this->fieldBelongsToModel($field, $model)) {
-						
+					if ($this->fieldBelongsToModel($field, $model, $saveAssociated)) {
+							//var_dump($field);
 							$this->_fields .= $this->fieldQuote($field) . ',';
 						
 					} else {
-						if(!in_array($field, $this->_associationFields))
-							$this->_associationFields[] = $field;
+						$diff = array_diff(array($field), $this->_associationFields);
+						$this->_associationFields = array_merge($this->_associationFields, $diff);
+						
 					}
 					
 				}
@@ -413,7 +414,8 @@ class PdoSource extends DataSource{
 				$this->_fields = $this->fieldQuote($fields);
 			else
 				$this->_fields = $fields;
-		} else {
+		}
+		if ($this->_fields == '' || empty($this->_fields)) {
 			$this->_fields = '*';
 		}
 		if (substr($this->_fields, strlen($this->_fields) - 1) == ',') {
@@ -611,18 +613,11 @@ class PdoSource extends DataSource{
 						$settings = array_merge($defaults, $relationship);
 						
 						$targetAlias = $settings['targetAlias'];
-						foreach ($this->_associationFields as $association_field) {
-							if (strpos($association_field, '.') !== false) {
-								list($aModel, $aFieldKey) = explode('.', $association_field);
-								if ($aModel === $associatedModel) {
-									if(empty($this->_fields))
-										$separator = '';
-									else
-										$separator = ', ';
-									$this->_fields .= $separator . $this->fieldQuote($association_field);
-								}
-							}
-						}
+						
+						
+						$this->fields($this->_associationFields, $model, false);
+						
+
 						
 						if ($association === 'belongsTo') {
 							$joinKey = $settings['class'] . '.' . $settings['foreign_key'];
@@ -680,6 +675,7 @@ class PdoSource extends DataSource{
 					switch ($association) {
 						case 'hasMany':
 							
+						
 							
 							$associatedName = $model->{$associatedModel}->_name;
 							foreach ($results as $key => $result) {
@@ -735,7 +731,7 @@ class PdoSource extends DataSource{
 									trigger_error('Join table doesn\'t exist!');
 								}
 							}
-						
+							
 							
 							$hABTM = ObjectRegistry::initHABTM($joinName, array('table' => $joinTable, 'name' => $joinName));
 							
@@ -746,7 +742,6 @@ class PdoSource extends DataSource{
 							
 							$associationFields = $this->_associationFields;
 							
-							
 								
 							$hABTM->bindModel(array(
 								'hasMany' => array(
@@ -755,10 +750,11 @@ class PdoSource extends DataSource{
 										'class' => $joinName,
 										'joinKey' => $model->_primaryKey
 									),
-								)
+								),
+								
 							));
 							
-		
+							
 							
 							foreach ($results as $key => $result) {
 							
@@ -839,7 +835,7 @@ class PdoSource extends DataSource{
 				if (is_array($value)) {
 					foreach ($value as $key => $val) {
 						foreach ($val as $assosiatedModel => $relationship) {
-							if ($type === 'hasOne' || $type === 'belongsTo') {
+							if ($type === 'hasOne' || $type === 'belongsTo' || 1) {
 								if ($extractedModel === $assosiatedModel && $saveAssociated) {
 									return true;
 								}
