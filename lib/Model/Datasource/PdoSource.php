@@ -387,16 +387,15 @@ class PdoSource extends DataSource{
 	 */
 	public function fields($fields, Model $model, $saveAssociated = false) {
 		if (is_array($fields)) {
-			$this->_fields = '';
+			//$this->_fields = '';
 			foreach($fields as $key => $field) {
 				if (!empty($field)) {
 					if (strpos($field, '.') === false) {
 						$field = $model->_name . '.' . $field;
 					}
-					if ($this->fieldBelongsToModel($field, $model, $saveAssociated)) {
+					if ($this->fieldBelongsToModel($field, $model, $saveAssociated) || 1) {
 							//var_dump($field);
 							$this->_fields .= $this->fieldQuote($field) . ',';
-						
 					} else {
 						$diff = array_diff(array($field), $this->_associationFields);
 						$this->_associationFields = array_merge($this->_associationFields, $diff);
@@ -409,7 +408,7 @@ class PdoSource extends DataSource{
 				$this->_fields = '*';
 			}
 
-		} elseif (!empty($fields)) {
+		} else {
 			if($fields !== '*')
 				$this->_fields = $this->fieldQuote($fields);
 			else

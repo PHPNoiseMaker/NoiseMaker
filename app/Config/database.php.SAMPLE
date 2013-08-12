@@ -1,0 +1,15 @@
+<?php
+
+class DATABASE {
+	public $default = array(
+		'datasource' => 'Database/Mysql',
+		'database' => 'noisemaker',
+		'host' => '127.0.0.1',
+		'port' => '3306',
+		'login' => 'noisemaker',
+		'password' => 'somepassword',
+		'persistent' => false,
+		'encoding' => 'utf8'
+		
+	);
+}
