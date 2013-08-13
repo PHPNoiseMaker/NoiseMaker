@@ -200,7 +200,6 @@ class Model {
 		if (isset($this->{$name})) {
 			return $this->{$name};
 		}
-		var_dump($name);
 		throw new ModelNotFoundException('Trying to load a non-associated model!');
 	}
 	

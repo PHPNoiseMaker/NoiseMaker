@@ -1,29 +1,27 @@
 <?php
 /**
- * Route Definitions
- 			
- 			Example Base URL Route:
-					Router::addRule('/', array(
-						'controller' => 'Pages',
-						'action' => 'index'
-					));
-			Example Custom Route:		
-					Router::addRule(
-						'/page/:page_id/view',
-						array(
-							'controller' => 'Pages',
-							'action' => 'display'
-						),
-						array(
-							'pass' => array(
-								'page_id'
-							)
-						)
-					);
-					
-					
-			Example Default Route:
-					Router::addRule('/:controller/:action/*');
+ * Example Base URL Route:
+ *					Router::addRule('/', array(
+ *						'controller' => 'Pages',
+ *						'action' => 'index'
+ *					));
+ *			Example Custom Route:		
+ *					Router::addRule(
+ *						'/page/:page_id/view',
+ *						array(
+ *							'controller' => 'Pages',
+ *							'action' => 'display'
+ *						),
+ *						array(
+ *							'pass' => array(
+ *								'page_id'
+ *							)
+ *						)
+ *					);
+ *					
+ *					
+ *			Example Default Route:
+ *					Router::addRule('/:controller/:action/*');
  */
  
 

@@ -393,17 +393,16 @@ class PdoSource extends DataSource{
 					if (strpos($field, '.') === false) {
 						$field = $model->_name . '.' . $field;
 					}
-					if ($this->fieldBelongsToModel($field, $model, $saveAssociated) || 1) {
-							//var_dump($field);
+					if ($this->fieldBelongsToModel($field, $model, $saveAssociated)) {
 							$this->_fields .= $this->fieldQuote($field) . ',';
 					} else {
 						$diff = array_diff(array($field), $this->_associationFields);
 						$this->_associationFields = array_merge($this->_associationFields, $diff);
 						
 					}
-					
 				}
 			} 
+
 			if (empty($this->_fields) && empty($this->_associationFields)) {
 				$this->_fields = '*';
 			}
